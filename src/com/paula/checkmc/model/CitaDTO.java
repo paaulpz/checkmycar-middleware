@@ -2,7 +2,7 @@ package com.paula.checkmc.model;
 
 import java.time.LocalDateTime;
 
-public class CitaDTO {
+public class CitaDTO extends AbstracValueObject {
 
     private Long id;
     private String descripcion;

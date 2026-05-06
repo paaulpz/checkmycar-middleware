@@ -1,6 +1,6 @@
 package com.paula.checkmc.model;
 
-public class ClienteDTO {
+public class ClienteDTO  extends AbstracValueObject{
 
     private Long id;
     private String dniNie;
@@ -135,12 +135,7 @@ public class ClienteDTO {
 		this.password = password;
 	}
 
-	@Override
-	public String toString() {
-	    String dni = this.dniNie != null ? this.dniNie : "";
-	    String nombre = this.nombre != null ? this.nombre : "";
-	    return dni + " - " + nombre;
-	}
+
     
 	
     

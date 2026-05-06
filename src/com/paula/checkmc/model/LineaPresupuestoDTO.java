@@ -1,6 +1,6 @@
 package com.paula.checkmc.model;
 
-public class LineaPresupuestoDTO {
+public class LineaPresupuestoDTO extends AbstracValueObject {
 
     private Long id;
     private Double unidades;

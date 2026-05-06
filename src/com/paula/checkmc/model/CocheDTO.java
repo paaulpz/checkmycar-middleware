@@ -1,6 +1,6 @@
 package com.paula.checkmc.model;
 
-public class CocheDTO {
+public class CocheDTO extends AbstracValueObject {
 
     private Long id;
     private String matricula;
@@ -183,5 +183,7 @@ public class CocheDTO {
 	}
 	
 
+	
+	
 
 }

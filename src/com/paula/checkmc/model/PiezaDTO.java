@@ -2,7 +2,7 @@ package com.paula.checkmc.model;
 
 import java.math.BigDecimal;
 
-public class PiezaDTO {
+public class PiezaDTO extends AbstracValueObject {
 
     private Long id;
     private String nombre;

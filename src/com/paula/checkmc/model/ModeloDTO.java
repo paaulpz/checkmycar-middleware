@@ -1,6 +1,6 @@
 package com.paula.checkmc.model;
 
-public class ModeloDTO {
+public class ModeloDTO extends AbstracValueObject {
 
     private Long id;
     private String nombre;
@@ -22,8 +22,5 @@ public class ModeloDTO {
     public String getMarcaNombre() { return marcaNombre; }
     public void setMarcaNombre(String marcaNombre) { this.marcaNombre = marcaNombre; }
 
-    @Override
-    public String toString() {
-        return nombre;
-    }
+ 
 }

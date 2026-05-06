@@ -1,8 +1,6 @@
 package com.paula.checkmc.model;
 
-import java.time.LocalDate;
-
-public class EmpleadoDTO {
+public class EmpleadoDTO extends AbstracValueObject {
 
     private Long id;
 

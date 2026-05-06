@@ -2,7 +2,7 @@ package com.paula.checkmc.model;
 
 import java.time.LocalDate;
 
-public class VentaDTO {
+public class VentaDTO extends AbstracValueObject {
 
     private Long id;
     private LocalDate fechaVenta;
@@ -22,7 +22,6 @@ public class VentaDTO {
     private Long cocheId;
     private String matriculaCoche;
 
-    // Getters & Setters
 
     public Long getId() {
         return id;

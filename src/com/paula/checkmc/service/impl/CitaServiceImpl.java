@@ -19,19 +19,9 @@ public class CitaServiceImpl implements CitaService {
     }
 
     @Override
-    public Long create(Cita  cita)  {
-
-        Cita c = new Cita();
-
-        c.setDescripcion(cita.getDescripcion());
-        c.setFecha(cita.getFecha());
-        c.setClienteId(cita.getClienteId());
-        c.setCocheId(cita.getCocheId());
-        c.setEstadoCitaId(cita.getEstadoCitaId());
-
-        return create(cita); 
+    public Long create(Cita cita) {
+        return dao.create(cita);
     }
-
     @Override
     public boolean delete(Long id) throws Exception {
         return dao.delete(id);
