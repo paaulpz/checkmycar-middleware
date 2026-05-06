@@ -264,6 +264,106 @@ public class ClienteDAO {
 
         return false;
     }
+    
+    public boolean login(String dni, String password) {
+
+        Connection c = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+
+            c = JDBCUtils.getConnection();
+
+            String sql =
+                    "SELECT * FROM client WHERE dni_nie = ? AND password = ?";
+
+            ps = c.prepareStatement(sql);
+
+            ps.setString(1, dni);
+            ps.setString(2, password);
+
+            rs = ps.executeQuery();
+
+            return rs.next();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        } finally {
+
+            DAOUtils.close(rs, ps, c);
+        }
+
+        return false;
+    }
+    
+    public boolean existeCorreo(String email) {
+
+        Connection c = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+
+            c = JDBCUtils.getConnection();
+
+            String sql =
+                    "SELECT * FROM client WHERE email = ?";
+
+            ps = c.prepareStatement(sql);
+
+            ps.setString(1, email);
+
+            rs = ps.executeQuery();
+
+            return rs.next();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        } finally {
+
+            DAOUtils.close(rs, ps, c);
+        }
+
+        return false;
+    }
+    
+    public boolean existeDni(String dni) {
+
+        Connection c = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+
+            c = JDBCUtils.getConnection();
+
+            String sql =
+                    "SELECT * FROM client WHERE dni_nie = ?";
+
+            ps = c.prepareStatement(sql);
+
+            ps.setString(1, dni);
+
+            rs = ps.executeQuery();
+
+            return rs.next();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        } finally {
+
+            DAOUtils.close(rs, ps, c);
+        }
+
+        return false;
+    }
 
     private Cliente loadNext(ResultSet rs) throws Exception {
 
