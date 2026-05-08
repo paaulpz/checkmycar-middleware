@@ -188,6 +188,23 @@ public class CitaDAO {
         return false;
     }
     
+    public boolean existeCitaEnFecha(java.time.LocalDateTime fecha) {
+        try (Connection c = DAOUtils.getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                 "SELECT COUNT(*) FROM appointment WHERE date = ?")) {
+
+            ps.setObject(1, fecha);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+
+        } catch (Exception e) {
+            logger.error("Error comprobando cita en fecha: {}", fecha, e);
+        }
+        return false;
+    }
+    
     private Cita loadNext(ResultSet rs) throws Exception {
 
         int i = 1;
