@@ -26,6 +26,11 @@ public class CitaServiceImpl implements CitaService {
     public boolean delete(Long id) throws Exception {
         return dao.delete(id);
     }
+    
+    @Override
+    public boolean existeCitaEnFecha(java.time.LocalDateTime fecha) {
+        return dao.existeCitaEnFecha(fecha);
+    }
 
 	@Override
 	public boolean update(Cliente cliente) {

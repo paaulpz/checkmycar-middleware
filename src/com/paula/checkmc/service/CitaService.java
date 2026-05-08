@@ -15,7 +15,7 @@ public interface CitaService {
 	 * @throws Exception
 	 */
 
-   Results<CitaDTO> findByCriteria(CitaCriteria criteria , int from, int pageSize);
+  public  Results<CitaDTO> findByCriteria(CitaCriteria criteria , int from, int pageSize);
     
     /**
 	 * Crea una nueva cita.
@@ -24,7 +24,7 @@ public interface CitaService {
 	 * @throws Exception
 	 */
 
-    Long create(Cita cita) throws Exception;
+  public  Long create(Cita cita) throws Exception;
     
     /**
      * Actualiza una cita existente.
@@ -33,8 +33,10 @@ public interface CitaService {
      * @throws Exception
      */
 
-    boolean delete(Long id) throws Exception;
+  public  boolean delete(Long id) throws Exception;
     
     
-    boolean update(Cliente cliente);
+   public  boolean update(Cliente cliente);
+    
+  public   boolean existeCitaEnFecha(java.time.LocalDateTime fecha);
 }
