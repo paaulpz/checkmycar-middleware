@@ -1,8 +1,9 @@
 package com.paula.checkmc.service;
 
 import java.util.List;
-import com.paula.checkmc.model.PiezaDTO;
+
 import com.paula.checkmc.model.PiezaCriteria;
+import com.paula.checkmc.model.PiezaDTO;
 
 public interface PiezaService {
 	
@@ -32,19 +33,5 @@ public interface PiezaService {
 	 * @param pieza
 	 * @return El ID de la pieza creada.
 	 */
-    Long create(PiezaDTO pieza);
     
-    
-    /**	 * Actualiza una pieza existente.
-     * @param pieza
-     * @return
-     */
-    boolean update(PiezaDTO pieza);
-    
-    /**	 * Elimina una pieza por su ID.
-	 * @param id
-	 * @return
-	 */
-
-    boolean delete(Long id);
 }

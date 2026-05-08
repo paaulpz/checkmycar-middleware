@@ -79,42 +79,4 @@ public class PiezaServiceImpl implements PiezaService {
         return res;
     }
 
-    @Override
-    public Long create(PiezaDTO dto) {
-
-        if (dto == null) return null;
-
-        Pieza p = new Pieza();
-
-        p.setNombre(dto.getNombre());
-        p.setStock(dto.getStock());
-        p.setEstadoId(dto.getEstadoId());
-        p.setPrecio(dto.getPrecio());
-
-        return dao.create(p);
-    }
-
-    @Override
-    public boolean update(PiezaDTO dto) {
-
-        if (dto == null || dto.getId() == null) return false;
-
-        Pieza p = new Pieza();
-
-        p.setId(dto.getId());
-        p.setNombre(dto.getNombre());
-        p.setStock(dto.getStock());
-        p.setEstadoId(dto.getEstadoId());
-        p.setPrecio(dto.getPrecio());
-
-        return dao.update(p);
-    }
-
-    @Override
-    public boolean delete(Long id) {
-
-        if (id == null || id <= 0) return false;
-
-        return dao.delete(id);
-    }
 }

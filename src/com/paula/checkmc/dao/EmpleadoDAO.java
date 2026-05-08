@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.mindrot.jbcrypt.BCrypt;
 
 import com.paula.checkmc.model.Empleado;
 import com.paula.checkmc.model.EmpleadoCriteria;
@@ -15,7 +16,6 @@ import com.paula.checkmc.model.EmpleadoDTO;
 import com.paula.checkmc.model.Results;
 import com.paula.checkmc.util.DAOUtils;
 import com.paula.checkmc.util.JDBCUtils;
-import com.paula.checkmc.util.SQLUtils;
 
 public class EmpleadoDAO {
 
@@ -127,22 +127,38 @@ public class EmpleadoDAO {
 
 			List<EmpleadoDTO> resultsPage = new ArrayList<>();
 			while (rs.next()) {
-				EmpleadoDTO dto = new EmpleadoDTO();
-				dto.setId(rs.getLong("id"));
-				dto.setNombre(rs.getString("name"));
-				dto.setPrimerApellido(rs.getString("first_surname"));
-				dto.setSegundoApellido(rs.getString("second_surname"));
-				dto.setDniNie(rs.getString("dni_nie"));
-				dto.setEmail(rs.getString("email"));
-				dto.setTelefono(rs.getString("phone"));
-				dto.setPassword(rs.getString("password"));
-				resultsPage.add(dto);
+			    EmpleadoDTO dto = new EmpleadoDTO();
+			    dto.setId(rs.getLong("id"));
+			    dto.setNombre(rs.getString("name"));
+			    dto.setPrimerApellido(rs.getString("first_surname"));
+			    dto.setSegundoApellido(rs.getString("second_surname"));
+			    dto.setDniNie(rs.getString("dni_nie"));
+			    dto.setEmail(rs.getString("email"));
+			    dto.setTelefono(rs.getString("phone"));
+			    dto.setPassword(rs.getString("password"));
+			    dto.setRolId(rs.getLong("rol_id"));
+			    dto.setGeneroId(rs.getLong("gender_id"));
+			    dto.setLocalidadId(rs.getLong("locality_id"));
+			    dto.setDireccion(rs.getString("address"));
+			    resultsPage.add(dto);
 			}
 
-			int totalResults = SQLUtils.getTotalRows(rs);
+			results.setPage(resultsPage);
 
-			results.setPage(resultsPage); // ✅ antes era null
-			results.setTotal(totalResults);
+			String countSql = "SELECT COUNT(*) FROM employee e";
+			if (!condiciones.isEmpty()) {
+			    countSql += " WHERE " + String.join(" AND ", condiciones);
+			}
+
+			PreparedStatement psCount = c.prepareStatement(countSql);
+			int idx = 1;
+			for (Object param : parametros) {
+			    psCount.setObject(idx++, param);
+			}
+			ResultSet rsCount = psCount.executeQuery();
+			if (rsCount.next()) {
+			    results.setTotal(rsCount.getInt(1));
+			}
 
 			return results;
 
@@ -234,42 +250,45 @@ public class EmpleadoDAO {
 
 	public boolean login(String dni, String password, Long rolId) {
 
-		Connection c = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
+	    Connection c = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
 
-		try {
+	    try {
 
-			c = JDBCUtils.getConnection();
+	        c = JDBCUtils.getConnection();
 
-			StringBuilder sql = new StringBuilder();
+	        StringBuilder sql = new StringBuilder();
 
-			sql.append("SELECT * ");
-			sql.append("FROM employee ");
-			sql.append("WHERE dni_nie = ? ");
-			sql.append("AND password = ? ");
-			sql.append("AND rol_id = ?");
+	        sql.append("SELECT password ");
+	        sql.append("FROM employee ");
+	        sql.append("WHERE dni_nie = ? ");
+	        sql.append("AND rol_id = ?");
 
-			ps = c.prepareStatement(sql.toString());
+	        ps = c.prepareStatement(sql.toString());
 
-			ps.setString(1, dni);
-			ps.setString(2, password);
-			ps.setLong(3, rolId);
+	        ps.setString(1, dni);
+	        ps.setLong(2, rolId);
 
-			rs = ps.executeQuery();
+	        rs = ps.executeQuery();
 
-			return rs.next();
+	        if (rs.next()) {
 
-		} catch (Exception e) {
+	            String hashedPassword = rs.getString("password");
 
-			e.printStackTrace();
+	            return BCrypt.checkpw(password, hashedPassword);
+	        }
 
-		} finally {
+	    } catch (Exception e) {
 
-			DAOUtils.close(rs, ps, c);
-		}
+	        e.printStackTrace();
 
-		return false;
+	    } finally {
+
+	        DAOUtils.close(rs, ps, c);
+	    }
+
+	    return false;
 	}
 
 	public boolean existeCorreo(String email) {
@@ -306,34 +325,38 @@ public class EmpleadoDAO {
 
 	public boolean existeDni(String dni) {
 
-		Connection c = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
+	    Connection c = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
 
-		try {
+	    try {
 
-			c = JDBCUtils.getConnection();
+	        c = JDBCUtils.getConnection();
 
-			String sql = "SELECT * FROM client WHERE dni_nie = ?";
+	        StringBuilder sql = new StringBuilder();
 
-			ps = c.prepareStatement(sql);
+	        sql.append("SELECT * ");
+	        sql.append("FROM employee ");
+	        sql.append("WHERE dni_nie = ?");
 
-			ps.setString(1, dni);
+	        ps = c.prepareStatement(sql.toString());
 
-			rs = ps.executeQuery();
+	        ps.setString(1, dni);
 
-			return rs.next();
+	        rs = ps.executeQuery();
 
-		} catch (Exception e) {
+	        return rs.next();
 
-			e.printStackTrace();
+	    } catch (Exception e) {
 
-		} finally {
+	        e.printStackTrace();
 
-			DAOUtils.close(rs, ps, c);
-		}
+	    } finally {
 
-		return false;
+	        DAOUtils.close(rs, ps, c);
+	    }
+
+	    return false;
 	}
 
 	private Empleado loadNext(ResultSet rs) throws Exception {

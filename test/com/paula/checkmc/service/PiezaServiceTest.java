@@ -1,11 +1,9 @@
 package com.paula.checkmc.service;
 
-import java.math.BigDecimal;
 import java.util.List;
 
-import com.paula.checkmc.model.PiezaDTO;
 import com.paula.checkmc.model.PiezaCriteria;
-import com.paula.checkmc.service.PiezaService;
+import com.paula.checkmc.model.PiezaDTO;
 import com.paula.checkmc.service.impl.PiezaServiceImpl;
 
 public class PiezaServiceTest {
@@ -17,24 +15,7 @@ public class PiezaServiceTest {
     }
 
    
-    public void testCreate() {
-
-
-        PiezaDTO pieza = new PiezaDTO();
-
-        pieza.setNombre("Filtro de aceite");
-        pieza.setStock(10);
-        pieza.setEstadoId(1L);
-        pieza.setPrecio(new BigDecimal("15.50"));
-
-        Long id = service.create(pieza);
-
-        if (id != null) {
-            System.out.println("Pieza creada con ID: " + id);
-        } else {
-            System.out.println("Error al crear la pieza");
-        }
-    }
+  
 
     public void testFindById(Long id) {
 
@@ -71,25 +52,15 @@ public class PiezaServiceTest {
     }
 
     
-    public void testDelete(Long id) {
-
-
-        boolean eliminado = service.delete(id);
-
-        if (eliminado) {
-            System.out.println("Pieza eliminada correctamente");
-        } else {
-            System.out.println("No se pudo eliminar la pieza");
-        }
-    }
+  
 
     public static void main(String[] args) {
 
         PiezaServiceTest test = new PiezaServiceTest();
 
-        test.testCreate();
+      
 
-        //test.testFindById(1L);
+        test.testFindById(1L);
 
         //test.testFindAll();
 

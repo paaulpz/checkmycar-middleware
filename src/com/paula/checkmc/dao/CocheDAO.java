@@ -30,9 +30,11 @@ public class CocheDAO {
         sb.append(" c.client_id, c.model_id, c.type_fuel_id, ");
         sb.append(" c.transmission_type_id, c.type_engine_id, c.price_final, ");
         sb.append(" mo.name AS nombre_modelo, ma.name AS nombre_marca, ");
+        sb.append(" cl.dni_nie AS dni_cliente, ");
         sb.append(" tf.name AS nombre_combustible, tt.name AS nombre_transmision, te.name AS nombre_motor ");
         sb.append(" FROM car c ");
         sb.append(" LEFT JOIN model mo ON c.model_id = mo.id ");
+        sb.append(" LEFT JOIN client cl ON c.client_id = cl.id ");
         sb.append(" LEFT JOIN brand ma ON mo.brand_id = ma.id ");
         sb.append(" LEFT JOIN type_fuel tf ON c.type_fuel_id = tf.id ");
         sb.append(" LEFT JOIN transmission_type tt ON c.transmission_type_id = tt.id ");
@@ -73,140 +75,172 @@ public class CocheDAO {
 	    return null;
 	}
     
-
 	public Results<CocheDTO> findByCriteria(CocheCriteria cr, int from, int pageSize) {
 
-        logger.info("criteria: {}", cr);
+	    logger.info("criteria: {}", cr);
 
-        Connection c = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+	    Connection c = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
 
-        Results<CocheDTO> results = new Results<>();
+	    Results<CocheDTO> results = new Results<>();
 
-        try {
-            c = JDBCUtils.getConnection();
+	    try {
+	        c = JDBCUtils.getConnection();
 
-            StringBuilder sql = new StringBuilder(BASE_SELECT);
-            List<String> condiciones = new ArrayList<>();
-            List<Object> parametros = new ArrayList<>();
+	        StringBuilder sql = new StringBuilder(BASE_SELECT);
+	        List<String> condiciones = new ArrayList<>();
+	        List<Object> parametros = new ArrayList<>();
 
-            if (cr.getMatricula() != null && !cr.getMatricula().isEmpty()) {
-                condiciones.add(" c.car_registration = ? ");
-                parametros.add(cr.getMatricula());
-            }
+	        if (cr.getMatricula() != null && !cr.getMatricula().isEmpty()) {
+	            condiciones.add(" c.car_registration = ? ");
+	            parametros.add(cr.getMatricula());
+	        }
 
-            if (cr.getNumeroBastidor() != null && !cr.getNumeroBastidor().isEmpty()) {
-                condiciones.add(" c.chassi_number = ? ");
-                parametros.add(cr.getNumeroBastidor());
-            }
+	        if (cr.getNumeroBastidor() != null && !cr.getNumeroBastidor().isEmpty()) {
+	            condiciones.add(" c.chassi_number = ? ");
+	            parametros.add(cr.getNumeroBastidor());
+	        }
 
-            if (cr.getClienteId() != null) {
-                condiciones.add(" c.client_id = ? ");
-                parametros.add(cr.getClienteId());
-            }
+	        if (cr.getClienteId() != null) {
+	            condiciones.add(" c.client_id = ? ");
+	            parametros.add(cr.getClienteId());
+	        }
 
-            if (cr.getMarcaId() != 0) {
-                condiciones.add(" ma.id = ? ");
-                parametros.add(cr.getMarcaId());
-            }
+	        if (cr.getMarcaId() != 0) {
+	            condiciones.add(" ma.id = ? ");
+	            parametros.add(cr.getMarcaId());
+	        }
 
-            if (cr.getModeloId() != null) {
-                condiciones.add(" c.model_id = ? ");
-                parametros.add(cr.getModeloId());
-            }
+	        if (cr.getModeloId() != null) {
+	            condiciones.add(" c.model_id = ? ");
+	            parametros.add(cr.getModeloId());
+	        }
 
-            if (cr.getTipoCombustibleId() != null) {
-                condiciones.add(" c.type_fuel_id = ? ");
-                parametros.add(cr.getTipoCombustibleId());
-            }
+	        if (cr.getTipoCombustibleId() != null) {
+	            condiciones.add(" c.type_fuel_id = ? ");
+	            parametros.add(cr.getTipoCombustibleId());
+	        }
 
-            if (cr.getTipoMotorId() != null) {
-                condiciones.add(" c.type_engine_id = ? ");
-                parametros.add(cr.getTipoMotorId());
-            }
+	        if (cr.getTipoMotorId() != null) {
+	            condiciones.add(" c.type_engine_id = ? ");
+	            parametros.add(cr.getTipoMotorId());
+	        }
 
-            if (cr.getTipoTransmisionId() != null) {
-                condiciones.add(" c.transmission_type_id = ? ");
-                parametros.add(cr.getTipoTransmisionId());
-            }
+	        if (cr.getTipoTransmisionId() != null) {
+	            condiciones.add(" c.transmission_type_id = ? ");
+	            parametros.add(cr.getTipoTransmisionId());
+	        }
 
-            if (cr.getPrecioMin() != null) {
-                condiciones.add(" c.price_final >= ? ");
-                parametros.add(cr.getPrecioMin());
-            }
+	        if (cr.getPrecioMin() != null) {
+	            condiciones.add(" c.price_final >= ? ");
+	            parametros.add(cr.getPrecioMin());
+	        }
 
-            if (cr.getPrecioMax() != null) {
-                condiciones.add(" c.precio_final <= ? ");
-                parametros.add(cr.getPrecioMax());
-            }
+	        if (cr.getPrecioMax() != null) {
+	            condiciones.add(" c.price_final <= ? ");
+	            parametros.add(cr.getPrecioMax());
+	        }
 
-            if (!condiciones.isEmpty()) {
-                sql.append(" WHERE ").append(String.join(" AND ", condiciones));
-            }
+	        if (!condiciones.isEmpty()) {
+	            sql.append(" WHERE ").append(String.join(" AND ", condiciones));
+	        }
 
-            String orderBy = cr.getOrderBy() != null ? cr.getOrderBy() : "c.id";
-            sql.append(" ORDER BY ").append(orderBy)
-               .append(cr.isAscDesc() ? " ASC " : " DESC ")
-               .append(" LIMIT ? OFFSET ? ");
+	        String orderBy = cr.getOrderBy() != null ? cr.getOrderBy() : "c.id";
+	        sql.append(" ORDER BY ").append(orderBy)
+	           .append(cr.isAscDesc() ? " ASC " : " DESC ")
+	           .append(" LIMIT ? OFFSET ? ");
 
-            logger.debug("SQL: {}", sql);
+	        logger.debug("SQL: {}", sql);
 
-            ps = c.prepareStatement(sql.toString());
+	        ps = c.prepareStatement(sql.toString(),
+	                ResultSet.TYPE_SCROLL_INSENSITIVE,
+	                ResultSet.CONCUR_READ_ONLY);
 
-            int i = 1;
-            for (Object param : parametros) {
-                ps.setObject(i++, param);
-            }
+	        int i = 1;
+	        for (Object param : parametros) {
+	            ps.setObject(i++, param);
+	        }
 
-            ps.setInt(i++, pageSize);
-            ps.setInt(i++, from - 1);
+	        ps.setInt(i++, pageSize);
+	        ps.setInt(i++, from - 1);
 
-            rs = ps.executeQuery();
+	        rs = ps.executeQuery();
 
-            List<CocheDTO> page = new ArrayList<>();
+	        List<CocheDTO> page = new ArrayList<>();
 
-            while (rs.next()) {
-                CocheDTO dto = new CocheDTO();
-                dto.setId(rs.getLong("id"));
-                dto.setMatricula(rs.getString("car_registration"));
-                dto.setNumeroBastidor(rs.getString("chassi_number"));
-                dto.setAno(rs.getInt("year"));
-                dto.setPotenciaCv(rs.getInt("potenciacv"));
-                dto.setKilometros(rs.getDouble("km"));
-                dto.setDiagnostico(rs.getString("diagnostico"));
-                dto.setClienteId(rs.getLong("client_id"));
-                dto.setModeloId(rs.getLong("model_id"));
-                dto.setTipoCombustibleId(rs.getLong("type_fuel_id"));
-                dto.setTipoTransmisionId(rs.getLong("transmission_type_id"));
-                dto.setTipoMotorId(rs.getLong("type_engine_id"));
-                double precio = rs.getDouble("price_final");
-                dto.setPrecioFinal(rs.wasNull() ? 0 : precio);
+	        while (rs.next()) {
+	            CocheDTO dto = new CocheDTO();
+	            dto.setId(rs.getLong("id"));
+	            dto.setMatricula(rs.getString("car_registration"));
+	            dto.setNumeroBastidor(rs.getString("chassi_number"));
+	            dto.setAno(rs.getInt("year"));
+	            dto.setPotenciaCv(rs.getInt("potenciacv"));
+	            dto.setKilometros(rs.getDouble("km"));
+	            dto.setDiagnostico(rs.getString("diagnostico"));
+	            dto.setClienteId(rs.getLong("client_id"));
+	            dto.setModeloId(rs.getLong("model_id"));
+	            dto.setTipoCombustibleId(rs.getLong("type_fuel_id"));
+	            dto.setTipoTransmisionId(rs.getLong("transmission_type_id"));
+	            dto.setTipoMotorId(rs.getLong("type_engine_id"));
+	            double precio = rs.getDouble("price_final");
+	            dto.setPrecioFinal(rs.wasNull() ? 0 : precio);
+	            dto.setNombreModelo(rs.getString("nombre_modelo"));
+	            dto.setNombreMarca(rs.getString("nombre_marca"));
+	            dto.setNombreModelo(rs.getString("nombre_modelo"));
+	            dto.setNombreMarca(rs.getString("nombre_marca"));
+	            dto.setNombreCliente(rs.getString("dni_cliente"));
+	            dto.setTipoCombustible(rs.getString("nombre_combustible"));
+	            dto.setTipoTransmision(rs.getString("nombre_transmision"));
+	            dto.setTipoMotor(rs.getString("nombre_motor"));
+	            page.add(dto);
+	        }
 
-               
-                dto.setNombreModelo(rs.getString("nombre_modelo"));
-                dto.setNombreMarca(rs.getString("nombre_marca"));
-                dto.setTipoCombustible(rs.getString("nombre_combustible"));
-                dto.setTipoTransmision(rs.getString("nombre_transmision"));
-                dto.setTipoMotor(rs.getString("nombre_motor"));
+	        results.setPage(page);
 
-                page.add(dto);
-            }
+	        StringBuilder countSql = new StringBuilder();
 
-            results.setPage(page);
-            results.setTotal(page.size());
+	        countSql.append(" SELECT COUNT(*) FROM car c ");
+	        countSql.append(" LEFT JOIN model mo ON c.model_id = mo.id ");
+	        countSql.append(" LEFT JOIN client cl ON c.client_id = cl.id ");
+	        countSql.append(" LEFT JOIN brand ma ON mo.brand_id = ma.id ");
+	        countSql.append(" LEFT JOIN type_fuel tf ON c.type_fuel_id = tf.id ");
+	        countSql.append(" LEFT JOIN transmission_type tt ON c.transmission_type_id = tt.id ");
+	        countSql.append(" LEFT JOIN type_engine te ON c.type_engine_id = te.id ");
 
-            return results;
+	        if (!condiciones.isEmpty()) {
+	            countSql.append(" WHERE ")
+	                     .append(String.join(" AND ", condiciones));
+	        }
 
-        } catch (Exception e) {
-            logger.error("Error en findByCriteria: {}", cr, e);
-        } finally {
-            DAOUtils.close(rs, ps, c);
-        }
+	        PreparedStatement psCount = c.prepareStatement(countSql.toString());
 
-        return results;
-    }
-	
+	        int idx = 1;
+
+	        for (Object param : parametros) {
+	            psCount.setObject(idx++, param);
+	        }
+
+	        ResultSet rsCount = psCount.executeQuery();
+
+	        if (rsCount.next()) {
+	            results.setTotal(rsCount.getInt(1));
+	        }
+
+	        return results;
+
+	        } catch (Exception e) {
+
+	            logger.error("Error en findByCriteria: {}", cr, e);
+
+	        } finally {
+
+	            DAOUtils.close(rs, ps, c);
+	        }
+
+	        return results;
+	        }
+	        
 	public Long create(Coche coche) {
 
 	    logger.debug("Creando coche: {}", coche);

@@ -96,63 +96,8 @@ public class PiezaDAO {
         return lista;
     }
 
-    public Long create(Pieza p) {
 
-        String sql = "INSERT INTO part(name,stock,part_status_id,price) VALUES(?,?,?,?)";
 
-        try (Connection c = JDBCUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-
-            ps.setString(1, p.getNombre());
-            ps.setInt(2, p.getStock());
-            ps.setLong(3, p.getEstadoId());
-            ps.setBigDecimal(4, p.getPrecio());
-
-            ps.executeUpdate();
-
-            ResultSet rs = ps.getGeneratedKeys();
-            return rs.next() ? rs.getLong(1) : null;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public boolean update(Pieza p) {
-
-        String sql = "UPDATE part SET name=?, stock=?, part_status_id=?, price=? WHERE id=?";
-
-        try (Connection c = JDBCUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-
-            ps.setString(1, p.getNombre());
-            ps.setInt(2, p.getStock());
-            ps.setLong(3, p.getEstadoId());
-            ps.setBigDecimal(4, p.getPrecio());
-            ps.setLong(5, p.getId());
-
-            return ps.executeUpdate() > 0;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean delete(Long id) {
-
-        try (Connection c = JDBCUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement("DELETE FROM part WHERE id=?")) {
-
-            ps.setLong(1, id);
-            return ps.executeUpdate() > 0;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
     
     private Pieza loadNext(ResultSet rs) throws Exception {
 

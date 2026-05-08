@@ -9,7 +9,7 @@ public class EmpleadoDTO extends AbstracValueObject {
     private String segundoApellido;
 
     private String dniNie;
-    
+    private String direccion; 
    
     private String email;
     private String telefono;
@@ -162,6 +162,14 @@ public class EmpleadoDTO extends AbstracValueObject {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public String getDireccion() {
+		return direccion;
+	}
+
+	public void setDireccion(String direccion) {
+		this.direccion = direccion;
 	}
 
     

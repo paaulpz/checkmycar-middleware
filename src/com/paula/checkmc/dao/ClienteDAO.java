@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.mindrot.jbcrypt.BCrypt;
 
 import com.paula.checkmc.model.Cliente;
 import com.paula.checkmc.model.ClienteCriteria;
@@ -65,86 +66,107 @@ public class ClienteDAO {
 
 	public Results<ClienteDTO> findByCriteria(ClienteCriteria cr, int from, int pageSize) {
 
-		logger.info("criteria: {}", cr);
+	    logger.info("criteria: {}", cr);
 
-		Connection c = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
+	    Connection c = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
 
-		Results<ClienteDTO> results = new Results<>();
+	    Results<ClienteDTO> results = new Results<>();
 
-		try {
-			c = JDBCUtils.getConnection();
+	    try {
+	        c = JDBCUtils.getConnection();
 
-			StringBuilder sql = new StringBuilder(BASE_SELECT);
-			List<String> condiciones = new ArrayList<>();
-			List<Object> parametros = new ArrayList<>();
+	        StringBuilder sql = new StringBuilder(BASE_SELECT);
+	        List<String> condiciones = new ArrayList<>();
+	        List<Object> parametros = new ArrayList<>();
 
-			if (cr.getDniNie() != null && !cr.getDniNie().isEmpty()) {
-				condiciones.add(" c.dni_nie = ? ");
-				parametros.add(cr.getDniNie());
-			}
+	        if (cr.getDniNie() != null && !cr.getDniNie().isEmpty()) {
+	            condiciones.add(" c.dni_nie = ? ");
+	            parametros.add(cr.getDniNie());
+	        }
 
-			if (cr.getEmail() != null && !cr.getEmail().isEmpty()) {
-				condiciones.add(" c.email = ? ");
-				parametros.add(cr.getEmail());
-			}
+	        if (cr.getEmail() != null && !cr.getEmail().isEmpty()) {
+	            condiciones.add(" c.email = ? ");
+	            parametros.add(cr.getEmail());
+	        }
 
-			if (cr.getLocalidadId() != null) {
-				condiciones.add(" c.locality_id = ? ");
-				parametros.add(cr.getLocalidadId());
-			}
+	        if (cr.getLocalidadId() != null) {
+	            condiciones.add(" c.locality_id = ? ");
+	            parametros.add(cr.getLocalidadId());
+	        }
 
-			if (cr.getGeneroId() != null) {
-				condiciones.add(" c.gender_id = ? ");
-				parametros.add(cr.getGeneroId());
-			}
+	        if (cr.getGeneroId() != null) {
+	            condiciones.add(" c.gender_id = ? ");
+	            parametros.add(cr.getGeneroId());
+	        }
 
-			if (!condiciones.isEmpty()) {
-				sql.append(" WHERE ").append(String.join(" AND ", condiciones));
-			}
+	        if (!condiciones.isEmpty()) {
+	            sql.append(" WHERE ").append(String.join(" AND ", condiciones));
+	        }
 
-			sql.append(" ORDER BY ").append(cr.getOrderBy()).append(cr.isAscDesc() ? " ASC " : " DESC ")
-					.append(" LIMIT ? OFFSET ? ");
+	        sql.append(" ORDER BY ").append(cr.getOrderBy()).append(cr.isAscDesc() ? " ASC " : " DESC ")
+	                .append(" LIMIT ? OFFSET ? ");
 
-			logger.debug("SQL: {}", sql);
+	        logger.debug("SQL: {}", sql);
 
-			ps = c.prepareStatement(sql.toString());
+	        ps = c.prepareStatement(sql.toString(),
+	                ResultSet.TYPE_SCROLL_INSENSITIVE,
+	                ResultSet.CONCUR_READ_ONLY);
 
-			int i = 1;
-			for (Object param : parametros) {
-				ps.setObject(i++, param);
-			}
+	        int i = 1;
+	        for (Object param : parametros) {
+	            ps.setObject(i++, param);
+	        }
 
-			ps.setInt(i++, pageSize);
-			ps.setInt(i++, from - 1);
+	        ps.setInt(i++, pageSize);
+	        ps.setInt(i++, from - 1);
 
-			rs = ps.executeQuery();
+	        rs = ps.executeQuery();
 
-			List<ClienteDTO> page = new ArrayList<>();
+	        List<ClienteDTO> page = new ArrayList<>();
 
-			while (rs.next()) {
-				ClienteDTO dto = new ClienteDTO();
-				dto.setId(rs.getLong("id"));
-				dto.setNombre(rs.getString("name"));
-				dto.setEmail(rs.getString("email"));
-				dto.setTelefono(rs.getString("phone"));
-				dto.setPassword(rs.getString("password")); // ✅ añadido para que login funcione
-				page.add(dto);
-			}
+	        while (rs.next()) {
+	            ClienteDTO dto = new ClienteDTO();
+	            dto.setId(rs.getLong("id"));
+	            dto.setDniNie(rs.getString("dni_nie"));
+	            dto.setNombre(rs.getString("name"));
+	            dto.setPrimerApellido(rs.getString("first_surname"));
+	            dto.setSegundoApellido(rs.getString("second_surname"));
+	            dto.setEmail(rs.getString("email"));
+	            dto.setTelefono(rs.getString("phone"));
+	            dto.setPassword(rs.getString("password"));
+	            dto.setLocalidadId(rs.getLong("locality_id"));
+	            dto.setGeneroId(rs.getLong("gender_id"));
+	            dto.setDireccion(rs.getString("address"));
+	            page.add(dto);
+	        }
 
-			results.setPage(page);
-			results.setTotal(page.size());
+	        results.setPage(page);
 
-			return results;
+	        String countSql = "SELECT COUNT(*) FROM client c";
+	        if (!condiciones.isEmpty()) {
+	            countSql += " WHERE " + String.join(" AND ", condiciones);
+	        }
+	        PreparedStatement psCount = c.prepareStatement(countSql);
+	        int idx = 1;
+	        for (Object param : parametros) {
+	            psCount.setObject(idx++, param);
+	        }
+	        ResultSet rsCount = psCount.executeQuery();
+	        if (rsCount.next()) {
+	            results.setTotal(rsCount.getInt(1));
+	        }
 
-		} catch (Exception e) {
-			logger.error("Error en findByCriteria: {}", cr, e);
-		} finally {
-			DAOUtils.close(rs, ps, c);
-		}
+	        return results;
 
-		return results;
+	    } catch (Exception e) {
+	        logger.error("Error en findByCriteria: {}", cr, e);
+	    } finally {
+	        DAOUtils.close(rs, ps, c);
+	    }
+
+	    return results;
 	}
 
 	public Cliente create(Cliente cliente) {
@@ -262,37 +284,49 @@ public class ClienteDAO {
 
 	public boolean login(String dni, String password) {
 
-		Connection c = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
+	    Connection c = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
 
-		try {
+	    try {
 
-			c = JDBCUtils.getConnection();
+	        c = JDBCUtils.getConnection();
 
-			String sql = "SELECT * FROM client WHERE dni_nie = ? AND password = ?";
+	        String sql =
+	                "SELECT password FROM client WHERE dni_nie = ?";
 
-			ps = c.prepareStatement(sql);
+	        ps = c.prepareStatement(sql);
 
-			ps.setString(1, dni);
-			ps.setString(2, password);
+	        ps.setString(1, dni);
 
-			rs = ps.executeQuery();
+	        rs = ps.executeQuery();
 
-			return rs.next();
+	        if (rs.next()) {
 
-		} catch (Exception e) {
+	            String hashedPassword = rs.getString("password");
 
-			e.printStackTrace();
+	            if (hashedPassword.startsWith("$2a$")) {
 
-		} finally {
+	                return BCrypt.checkpw(password, hashedPassword);
 
-			DAOUtils.close(rs, ps, c);
-		}
+	            } else {
 
-		return false;
+	                return password.equals(hashedPassword);
+	            }
+	        }
+
+	    } catch (Exception e) {
+
+	        e.printStackTrace();
+
+	    } finally {
+
+	        DAOUtils.close(rs, ps, c);
+	    }
+
+	    return false;
 	}
-
+	
 	public boolean existeCorreo(String email) {
 
 		Connection c = null;
