@@ -28,7 +28,7 @@ public class CocheDAO {
         sb.append(" SELECT c.id, c.car_registration, c.chassi_number, c.year, ");
         sb.append(" c.potenciacv, c.km, c.diagnostico, ");
         sb.append(" c.client_id, c.model_id, c.type_fuel_id, ");
-        sb.append(" c.transmission_type_id, c.type_engine_id, c.price_final, ");
+        sb.append(" c.transmission_type_id, c.type_engine_id, ");
         sb.append(" mo.name AS nombre_modelo, ma.name AS nombre_marca, ");
         sb.append(" cl.dni_nie AS dni_cliente, ");
         sb.append(" tf.name AS nombre_combustible, tt.name AS nombre_transmision, te.name AS nombre_motor ");
@@ -122,15 +122,7 @@ public class CocheDAO {
                 parametros.add(cr.getTipoTransmisionId());
             }
 
-            if (cr.getPrecioMin() != null) {
-                condiciones.add(" c.price_final >= ? ");
-                parametros.add(cr.getPrecioMin());
-            }
-
-            if (cr.getPrecioMax() != null) {
-                condiciones.add(" c.price_final <= ? ");
-                parametros.add(cr.getPrecioMax());
-            }
+          
 
             if (!condiciones.isEmpty()) {
                 sql.append(" WHERE ").append(String.join(" AND ", condiciones));
@@ -172,8 +164,6 @@ public class CocheDAO {
                 dto.setTipoCombustibleId(rs.getLong("type_fuel_id"));
                 dto.setTipoTransmisionId(rs.getLong("transmission_type_id"));
                 dto.setTipoMotorId(rs.getLong("type_engine_id"));
-                double precio = rs.getDouble("price_final");
-                dto.setPrecioFinal(rs.wasNull() ? null : precio);
                 dto.setNombreModelo(rs.getString("nombre_modelo"));
                 dto.setNombreMarca(rs.getString("nombre_marca"));
                 dto.setNombreCliente(rs.getString("dni_cliente"));
@@ -224,10 +214,10 @@ public class CocheDAO {
         logger.debug("Creando coche: {}", coche);
 
         String sql =
-            " INSERT INTO car " +
-            " (diagnostico, car_registration, chassi_number, year, potenciacv, km, " +
-            " client_id, type_fuel_id, transmission_type_id, model_id, type_engine_id, price_final) " +
-            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+        	    " INSERT INTO car " +
+        	    " (diagnostico, car_registration, chassi_number, year, potenciacv, km, " +
+        	    " client_id, type_fuel_id, transmission_type_id, model_id, type_engine_id) " +
+        	    " VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
         try (Connection c = JDBCUtils.getConnection();
              PreparedStatement ps = c.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -247,12 +237,7 @@ public class CocheDAO {
             ps.setLong(9, coche.getTipoTransmisionId());
             ps.setLong(10, coche.getModeloId());
             ps.setLong(11, coche.getTipoMotorId());
-            if (coche.getPrecioFinal() != null) {
-                ps.setDouble(12, coche.getPrecioFinal());
-            } else {
-                ps.setNull(12, Types.DOUBLE);
-            }
-
+            
             ps.executeUpdate();
 
             ResultSet rs = ps.getGeneratedKeys();
@@ -276,7 +261,7 @@ public class CocheDAO {
         String sql =
             " UPDATE car SET diagnostico=?, car_registration=?, chassi_number=?, year=?, " +
             " potenciacv=?, km=?, client_id=?, type_fuel_id=?, transmission_type_id=?, " +
-            " model_id=?, type_engine_id=?, price_final=? WHERE id=?";
+            " model_id=?, type_engine_id=? WHERE id=?";
 
         try (Connection c = JDBCUtils.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
@@ -296,12 +281,8 @@ public class CocheDAO {
             ps.setLong(9, coche.getTipoTransmisionId());
             ps.setLong(10, coche.getModeloId());
             ps.setLong(11, coche.getTipoMotorId());
-            if (coche.getPrecioFinal() != null) {
-                ps.setDouble(12, coche.getPrecioFinal());
-            } else {
-                ps.setNull(12, Types.DOUBLE);
-            }
-            ps.setLong(13, coche.getId());
+            
+            ps.setLong(12, coche.getId());
 
             return ps.executeUpdate() > 0;
 
@@ -339,8 +320,6 @@ public class CocheDAO {
         c.setTipoCombustibleId(rs.getLong(i++));
         c.setTipoTransmisionId(rs.getLong(i++));
         c.setTipoMotorId(rs.getLong(i++));
-        double precio = rs.getDouble(i++);
-        c.setPrecioFinal(rs.wasNull() ? null : precio);
         return c;
     }
 }

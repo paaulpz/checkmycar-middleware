@@ -1,19 +1,19 @@
 package com.paula.checkmc.service;
 
-import java.util.List;
-
+import com.paula.checkmc.model.Results;
+import com.paula.checkmc.model.Venta;
 import com.paula.checkmc.model.VentaCriteria;
 import com.paula.checkmc.model.VentaDTO;
 
 public interface VentaService {
 
-    VentaDTO findById(Long id) throws Exception;
+	  public VentaDTO findById(Long id) throws Exception;
 
-    List<VentaDTO> findByCriteria(VentaCriteria criteria, int from , int pageSize) throws Exception;
+  public Results<VentaDTO> findByCriteria(VentaCriteria criteria, int from , int pageSize) throws Exception;
 
-    Long create(VentaDTO venta) throws Exception;
+  public Venta create(VentaDTO venta) throws Exception;
 
-    boolean update(VentaDTO venta) throws Exception;
+  public boolean update(VentaDTO venta) throws Exception;
 
-    boolean delete(Long id) throws Exception;
+  public boolean delete(Long id) throws Exception;
 }

@@ -2,9 +2,9 @@ package com.paula.checkmc.service;
 
 import java.util.List;
 
+import com.paula.checkmc.model.Venta;
 import com.paula.checkmc.model.VentaCriteria;
 import com.paula.checkmc.model.VentaDTO;
-import com.paula.checkmc.service.VentaService;
 import com.paula.checkmc.service.impl.VentaServiceImpl;
 
 public class VentaServiceTest {
@@ -21,12 +21,12 @@ public class VentaServiceTest {
 
     public void testFindByCriteria() throws Exception {
         VentaCriteria criteria = new VentaCriteria();
-        List<VentaDTO> ventas = service.findByCriteria(criteria, 0, 10);
+        List<VentaDTO> ventas = (List<VentaDTO>) service.findByCriteria(criteria, 0, 10);
     }
 
     public void testCreate() throws Exception {
         VentaDTO venta = new VentaDTO();
-        Long id = service.create(venta);
+        Venta id = service.create(venta);
     }
 
     public void testUpdate() throws Exception {

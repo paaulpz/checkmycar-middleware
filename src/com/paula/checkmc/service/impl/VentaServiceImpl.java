@@ -1,8 +1,7 @@
 package com.paula.checkmc.service.impl;
 
-import java.util.List;
-
 import com.paula.checkmc.dao.VentaDAO;
+import com.paula.checkmc.model.Results;
 import com.paula.checkmc.model.Venta;
 import com.paula.checkmc.model.VentaCriteria;
 import com.paula.checkmc.model.VentaDTO;
@@ -17,10 +16,10 @@ public class VentaServiceImpl implements VentaService {
         return dao.findById(id);
     }
 
-    @Override
-    public List<VentaDTO> findByCriteria(VentaCriteria criteria, int from , int pageSize) throws Exception {
-        return dao.findByCriteria(criteria, from, pageSize);
-    }
+    public Results<VentaDTO> findByCriteria(VentaCriteria criteria, int from, int pageSize) throws Exception {
+
+      return dao.findByCriteria(criteria, from, pageSize);
+}
 
     
 
@@ -30,7 +29,7 @@ public class VentaServiceImpl implements VentaService {
     }
 
     @Override
-    public Long create(VentaDTO venta) throws Exception {
+    public Venta create(VentaDTO venta) throws Exception {
         Venta v = new Venta();
         v.setFechaVenta(venta.getFechaVenta());
         v.setPrecioCliente(venta.getPrecioCliente());
