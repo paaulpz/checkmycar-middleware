@@ -16,7 +16,6 @@ public class Venta {
     private Long empleadoId;
     private Long cocheId;
 
-    // Getters & Setters
 
     public Long getId() {
         return id;

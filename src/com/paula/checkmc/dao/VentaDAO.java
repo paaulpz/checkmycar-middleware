@@ -21,14 +21,14 @@ public class VentaDAO {
         sb.append(" s.price_client, s.price_final, ");
         sb.append(" s.buyer_client_id, ");
         sb.append(" CONCAT(cb.name,' ',cb.first_surname) AS comprador_nombre, ");
-        sb.append(" s.seler_client_id, ");
+        sb.append(" s.seller_client_id, ");
         sb.append(" CONCAT(cv.name,' ',cv.first_surname) AS vendedor_nombre, ");
         sb.append(" s.employee_id, ");
         sb.append(" CONCAT(e.name,' ',e.first_surname) AS empleado_nombre, ");
         sb.append(" s.car_id, ca.car_registration ");
         sb.append(" FROM sale s ");
         sb.append(" LEFT JOIN client cb ON s.buyer_client_id = cb.id ");
-        sb.append(" LEFT JOIN client cv ON s.seler_client_id = cv.id ");
+        sb.append(" LEFT JOIN client cv ON s.seller_client_id = cv.id ");
         sb.append(" JOIN employee e ON s.employee_id = e.id ");
         sb.append(" JOIN car ca ON s.car_id = ca.id ");
         BASE_SELECT = sb.toString();
@@ -67,7 +67,7 @@ public class VentaDAO {
             }
 
             if (cr.getClienteVendedorId() != null) {
-                cond.add(" s.seler_client_id = ? ");
+                cond.add(" s.seller_client_id = ? ");
                 params.add(cr.getClienteVendedorId());
             }
 
@@ -122,7 +122,7 @@ public class VentaDAO {
 
             StringBuilder sql = new StringBuilder();
             sql.append(" INSERT INTO sale ");
-            sql.append(" (sale_date, price_client, price_final, buyer_client_id, seler_client_id, employee_id, car_id) ");
+            sql.append(" (sale_date, price_client, price_final, buyer_client_id, s.seller_client_id, employee_id, car_id) ");
             sql.append(" VALUES (?, ?, ?, ?, ?, ?, ?) ");
 
             PreparedStatement ps = c.prepareStatement(sql.toString(), PreparedStatement.RETURN_GENERATED_KEYS);
@@ -154,7 +154,7 @@ public class VentaDAO {
             sql.append(" price_client = ?, ");
             sql.append(" price_final = ?, ");
             sql.append(" buyer_client_id = ?, ");
-            sql.append(" seler_client_id = ?, ");
+            sql.append(" s.seller_client_id = ?, ");
             sql.append(" employee_id = ?, ");
             sql.append(" car_id = ? ");
             sql.append(" WHERE id = ? ");

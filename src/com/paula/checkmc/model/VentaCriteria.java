@@ -12,12 +12,9 @@ public class VentaCriteria {
     private LocalDate fechaDesde;
     private LocalDate fechaHasta;
 
-    // true → solo ventas abiertas (buyer IS NULL)
-    // false → solo ventas cerradas (buyer IS NOT NULL)
-    // null → todas
+   
     private Boolean soloAbiertas;
 
-    // Getters & Setters
 
     public Long getClienteCompradorId() {
         return clienteCompradorId;
