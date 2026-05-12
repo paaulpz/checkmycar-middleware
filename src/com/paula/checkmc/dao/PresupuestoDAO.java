@@ -23,10 +23,13 @@ public class PresupuestoDAO {
     private static final String BASE_SELECT;
 
     static {
+
         StringBuilder sb = new StringBuilder();
-        sb.append(" SELECT id, date, final_price, ");
-        sb.append(" client_id, quotation_status_id, name ");
-        sb.append(" FROM quotation ");
+
+        sb.append("SELECT id, date, final_price, ");
+        sb.append("client_id, quotation_status_id, name ");
+        sb.append("FROM quotation ");
+
         BASE_SELECT = sb.toString();
     }
 
@@ -34,17 +37,36 @@ public class PresupuestoDAO {
 
         logger.debug("Buscando presupuesto id: {}", id);
 
-        try (Connection c = DAOUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement(BASE_SELECT + " WHERE id = ?")) {
+        Connection c = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
-            DAOUtils.setParameters(ps, id);
+        try {
 
-            ResultSet rs = ps.executeQuery();
+            c = DAOUtils.getConnection();
 
-            return rs.next() ? loadNext(rs) : null;
+            StringBuilder sql = new StringBuilder(BASE_SELECT);
+
+            sql.append("WHERE id=?");
+
+            ps = c.prepareStatement(sql.toString());
+
+            ps.setLong(1, id);
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+
+                return loadNext(rs);
+            }
 
         } catch (Exception e) {
-            logger.error("Error en findById: {}", id, e);
+
+            logger.error("Error findById presupuesto: {}", id, e);
+
+        } finally {
+
+            DAOUtils.close(rs, ps, c);
         }
 
         return null;
@@ -56,51 +78,65 @@ public class PresupuestoDAO {
 
         Connection c = null;
         PreparedStatement ps = null;
+        PreparedStatement psCount = null;
+
         ResultSet rs = null;
+        ResultSet rsCount = null;
 
         Results<PresupuestoDTO> results = new Results<>();
 
         try {
+
             c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder(BASE_SELECT);
+
             List<String> condiciones = new ArrayList<>();
             List<Object> parametros = new ArrayList<>();
 
             if (cr.getClienteId() != null) {
-                condiciones.add(" client_id = ? ");
+
+                condiciones.add("client_id=?");
                 parametros.add(cr.getClienteId());
             }
 
             if (cr.getEstadoPresupuestoId() != null) {
-                condiciones.add(" quotation_status_id = ? ");
+
+                condiciones.add("quotation_status_id=?");
                 parametros.add(cr.getEstadoPresupuestoId());
             }
 
             if (cr.getFechaDesde() != null) {
-                condiciones.add(" date >= ? ");
+
+                condiciones.add("date >= ?");
                 parametros.add(cr.getFechaDesde());
             }
 
             if (cr.getFechaHasta() != null) {
-                condiciones.add(" date <= ? ");
+
+                condiciones.add("date <= ?");
                 parametros.add(cr.getFechaHasta());
             }
 
             if (!condiciones.isEmpty()) {
-                sql.append(" WHERE ").append(String.join(" AND ", condiciones));
+
+                sql.append(" WHERE ");
+                sql.append(String.join(" AND ", condiciones));
             }
 
-            sql.append(" ORDER BY ").append(cr.getOrderBy())
-               .append(cr.isAscDesc() ? " ASC " : " DESC ")
-               .append(" LIMIT ? OFFSET ? ");
+            sql.append(" ORDER BY ");
+            sql.append(cr.getOrderBy());
+            sql.append(cr.isAscDesc() ? " ASC " : " DESC ");
+            sql.append(" LIMIT ? OFFSET ? ");
 
             logger.debug("SQL: {}", sql);
 
             ps = c.prepareStatement(sql.toString());
 
             int i = 1;
+
             for (Object param : parametros) {
+
                 ps.setObject(i++, param);
             }
 
@@ -126,13 +162,41 @@ public class PresupuestoDAO {
             }
 
             results.setPage(page);
-            results.setTotal(page.size());
 
-            return results;
+            StringBuilder countSql = new StringBuilder();
+
+            countSql.append("SELECT COUNT(*) ");
+            countSql.append("FROM quotation ");
+
+            if (!condiciones.isEmpty()) {
+
+                countSql.append("WHERE ");
+                countSql.append(String.join(" AND ", condiciones));
+            }
+
+            psCount = c.prepareStatement(countSql.toString());
+
+            int j = 1;
+
+            for (Object param : parametros) {
+
+                psCount.setObject(j++, param);
+            }
+
+            rsCount = psCount.executeQuery();
+
+            if (rsCount.next()) {
+
+                results.setTotal(rsCount.getInt(1));
+            }
 
         } catch (Exception e) {
-            logger.error("Error en findByCriteria: {}", cr, e);
+
+            logger.error("Error findByCriteria presupuesto: {}", cr, e);
+
         } finally {
+
+            DAOUtils.close(rsCount, psCount, null);
             DAOUtils.close(rs, ps, c);
         }
 
@@ -143,83 +207,133 @@ public class PresupuestoDAO {
 
         logger.debug("Creando presupuesto: {}", p);
 
-        String sql = "INSERT INTO quotation(date, final_price, client_id, quotation_status_id, name) VALUES(?,?,?,?,?)";
+        Connection c = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
-        try (Connection c = DAOUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+        try {
 
-            DAOUtils.setParameters(ps,
-                java.sql.Date.valueOf(p.getFecha()),
-                p.getPrecioFinal(),
-                p.getClienteId(),
-                p.getEstadoPresupuestoId(),
-                p.getNombre()
-            );
+            c = DAOUtils.getConnection();
+
+            StringBuilder sql = new StringBuilder();
+
+            sql.append("INSERT INTO quotation ");
+            sql.append("(date, final_price, client_id, quotation_status_id, name) ");
+            sql.append("VALUES (?,?,?,?,?)");
+
+            ps = c.prepareStatement(
+                    sql.toString(),
+                    PreparedStatement.RETURN_GENERATED_KEYS);
+
+            DAOUtils.setParameters(
+                    ps,
+                    java.sql.Date.valueOf(p.getFecha()),
+                    p.getPrecioFinal(),
+                    p.getClienteId(),
+                    p.getEstadoPresupuestoId(),
+                    p.getNombre());
 
             ps.executeUpdate();
 
-            ResultSet rs = ps.getGeneratedKeys();
+            rs = ps.getGeneratedKeys();
 
             if (rs.next()) {
+
                 Long id = rs.getLong(1);
+
                 logger.info("Presupuesto creado con id: {}", id);
+
                 return id;
             }
 
         } catch (Exception e) {
+
             logger.error("Error creando presupuesto: {}", p, e);
+
+        } finally {
+
+            DAOUtils.close(rs, ps, c);
         }
 
         return null;
     }
 
-   
     public boolean update(Presupuesto p) {
 
         logger.debug("Actualizando presupuesto: {}", p);
 
-        String sql = "UPDATE quotation SET date=?, final_price=?, client_id=?, quotation_status_id=?, name=? WHERE id=?";
+        Connection c = null;
+        PreparedStatement ps = null;
 
-        try (Connection c = DAOUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+        try {
 
-            DAOUtils.setParameters(ps,
-                java.sql.Date.valueOf(p.getFecha()),
-                p.getPrecioFinal(),
-                p.getClienteId(),
-                p.getEstadoPresupuestoId(),
-                p.getNombre(),
-                p.getId()
-            );
+            c = DAOUtils.getConnection();
+
+            StringBuilder sql = new StringBuilder();
+
+            sql.append("UPDATE quotation SET ");
+            sql.append("date=?, final_price=?, client_id=?, ");
+            sql.append("quotation_status_id=?, name=? ");
+            sql.append("WHERE id=?");
+
+            ps = c.prepareStatement(sql.toString());
+
+            DAOUtils.setParameters(
+                    ps,
+                    java.sql.Date.valueOf(p.getFecha()),
+                    p.getPrecioFinal(),
+                    p.getClienteId(),
+                    p.getEstadoPresupuestoId(),
+                    p.getNombre(),
+                    p.getId());
 
             return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
+
             logger.error("Error actualizando presupuesto: {}", p, e);
+
+        } finally {
+
+            DAOUtils.close(null, ps, c);
         }
 
         return false;
     }
 
-  
     public boolean delete(Long id) {
 
         logger.warn("Eliminando presupuesto id: {}", id);
 
-        try (Connection c = DAOUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement("DELETE FROM quotation WHERE id=?")) {
+        Connection c = null;
+        PreparedStatement ps = null;
 
-            DAOUtils.setParameters(ps, id);
+        try {
+
+            c = DAOUtils.getConnection();
+
+            StringBuilder sql = new StringBuilder();
+
+            sql.append("DELETE FROM quotation ");
+            sql.append("WHERE id=?");
+
+            ps = c.prepareStatement(sql.toString());
+
+            ps.setLong(1, id);
 
             return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
-            logger.error("Error eliminando presupuesto id: {}", id, e);
+
+            logger.error("Error eliminando presupuesto: {}", id, e);
+
+        } finally {
+
+            DAOUtils.close(null, ps, c);
         }
 
         return false;
     }
-
 
     private Presupuesto loadNext(ResultSet rs) throws Exception {
 

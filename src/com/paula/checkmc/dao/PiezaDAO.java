@@ -6,48 +6,100 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.paula.checkmc.model.Pieza;
 import com.paula.checkmc.model.PiezaCriteria;
+import com.paula.checkmc.util.DAOUtils;
 import com.paula.checkmc.util.JDBCUtils;
 
 public class PiezaDAO {
 
-    private static final String BASE_SELECT =
-        " SELECT p.id, p.name, p.stock, p.part_status_id, p.price " +
-        " FROM part p ";
+    private static final Logger logger = LogManager.getLogger(PiezaDAO.class);
 
-   
+    private static final String BASE_SELECT;
+
+    static {
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("SELECT p.id, p.name, p.stock, ");
+        sb.append("p.part_status_id, p.price ");
+        sb.append("FROM part p ");
+
+        BASE_SELECT = sb.toString();
+    }
 
     public Pieza findById(Long id) {
 
-        try (Connection c = JDBCUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement(BASE_SELECT + " WHERE p.id=?")) {
+        Connection c = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+
+            c = JDBCUtils.getConnection();
+
+            StringBuilder sql = new StringBuilder(BASE_SELECT);
+
+            sql.append("WHERE p.id=?");
+
+            ps = c.prepareStatement(sql.toString());
 
             ps.setLong(1, id);
-            ResultSet rs = ps.executeQuery();
 
-            return rs.next() ? loadNext(rs) : null;
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+
+                return loadNext(rs);
+            }
 
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+
+            logger.error("Error buscando pieza: {}", id, e);
+
+        } finally {
+
+            DAOUtils.close(rs, ps, c);
         }
+
+        return null;
     }
 
     public List<Pieza> findAll() {
 
         List<Pieza> lista = new ArrayList<>();
 
-        try (Connection c = JDBCUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement(BASE_SELECT + " ORDER BY p.name");
-             ResultSet rs = ps.executeQuery()) {
+        Connection c = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+
+            c = JDBCUtils.getConnection();
+
+            StringBuilder sql = new StringBuilder(BASE_SELECT);
+
+            sql.append("ORDER BY p.name");
+
+            ps = c.prepareStatement(sql.toString());
+
+            rs = ps.executeQuery();
 
             while (rs.next()) {
+
                 lista.add(loadNext(rs));
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+
+            logger.error("Error listando piezas", e);
+
+        } finally {
+
+            DAOUtils.close(rs, ps, c);
         }
 
         return lista;
@@ -57,52 +109,70 @@ public class PiezaDAO {
 
         List<Pieza> lista = new ArrayList<>();
 
-        try (Connection c = JDBCUtils.getConnection()) {
+        Connection c = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+
+            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder(BASE_SELECT);
-            List<String> cond = new ArrayList<>();
-            List<Object> params = new ArrayList<>();
+
+            List<String> condiciones = new ArrayList<>();
+            List<Object> parametros = new ArrayList<>();
 
             if (cr.getNombre() != null && !cr.getNombre().trim().isEmpty()) {
-                cond.add(" UPPER(p.name) LIKE UPPER(?) ");
-                params.add("%" + cr.getNombre() + "%");
+
+                condiciones.add("UPPER(p.name) LIKE UPPER(?)");
+                parametros.add("%" + cr.getNombre() + "%");
             }
 
             if (cr.getEstadoId() != null) {
-                cond.add(" p.part_status_id = ? ");
-                params.add(cr.getEstadoId());
+
+                condiciones.add("p.part_status_id=?");
+                parametros.add(cr.getEstadoId());
             }
 
-            if (!cond.isEmpty()) {
-                sql.append(" WHERE ").append(String.join(" AND ", cond));
+            if (!condiciones.isEmpty()) {
+
+                sql.append(" WHERE ");
+                sql.append(String.join(" AND ", condiciones));
             }
 
-            PreparedStatement ps = c.prepareStatement(sql.toString());
+            ps = c.prepareStatement(sql.toString());
 
-            for (int i = 0; i < params.size(); i++) {
-                ps.setObject(i + 1, params.get(i));
+            int i = 1;
+
+            for (Object param : parametros) {
+
+                ps.setObject(i++, param);
             }
 
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
 
             while (rs.next()) {
+
                 lista.add(loadNext(rs));
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+
+            logger.error("Error buscando piezas", e);
+
+        } finally {
+
+            DAOUtils.close(rs, ps, c);
         }
 
         return lista;
     }
 
-
-
-    
     private Pieza loadNext(ResultSet rs) throws Exception {
 
-        Pieza p = new Pieza();
         int i = 1;
+
+        Pieza p = new Pieza();
 
         p.setId(rs.getLong(i++));
         p.setNombre(rs.getString(i++));

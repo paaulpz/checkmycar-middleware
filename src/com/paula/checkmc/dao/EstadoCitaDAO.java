@@ -11,53 +11,134 @@ import com.paula.checkmc.util.JDBCUtils;
 
 public class EstadoCitaDAO {
 
-    public EstadoCita findById(Long id) {
+	public EstadoCita findById(Long id) {
 
-        String sql = "SELECT id, name FROM appointment_status WHERE id=?";
-        
-    
+	    StringBuilder sql = new StringBuilder();
 
-        try (Connection c = JDBCUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+	    sql.append("SELECT id, name ");
+	    sql.append("FROM appointment_status ");
+	    sql.append("WHERE id=?");
 
-            ps.setLong(1, id);
-            ResultSet rs = ps.executeQuery();
+	    Connection c = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
 
-            if (rs.next()) {
-                EstadoCita ec = new EstadoCita();
-                ec.setId(rs.getLong("id"));
-                ec.setNombre(rs.getString("name"));
-                return ec;
-            }
+	    try {
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+	        c = JDBCUtils.getConnection();
+	        ps = c.prepareStatement(sql.toString());
 
-        return null;
-    }
+	        ps.setLong(1, id);
 
-    public List<EstadoCita> findAll() {
+	        rs = ps.executeQuery();
 
-        List<EstadoCita> lista = new ArrayList<>();
+	        if (rs.next()) {
 
-        String sql = "SELECT id, name FROM appointment_status ORDER BY name";
+	            EstadoCita estado = new EstadoCita();
 
-        try (Connection c = JDBCUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+	            estado.setId(rs.getLong("id"));
+	            estado.setNombre(rs.getString("name"));
 
-            while (rs.next()) {
-                EstadoCita ec = new EstadoCita();
-                ec.setId(rs.getLong("id"));
-                ec.setNombre(rs.getString("name"));
-                lista.add(ec);
-            }
+	            return estado;
+	        }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+	    } catch (Exception e) {
 
-        return lista;
-    }
+	        e.printStackTrace();
+
+	    } finally {
+
+	        try {
+	            if (rs != null) {
+	                rs.close();
+	            }
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+
+	        try {
+	            if (ps != null) {
+	                ps.close();
+	            }
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+
+	        try {
+	            if (c != null) {
+	                c.close();
+	            }
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    return null;
+	}
+
+	public List<EstadoCita> findAll() {
+
+	    List<EstadoCita> lista = new ArrayList<>();
+
+	    StringBuilder sql = new StringBuilder();
+
+	    sql.append("SELECT id, name ");
+	    sql.append("FROM appointment_status ");
+	    sql.append("ORDER BY name");
+
+	    Connection c = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
+
+	    try {
+
+	        c = JDBCUtils.getConnection();
+
+	        ps = c.prepareStatement(sql.toString());
+
+	        rs = ps.executeQuery();
+
+	        while (rs.next()) {
+
+	            EstadoCita estado = new EstadoCita();
+
+	            estado.setId(rs.getLong("id"));
+	            estado.setNombre(rs.getString("name"));
+
+	            lista.add(estado);
+	        }
+
+	    } catch (Exception e) {
+
+	        e.printStackTrace();
+
+	    } finally {
+
+	        try {
+	            if (rs != null) {
+	                rs.close();
+	            }
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+
+	        try {
+	            if (ps != null) {
+	                ps.close();
+	            }
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+
+	        try {
+	            if (c != null) {
+	                c.close();
+	            }
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    return lista;
+	}
 }

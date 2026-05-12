@@ -6,18 +6,34 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.paula.checkmc.model.Empleado;
 import com.paula.checkmc.model.PresupuestoEmpleado;
+import com.paula.checkmc.util.DAOUtils;
 import com.paula.checkmc.util.JDBCUtils;
 
 public class PresupuestoEmpleadoDAO {
 
+    private static final Logger logger = LogManager.getLogger(PresupuestoEmpleadoDAO.class);
+
     public boolean create(PresupuestoEmpleado pe) {
 
-        String sql = "INSERT INTO employee_has_quotation(employee_id, quotation_id) VALUES(?,?)";
+        Connection c = null;
+        PreparedStatement ps = null;
 
-        try (Connection c = JDBCUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+        try {
+
+            c = JDBCUtils.getConnection();
+
+            StringBuilder sql = new StringBuilder();
+
+            sql.append("INSERT INTO employee_has_quotation ");
+            sql.append("(employee_id, quotation_id) ");
+            sql.append("VALUES (?, ?)");
+
+            ps = c.prepareStatement(sql.toString());
 
             ps.setLong(1, pe.getEmpleadoId());
             ps.setLong(2, pe.getPresupuestoId());
@@ -25,17 +41,33 @@ public class PresupuestoEmpleadoDAO {
             return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+
+            logger.error("Error creando relacion empleado presupuesto", e);
+
+        } finally {
+
+            DAOUtils.close(null, ps, c);
         }
+
+        return false;
     }
 
     public boolean delete(Long empleadoId, Long presupuestoId) {
 
-        String sql = "DELETE FROM employee_has_quotation WHERE employee_id=? AND quotation_id=?";
+        Connection c = null;
+        PreparedStatement ps = null;
 
-        try (Connection c = JDBCUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+        try {
+
+            c = JDBCUtils.getConnection();
+
+            StringBuilder sql = new StringBuilder();
+
+            sql.append("DELETE FROM employee_has_quotation ");
+            sql.append("WHERE employee_id=? ");
+            sql.append("AND quotation_id=?");
+
+            ps = c.prepareStatement(sql.toString());
 
             ps.setLong(1, empleadoId);
             ps.setLong(2, presupuestoId);
@@ -43,29 +75,53 @@ public class PresupuestoEmpleadoDAO {
             return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+
+            logger.error("Error eliminando relacion empleado presupuesto", e);
+
+        } finally {
+
+            DAOUtils.close(null, ps, c);
         }
+
+        return false;
     }
 
     public List<Empleado> findPresupuestosByEmpleado(Long empleadoId) {
 
         List<Empleado> lista = new ArrayList<>();
 
-        String sql = "SELECT quotation_id FROM employee_has_quotation WHERE employee_id=?";
+        Connection c = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
-        try (Connection c = JDBCUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+        try {
+
+            c = JDBCUtils.getConnection();
+
+            StringBuilder sql = new StringBuilder();
+
+            sql.append("SELECT employee_id ");
+            sql.append("FROM employee_has_quotation ");
+            sql.append("WHERE employee_id=?");
+
+            ps = c.prepareStatement(sql.toString());
 
             ps.setLong(1, empleadoId);
-            ResultSet rs = ps.executeQuery();
+
+            rs = ps.executeQuery();
 
             while (rs.next()) {
+
                 lista.add(loadNext(rs));
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+
+            logger.error("Error buscando presupuestos por empleado: {}", empleadoId, e);
+
+        } finally {
+
+            DAOUtils.close(rs, ps, c);
         }
 
         return lista;
@@ -75,34 +131,49 @@ public class PresupuestoEmpleadoDAO {
 
         List<Empleado> lista = new ArrayList<>();
 
-        String sql = "SELECT employee_id FROM employee_has_quotation WHERE quotation_id=?";
+        Connection c = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
-        try (Connection c = JDBCUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+        try {
+
+            c = JDBCUtils.getConnection();
+
+            StringBuilder sql = new StringBuilder();
+
+            sql.append("SELECT employee_id ");
+            sql.append("FROM employee_has_quotation ");
+            sql.append("WHERE quotation_id=?");
+
+            ps = c.prepareStatement(sql.toString());
 
             ps.setLong(1, presupuestoId);
-            ResultSet rs = ps.executeQuery();
+
+            rs = ps.executeQuery();
 
             while (rs.next()) {
+
                 lista.add(loadNext(rs));
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+
+            logger.error("Error buscando empleados por presupuesto: {}", presupuestoId, e);
+
+        } finally {
+
+            DAOUtils.close(rs, ps, c);
         }
 
         return lista;
     }
-    
-    
+
     private Empleado loadNext(ResultSet rs) throws Exception {
 
-        int i = 1;
-      Empleado e = new Empleado();
+        Empleado e = new Empleado();
 
-        e.setId(rs.getLong(i++));
-        e.setNombre(rs.getString(i++));
-    
+        e.setId(rs.getLong(1));
+
         return e;
     }
 }

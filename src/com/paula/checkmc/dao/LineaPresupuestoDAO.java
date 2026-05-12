@@ -19,47 +19,81 @@ public class LineaPresupuestoDAO {
     private static final String BASE_SELECT;
 
     static {
+
         StringBuilder sb = new StringBuilder();
-        sb.append(" SELECT id, units, unit_price, final_price, ");
-        sb.append(" part_id, quotation_id ");
-        sb.append(" FROM quotation_line ");
+
+        sb.append("SELECT id, units, unit_price, final_price, ");
+        sb.append("part_id, quotation_id ");
+        sb.append("FROM quotation_line ");
+
         BASE_SELECT = sb.toString();
     }
 
     public List<LineaPresupuesto> findByPresupuesto(Long presupuestoId) {
 
-        logger.debug("Buscando lineas de presupuesto id: {}", presupuestoId);
+        logger.debug("Buscando lineas presupuesto id: {}", presupuestoId);
 
-        List<LineaPresupuesto> res = new ArrayList<>();
+        List<LineaPresupuesto> lista = new ArrayList<>();
 
-        try (Connection c = DAOUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement(BASE_SELECT + " WHERE quotation_id = ?")) {
+        Connection c = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
-            DAOUtils.setParameters(ps, presupuestoId);
+        try {
 
-            ResultSet rs = ps.executeQuery();
+            c = DAOUtils.getConnection();
+
+            StringBuilder sql = new StringBuilder(BASE_SELECT);
+
+            sql.append("WHERE quotation_id=?");
+
+            ps = c.prepareStatement(sql.toString());
+
+            ps.setLong(1, presupuestoId);
+
+            rs = ps.executeQuery();
 
             while (rs.next()) {
-                res.add(loadNext(rs));
+
+                lista.add(loadNext(rs));
             }
 
         } catch (Exception e) {
-            logger.error("Error en findByPresupuesto: {}", presupuestoId, e);
+
+            logger.error("Error findByPresupuesto: {}", presupuestoId, e);
+
+        } finally {
+
+            DAOUtils.close(rs, ps, c);
         }
 
-        return res;
+        return lista;
     }
 
     public Long create(LineaPresupuesto lp) {
 
         logger.debug("Creando linea presupuesto: {}", lp);
 
-        String sql = "INSERT INTO quotation_line(units, unit_price, final_price, part_id, quotation_id) VALUES(?,?,?,?,?)";
+        Connection c = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
-        try (Connection c = DAOUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+        try {
 
-            DAOUtils.setParameters(ps,
+            c = DAOUtils.getConnection();
+
+            StringBuilder sql = new StringBuilder();
+
+            sql.append("INSERT INTO quotation_line ");
+            sql.append("(units, unit_price, final_price, part_id, quotation_id) ");
+            sql.append("VALUES (?,?,?,?,?)");
+
+            ps = c.prepareStatement(
+                    sql.toString(),
+                    PreparedStatement.RETURN_GENERATED_KEYS);
+
+            DAOUtils.setParameters(
+                    ps,
                     lp.getUnidades(),
                     lp.getPrecioUnitario(),
                     lp.getPrecioFinal(),
@@ -68,16 +102,24 @@ public class LineaPresupuestoDAO {
 
             ps.executeUpdate();
 
-            ResultSet rs = ps.getGeneratedKeys();
+            rs = ps.getGeneratedKeys();
 
             if (rs.next()) {
+
                 Long id = rs.getLong(1);
+
                 logger.info("Linea creada con id: {}", id);
+
                 return id;
             }
 
         } catch (Exception e) {
+
             logger.error("Error creando linea presupuesto: {}", lp, e);
+
+        } finally {
+
+            DAOUtils.close(rs, ps, c);
         }
 
         return null;
@@ -87,15 +129,31 @@ public class LineaPresupuestoDAO {
 
         logger.warn("Eliminando linea presupuesto id: {}", id);
 
-        try (Connection c = DAOUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement("DELETE FROM quotation_line WHERE id=?")) {
+        Connection c = null;
+        PreparedStatement ps = null;
 
-            DAOUtils.setParameters(ps, id);
+        try {
+
+            c = DAOUtils.getConnection();
+
+            StringBuilder sql = new StringBuilder();
+
+            sql.append("DELETE FROM quotation_line ");
+            sql.append("WHERE id=?");
+
+            ps = c.prepareStatement(sql.toString());
+
+            ps.setLong(1, id);
 
             return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
-            logger.error("Error eliminando linea presupuesto id: {}", id, e);
+
+            logger.error("Error eliminando linea presupuesto: {}", id, e);
+
+        } finally {
+
+            DAOUtils.close(null, ps, c);
         }
 
         return false;

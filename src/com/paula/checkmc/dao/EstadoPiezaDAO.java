@@ -6,28 +6,51 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.paula.checkmc.model.EstadoPieza;
+import com.paula.checkmc.util.DAOUtils;
 import com.paula.checkmc.util.JDBCUtils;
 
 public class EstadoPiezaDAO {
 
+    private static final Logger logger = LogManager.getLogger(EstadoPiezaDAO.class);
+
     public EstadoPieza findById(Long id) {
 
-        String sql = "SELECT id, name FROM part_status WHERE id=?";
+        Connection c = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
-        try (Connection c = JDBCUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+        try {
+
+            c = JDBCUtils.getConnection();
+
+            StringBuilder sql = new StringBuilder();
+
+            sql.append("SELECT id, name ");
+            sql.append("FROM part_status ");
+            sql.append("WHERE id=?");
+
+            ps = c.prepareStatement(sql.toString());
 
             ps.setLong(1, id);
-            ResultSet rs = ps.executeQuery();
+
+            rs = ps.executeQuery();
 
             if (rs.next()) {
-              
+
                 return loadNext(rs);
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+
+            logger.error("Error buscando estado pieza: {}", id, e);
+
+        } finally {
+
+            DAOUtils.close(rs, ps, c);
         }
 
         return null;
@@ -37,25 +60,41 @@ public class EstadoPiezaDAO {
 
         List<EstadoPieza> lista = new ArrayList<>();
 
-        String sql = "SELECT id, name FROM part_status ORDER BY name";
+        Connection c = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
-        try (Connection c = JDBCUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try {
+
+            c = JDBCUtils.getConnection();
+
+            StringBuilder sql = new StringBuilder();
+
+            sql.append("SELECT id, name ");
+            sql.append("FROM part_status ");
+            sql.append("ORDER BY name");
+
+            ps = c.prepareStatement(sql.toString());
+
+            rs = ps.executeQuery();
 
             while (rs.next()) {
-                
+
                 lista.add(loadNext(rs));
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+
+            logger.error("Error listando estados pieza", e);
+
+        } finally {
+
+            DAOUtils.close(rs, ps, c);
         }
 
         return lista;
     }
-    
-    
+
     private EstadoPieza loadNext(ResultSet rs) throws Exception {
 
         int i = 1;
@@ -64,7 +103,6 @@ public class EstadoPiezaDAO {
 
         e.setId(rs.getLong(i++));
         e.setNombre(rs.getString(i++));
-        
 
         return e;
     }

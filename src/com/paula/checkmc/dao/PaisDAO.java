@@ -6,52 +6,95 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.paula.checkmc.model.Pais;
+import com.paula.checkmc.util.DAOUtils;
 import com.paula.checkmc.util.JDBCUtils;
 
 public class PaisDAO {
 
+    private static final Logger logger = LogManager.getLogger(PaisDAO.class);
+
     public Pais findById(Long id) {
 
-        try (Connection c = JDBCUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement(
-                     "SELECT id, name FROM country WHERE id = ?")) {
+        Connection c = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+
+            c = JDBCUtils.getConnection();
+
+            StringBuilder sql = new StringBuilder();
+
+            sql.append("SELECT id, name ");
+            sql.append("FROM country ");
+            sql.append("WHERE id=?");
+
+            ps = c.prepareStatement(sql.toString());
 
             ps.setLong(1, id);
-            ResultSet rs = ps.executeQuery();
+
+            rs = ps.executeQuery();
 
             if (rs.next()) {
+
                 return loadNext(rs);
             }
 
-            return null;
-
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+
+            logger.error("Error buscando pais: {}", id, e);
+
+        } finally {
+
+            DAOUtils.close(rs, ps, c);
         }
+
+        return null;
     }
 
     public List<Pais> findAll() {
 
         List<Pais> lista = new ArrayList<>();
 
-        try (Connection c = JDBCUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement(
-                     "SELECT id, name FROM country ORDER BY name");
-             ResultSet rs = ps.executeQuery()) {
+        Connection c = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+
+            c = JDBCUtils.getConnection();
+
+            StringBuilder sql = new StringBuilder();
+
+            sql.append("SELECT id, name ");
+            sql.append("FROM country ");
+            sql.append("ORDER BY name");
+
+            ps = c.prepareStatement(sql.toString());
+
+            rs = ps.executeQuery();
 
             while (rs.next()) {
+
                 lista.add(loadNext(rs));
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+
+            logger.error("Error listando paises", e);
+
+        } finally {
+
+            DAOUtils.close(rs, ps, c);
         }
 
         return lista;
     }
-    
+
     private Pais loadNext(ResultSet rs) throws Exception {
 
         int i = 1;
@@ -60,7 +103,7 @@ public class PaisDAO {
 
         p.setId(rs.getLong(i++));
         p.setNombre(rs.getString(i++));
-       
+
         return p;
     }
 }

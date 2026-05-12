@@ -6,10 +6,16 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.paula.checkmc.model.Localidad;
+import com.paula.checkmc.util.DAOUtils;
 import com.paula.checkmc.util.JDBCUtils;
 
 public class LocalidadDAO {
+
+    private static final Logger logger = LogManager.getLogger(LocalidadDAO.class);
 
     public LocalidadDAO() {
     }
@@ -21,49 +27,57 @@ public class LocalidadDAO {
         ResultSet rs = null;
 
         try {
+
             c = JDBCUtils.getConnection();
 
-            String sql = "SELECT id, name, province_id FROM locality WHERE id = ?";
-            ps = c.prepareStatement(sql);
+            StringBuilder sql = new StringBuilder();
+
+            sql.append("SELECT id, name, province_id ");
+            sql.append("FROM locality ");
+            sql.append("WHERE id=?");
+
+            ps = c.prepareStatement(sql.toString());
+
             ps.setLong(1, id);
 
             rs = ps.executeQuery();
 
             if (rs.next()) {
-           
 
                 return loadNext(rs);
             }
 
-            return null;
-
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+
+            logger.error("Error buscando localidad: {}", id, e);
+
         } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (c != null) c.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+
+            DAOUtils.close(rs, ps, c);
         }
+
+        return null;
     }
 
-    
     public List<Localidad> findAll() {
 
         List<Localidad> resultados = new ArrayList<>();
+
         Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
+
             c = JDBCUtils.getConnection();
 
-            String sql = "SELECT id, name, province_id FROM locality ORDER BY name";
-            ps = c.prepareStatement(sql);
+            StringBuilder sql = new StringBuilder();
+
+            sql.append("SELECT id, name, province_id ");
+            sql.append("FROM locality ");
+            sql.append("ORDER BY name");
+
+            ps = c.prepareStatement(sql.toString());
 
             rs = ps.executeQuery();
 
@@ -72,74 +86,81 @@ public class LocalidadDAO {
                 resultados.add(loadNext(rs));
             }
 
-            return resultados;
-
         } catch (Exception e) {
-            e.printStackTrace();
-            return new ArrayList<>();
+
+            logger.error("Error listando localidades", e);
+
         } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (c != null) c.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+
+            DAOUtils.close(rs, ps, c);
         }
+
+        return resultados;
     }
 
     public List<Localidad> findByProvince(Long provinceId) {
 
         List<Localidad> resultados = new ArrayList<>();
+
         Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
+
             c = JDBCUtils.getConnection();
 
-            String sql = "SELECT id, name, province_id FROM locality WHERE province_id = ? ORDER BY name";
-            ps = c.prepareStatement(sql);
+            StringBuilder sql = new StringBuilder();
+
+            sql.append("SELECT id, name, province_id ");
+            sql.append("FROM locality ");
+            sql.append("WHERE province_id=? ");
+            sql.append("ORDER BY name");
+
+            ps = c.prepareStatement(sql.toString());
+
             ps.setLong(1, provinceId);
 
             rs = ps.executeQuery();
 
             while (rs.next()) {
 
-                int i = 1;
-       
                 resultados.add(loadNext(rs));
             }
 
-            return resultados;
-
         } catch (Exception e) {
-            e.printStackTrace();
-            return new ArrayList<>();
+
+            logger.error("Error buscando localidades por provincia: {}", provinceId, e);
+
         } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (c != null) c.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+
+            DAOUtils.close(rs, ps, c);
         }
+
+        return resultados;
     }
 
-   
     public List<Localidad> findByNombre(String nombre) {
 
         List<Localidad> resultados = new ArrayList<>();
+
         Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
+
             c = JDBCUtils.getConnection();
 
-            String sql = "SELECT id, name, province_id FROM locality WHERE UPPER(name) LIKE UPPER(?) ORDER BY name";
-            ps = c.prepareStatement(sql);
+            StringBuilder sql = new StringBuilder();
+
+            sql.append("SELECT id, name, province_id ");
+            sql.append("FROM locality ");
+            sql.append("WHERE UPPER(name) LIKE UPPER(?) ");
+            sql.append("ORDER BY name");
+
+            ps = c.prepareStatement(sql.toString());
+
             ps.setString(1, "%" + nombre + "%");
 
             rs = ps.executeQuery();
@@ -149,22 +170,18 @@ public class LocalidadDAO {
                 resultados.add(loadNext(rs));
             }
 
-            return resultados;
-
         } catch (Exception e) {
-            e.printStackTrace();
-            return new ArrayList<>();
+
+            logger.error("Error buscando localidades por nombre: {}", nombre, e);
+
         } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (c != null) c.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+
+            DAOUtils.close(rs, ps, c);
         }
+
+        return resultados;
     }
-    
+
     private Localidad loadNext(ResultSet rs) throws Exception {
 
         int i = 1;
@@ -174,7 +191,6 @@ public class LocalidadDAO {
         l.setId(rs.getLong(i++));
         l.setNombre(rs.getString(i++));
         l.setProvinceId(rs.getLong(i++));
-
 
         return l;
     }

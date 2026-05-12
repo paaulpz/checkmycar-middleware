@@ -209,27 +209,33 @@ public class CocheDAO {
         return results;
     }
 
+
     public Long create(Coche coche) {
 
         logger.debug("Creando coche: {}", coche);
 
-        String sql =
-        	    " INSERT INTO car " +
-        	    " (diagnostico, car_registration, chassi_number, year, potenciacv, km, " +
-        	    " client_id, type_fuel_id, transmission_type_id, model_id, type_engine_id) " +
-        	    " VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+        StringBuilder sql = new StringBuilder();
 
-        try (Connection c = JDBCUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+        sql.append("INSERT INTO car ");
+        sql.append("(diagnostico, car_registration, chassi_number, year, potenciacv, km, ");
+        sql.append("client_id, type_fuel_id, transmission_type_id, model_id, type_engine_id) ");
+        sql.append("VALUES (?,?,?,?,?,?,?,?,?,?,?)");
 
+        try {
+            Connection c = JDBCUtils.getConnection();
+            c.setAutoCommit(false);
+
+            PreparedStatement ps = c.prepareStatement(sql.toString(), PreparedStatement.RETURN_GENERATED_KEYS);
             ps.setString(1, coche.getDiagnostico());
             ps.setString(2, coche.getMatricula());
             ps.setString(3, coche.getNumeroBastidor());
+
             if (coche.getAno() != null) {
                 ps.setInt(4, coche.getAno());
             } else {
                 ps.setNull(4, Types.INTEGER);
             }
+
             ps.setDouble(5, coche.getPotenciaCv());
             ps.setDouble(6, coche.getKilometros());
             ps.setLong(7, coche.getClienteId());
@@ -237,10 +243,11 @@ public class CocheDAO {
             ps.setLong(9, coche.getTipoTransmisionId());
             ps.setLong(10, coche.getModeloId());
             ps.setLong(11, coche.getTipoMotorId());
-            
+
             ps.executeUpdate();
 
             ResultSet rs = ps.getGeneratedKeys();
+
             if (rs.next()) {
                 Long id = rs.getLong(1);
                 logger.info("Coche creado con id: {}", id);
@@ -258,13 +265,15 @@ public class CocheDAO {
 
         logger.debug("Actualizando coche: {}", coche);
 
-        String sql =
-            " UPDATE car SET diagnostico=?, car_registration=?, chassi_number=?, year=?, " +
-            " potenciacv=?, km=?, client_id=?, type_fuel_id=?, transmission_type_id=?, " +
-            " model_id=?, type_engine_id=? WHERE id=?";
+        StringBuilder sql = new StringBuilder();
+
+        sql.append("UPDATE car SET diagnostico=?, car_registration=?, ");
+        sql.append("chassi_number=?, year=?, potenciacv=?, km=?, ");
+        sql.append("client_id=?, type_fuel_id=?, transmission_type_id=?, ");
+        sql.append("model_id=?, type_engine_id=? WHERE id=?");
 
         try (Connection c = JDBCUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+             PreparedStatement ps = c.prepareStatement(sql.toString())) {
 
             ps.setString(1, coche.getDiagnostico());
             ps.setString(2, coche.getMatricula());
