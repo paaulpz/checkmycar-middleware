@@ -264,6 +264,52 @@ public class CitaDAO {
 
         return false;
     }
+    
+    public boolean update(Cita cita) {
+
+        logger.debug("Actualizando cita: {}", cita);
+
+        Connection c = null;
+        PreparedStatement ps = null;
+
+        try {
+
+            c = DAOUtils.getConnection();
+
+            StringBuilder sql = new StringBuilder();
+
+            sql.append("UPDATE appointment SET ");
+            sql.append("description=?, ");
+            sql.append("date=?, ");
+            sql.append("client_id=?, ");
+            sql.append("car_id=?, ");
+            sql.append("appointment_status_id=? ");
+            sql.append("WHERE id=?");
+
+            ps = c.prepareStatement(sql.toString());
+
+            DAOUtils.setParameters(
+                    ps,
+                    cita.getDescripcion(),
+                    cita.getFecha(),
+                    cita.getClienteId(),
+                    cita.getCocheId(),
+                    cita.getEstadoCitaId(),
+                    cita.getId());
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+
+            logger.error("Error actualizando cita: {}", cita, e);
+
+        } finally {
+
+            DAOUtils.close(null, ps, c);
+        }
+
+        return false;
+    }
 
     private Cita loadNext(ResultSet rs) throws Exception {
 
@@ -280,4 +326,5 @@ public class CitaDAO {
 
         return c;
     }
+
 }

@@ -3,7 +3,6 @@ package com.paula.checkmc.service;
 import com.paula.checkmc.model.Cita;
 import com.paula.checkmc.model.CitaCriteria;
 import com.paula.checkmc.model.CitaDTO;
-import com.paula.checkmc.model.Cliente;
 import com.paula.checkmc.model.Results;
 
 public interface CitaService {
@@ -36,7 +35,9 @@ public interface CitaService {
   public  boolean delete(Long id) throws Exception;
     
     
-   public  boolean update(Cliente cliente);
+   public  boolean update(Cita cita);
     
   public   boolean existeCitaEnFecha(java.time.LocalDateTime fecha);
+
+  
 }
