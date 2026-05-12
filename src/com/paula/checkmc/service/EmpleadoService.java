@@ -51,6 +51,5 @@ public interface EmpleadoService {
   public   boolean delete(Long id);
 
 
-
-	EmpleadoDTO login(String dni, String password);
+public EmpleadoDTO login(String dni, String password, Long rolId);
 }

@@ -129,18 +129,31 @@ public class EmpleadoServiceImpl implements EmpleadoService {
     }
     
     @Override
-    public EmpleadoDTO login(String dni, String password) {
+    public EmpleadoDTO login(String dni,  String password, Long rolId) {
+
         EmpleadoCriteria criteria = new EmpleadoCriteria();
+
         criteria.setDniNie(dni);
+        criteria.setRolId(rolId);
 
-        Results<EmpleadoDTO> resultados = empleadoDAO.findByCriteria(criteria, 1, 1);
+        Results<EmpleadoDTO> resultados =
+                empleadoDAO.findByCriteria(criteria, 1, 1);
 
-        if (resultados != null && resultados.getPage() != null && !resultados.getPage().isEmpty()) {
-            EmpleadoDTO empleado = resultados.getPage().get(0);
-            if (encryptionService.checkEncryption(password, empleado.getPassword())) {
+        if (resultados != null
+                && resultados.getPage() != null
+                && !resultados.getPage().isEmpty()) {
+
+            EmpleadoDTO empleado =
+                    resultados.getPage().get(0);
+
+            if (encryptionService.checkEncryption(
+                    password,
+                    empleado.getPassword())) {
+
                 return empleado;
             }
         }
+
         return null;
     }
 	

@@ -16,7 +16,7 @@ public class EmpleadoCriteria {
 	private String primerApellido = null;
 	private String telefono = null;
 	private String direccion = null;	
-	private Integer rolId = null;
+	private Long rolId = null;
 	private Integer localidadId = null;
 	private Integer generoId;
 	private String nombreRol; 
@@ -74,13 +74,14 @@ public class EmpleadoCriteria {
 		this.primerApellido = primerApellido;
 	}
 	
-	public Integer getRolId() {
+	public Long getRolId() {
 		return rolId;
 	}
-
-	public void setRolId(Integer rolId) {
+	
+	public void setRolId(Long rolId) {
 		this.rolId = rolId;
 	}
+	
 
 	public Integer getLocalidadId() {
 		return localidadId;
