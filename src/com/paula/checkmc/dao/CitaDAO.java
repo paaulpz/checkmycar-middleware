@@ -34,11 +34,11 @@ public class CitaDAO {
         BASE_SELECT = sb.toString();
     }
 
-    public Results<CitaDTO> findByCriteria(CitaCriteria cr, int from, int pageSize) {
+    public Results<CitaDTO> findByCriteria( Connection c ,CitaCriteria cr, int from, int pageSize) {
 
         logger.info("criteria: {}", cr);
 
-        Connection c = null;
+       
         PreparedStatement ps = null;
         ResultSet rs = null;
 
@@ -46,7 +46,7 @@ public class CitaDAO {
 
         try {
 
-            c = DAOUtils.getConnection();
+            
 
             StringBuilder sql = new StringBuilder(BASE_SELECT);
 
@@ -140,17 +140,15 @@ public class CitaDAO {
         return results;
     }
 
-    public Long create(Cita cita) {
+    public Long create(Connection c, Cita cita) {
 
         logger.debug("Creando cita: {}", cita);
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = DAOUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -193,16 +191,14 @@ public class CitaDAO {
         return null;
     }
 
-    public boolean delete(Long id) {
+    public boolean delete(Connection c, Long id) {
 
         logger.warn("Eliminando cita id: {}", id);
 
-        Connection c = null;
         PreparedStatement ps = null;
 
         try {
 
-            c = DAOUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -265,16 +261,14 @@ public class CitaDAO {
         return false;
     }
     
-    public boolean update(Cita cita) {
+    public boolean update(Connection c , Cita cita) {
 
         logger.debug("Actualizando cita: {}", cita);
 
-        Connection c = null;
         PreparedStatement ps = null;
 
         try {
 
-            c = DAOUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 

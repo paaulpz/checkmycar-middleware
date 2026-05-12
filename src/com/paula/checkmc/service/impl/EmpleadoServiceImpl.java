@@ -146,9 +146,24 @@ public class EmpleadoServiceImpl implements EmpleadoService {
             EmpleadoDTO empleado =
                     resultados.getPage().get(0);
 
-            if (encryptionService.checkEncryption(
-                    password,
-                    empleado.getPassword())) {
+            String storedPassword = empleado.getPassword();
+
+            if (storedPassword.startsWith("$2a$")) {
+
+                if (encryptionService.checkEncryption(
+                        password,
+                        storedPassword)) {
+
+                    return empleado;
+                }
+
+            } else {
+
+                if (password.equals(storedPassword)) {
+
+                    return empleado;
+                }
+             {
 
                 return empleado;
             }
@@ -156,8 +171,9 @@ public class EmpleadoServiceImpl implements EmpleadoService {
 
         return null;
     }
+    }
+}
 	
-	}
 
 
 

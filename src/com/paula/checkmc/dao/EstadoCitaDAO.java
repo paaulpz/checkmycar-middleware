@@ -11,7 +11,7 @@ import com.paula.checkmc.util.JDBCUtils;
 
 public class EstadoCitaDAO {
 
-	public EstadoCita findById(Long id) {
+	public EstadoCita findById( Connection c , Long id) {
 
 	    StringBuilder sql = new StringBuilder();
 
@@ -19,13 +19,11 @@ public class EstadoCitaDAO {
 	    sql.append("FROM appointment_status ");
 	    sql.append("WHERE id=?");
 
-	    Connection c = null;
 	    PreparedStatement ps = null;
 	    ResultSet rs = null;
 
 	    try {
 
-	        c = JDBCUtils.getConnection();
 	        ps = c.prepareStatement(sql.toString());
 
 	        ps.setLong(1, id);
@@ -76,7 +74,7 @@ public class EstadoCitaDAO {
 	    return null;
 	}
 
-	public List<EstadoCita> findAll() {
+	public List<EstadoCita> findAll(Connection c) {
 
 	    List<EstadoCita> lista = new ArrayList<>();
 
@@ -86,13 +84,11 @@ public class EstadoCitaDAO {
 	    sql.append("FROM appointment_status ");
 	    sql.append("ORDER BY name");
 
-	    Connection c = null;
 	    PreparedStatement ps = null;
 	    ResultSet rs = null;
 
 	    try {
 
-	        c = JDBCUtils.getConnection();
 
 	        ps = c.prepareStatement(sql.toString());
 

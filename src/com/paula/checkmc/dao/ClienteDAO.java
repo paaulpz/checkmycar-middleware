@@ -15,7 +15,6 @@ import com.paula.checkmc.model.ClienteCriteria;
 import com.paula.checkmc.model.ClienteDTO;
 import com.paula.checkmc.model.Results;
 import com.paula.checkmc.util.DAOUtils;
-import com.paula.checkmc.util.JDBCUtils;
 
 public class ClienteDAO {
 
@@ -36,17 +35,15 @@ public class ClienteDAO {
 		BASE_SELECT = sb.toString();
 	}
 
-	public Cliente findById(Long id) {
+	public Cliente findById(Connection c, Long id) {
 
 		logger.debug("Buscando cliente por id: {}", id);
 
-		Connection c = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
 		try {
 
-			c = JDBCUtils.getConnection();
 
 			StringBuilder sql = new StringBuilder(BASE_SELECT);
 
@@ -75,11 +72,10 @@ public class ClienteDAO {
 		return null;
 	}
 
-	public Results<ClienteDTO> findByCriteria(ClienteCriteria cr, int from, int pageSize) {
+	public Results<ClienteDTO> findByCriteria(Connection c, ClienteCriteria cr, int from, int pageSize) {
 
 		logger.info("criteria: {}", cr);
 
-		Connection c = null;
 		PreparedStatement ps = null;
 		PreparedStatement psCount = null;
 
@@ -90,7 +86,6 @@ public class ClienteDAO {
 
 		try {
 
-			c = JDBCUtils.getConnection();
 
 			StringBuilder sql = new StringBuilder(BASE_SELECT);
 
@@ -214,17 +209,15 @@ public class ClienteDAO {
 		return results;
 	}
 
-	public Cliente create(Cliente cliente) {
+	public Cliente create(Connection c , Cliente cliente) {
 
 		logger.debug("Creando cliente: {}", cliente);
 
-		Connection c = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
 		try {
 
-			c = JDBCUtils.getConnection();
 
 			StringBuilder sql = new StringBuilder();
 
@@ -273,16 +266,14 @@ public class ClienteDAO {
 		return null;
 	}
 
-	public boolean update(Cliente cliente) {
+	public boolean update(Connection c, Cliente cliente) {
 
 		logger.debug("Actualizando cliente: {}", cliente);
 
-		Connection c = null;
 		PreparedStatement ps = null;
 
 		try {
 
-			c = JDBCUtils.getConnection();
 
 			StringBuilder sql = new StringBuilder();
 
@@ -322,16 +313,14 @@ public class ClienteDAO {
 		return false;
 	}
 
-	public boolean delete(Long id) {
+	public boolean delete(Connection c, Long id) {
 
 		logger.warn("Eliminando cliente id: {}", id);
 
-		Connection c = null;
 		PreparedStatement ps = null;
 
 		try {
 
-			c = JDBCUtils.getConnection();
 
 			StringBuilder sql = new StringBuilder();
 
@@ -356,15 +345,13 @@ public class ClienteDAO {
 		return false;
 	}
 
-	public boolean login(String dni, String password) {
+	public boolean login(Connection c, String dni, String password) {
 
-		Connection c = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
 		try {
 
-			c = JDBCUtils.getConnection();
 
 			StringBuilder sql = new StringBuilder();
 
@@ -402,15 +389,13 @@ public class ClienteDAO {
 		return false;
 	}
 
-	public boolean existeCorreo(String email) {
+	public boolean existeCorreo(Connection c, String email) {
 
-		Connection c = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
 		try {
 
-			c = JDBCUtils.getConnection();
 
 			StringBuilder sql = new StringBuilder();
 
@@ -438,15 +423,13 @@ public class ClienteDAO {
 		return false;
 	}
 
-	public boolean existeDni(String dni) {
+	public boolean existeDni(Connection c , String dni) {
 
-		Connection c = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
 		try {
 
-			c = JDBCUtils.getConnection();
 
 			StringBuilder sql = new StringBuilder();
 

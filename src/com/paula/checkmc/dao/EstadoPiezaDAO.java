@@ -17,15 +17,12 @@ public class EstadoPiezaDAO {
 
     private static final Logger logger = LogManager.getLogger(EstadoPiezaDAO.class);
 
-    public EstadoPieza findById(Long id) {
+    public EstadoPieza findById(Connection c, Long id) {
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -56,17 +53,15 @@ public class EstadoPiezaDAO {
         return null;
     }
 
-    public List<EstadoPieza> findAll() {
+    public List<EstadoPieza> findAll(Connection c) {
 
         List<EstadoPieza> lista = new ArrayList<>();
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 

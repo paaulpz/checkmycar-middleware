@@ -36,17 +36,15 @@ public class EmpleadoDAO {
 		BASE_SELECT = sb.toString();
 	}
 
-	public Empleado findById(Long id) {
+	public Empleado findById(Connection c, Long id) {
 
 		logger.debug("Buscando empleado id: {}", id);
 
-		Connection c = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
 		try {
 
-			c = JDBCUtils.getConnection();
 
 			StringBuilder sql = new StringBuilder(BASE_SELECT);
 
@@ -75,15 +73,13 @@ public class EmpleadoDAO {
 		return null;
 	}
 
-	public Empleado findByEmail(String email) {
+	public Empleado findByEmail(Connection c, String email) {
 
-		Connection c = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
 		try {
 
-			c = JDBCUtils.getConnection();
 
 			StringBuilder sql = new StringBuilder(BASE_SELECT);
 
@@ -112,11 +108,10 @@ public class EmpleadoDAO {
 		return null;
 	}
 
-	public Results<EmpleadoDTO> findByCriteria(EmpleadoCriteria cr, int from, int pageSize) {
+	public Results<EmpleadoDTO> findByCriteria(Connection c, EmpleadoCriteria cr, int from, int pageSize) {
 
 		logger.info("criteria: {}", cr);
 
-		Connection c = null;
 		PreparedStatement ps = null;
 		PreparedStatement psCount = null;
 
@@ -126,8 +121,6 @@ public class EmpleadoDAO {
 		Results<EmpleadoDTO> results = new Results<>();
 
 		try {
-
-			c = DAOUtils.getConnection();
 
 			StringBuilder sql = new StringBuilder(BASE_SELECT);
 
@@ -274,15 +267,13 @@ public class EmpleadoDAO {
 		return results;
 	}
 
-	public Empleado create(Empleado e) {
+	public Empleado create(Connection c, Empleado e) {
 
-		Connection c = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
 		try {
 
-			c = JDBCUtils.getConnection();
 
 			StringBuilder sql = new StringBuilder();
 
@@ -333,14 +324,12 @@ public class EmpleadoDAO {
 		return null;
 	}
 
-	public boolean update(Empleado e) {
+	public boolean update(Connection c, Empleado e) {
 
-		Connection c = null;
 		PreparedStatement ps = null;
 
 		try {
 
-			c = JDBCUtils.getConnection();
 
 			StringBuilder sql = new StringBuilder();
 
@@ -380,14 +369,12 @@ public class EmpleadoDAO {
 		return false;
 	}
 
-	public boolean delete(Long id) {
+	public boolean delete(Connection c, Long id) {
 
-		Connection c = null;
 		PreparedStatement ps = null;
 
 		try {
 
-			c = JDBCUtils.getConnection();
 
 			StringBuilder sql = new StringBuilder();
 
@@ -412,15 +399,13 @@ public class EmpleadoDAO {
 		return false;
 	}
 
-	public boolean login(String dni, String password, Long rolId) {
+	public boolean login(Connection c, String dni, String password, Long rolId) {
 
-		Connection c = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
 		try {
 
-			c = JDBCUtils.getConnection();
 
 			StringBuilder sql = new StringBuilder();
 
@@ -455,15 +440,13 @@ public class EmpleadoDAO {
 		return false;
 	}
 
-	public boolean existeCorreo(String email) {
+	public boolean existeCorreo(Connection c, String email) {
 
-		Connection c = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
 		try {
 
-			c = JDBCUtils.getConnection();
 
 			StringBuilder sql = new StringBuilder();
 
@@ -491,15 +474,13 @@ public class EmpleadoDAO {
 		return false;
 	}
 
-	public boolean existeDni(String dni) {
+	public boolean existeDni(Connection c, String dni) {
 
-		Connection c = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
 		try {
 
-			c = JDBCUtils.getConnection();
 
 			StringBuilder sql = new StringBuilder();
 
