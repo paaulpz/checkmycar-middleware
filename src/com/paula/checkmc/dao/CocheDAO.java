@@ -42,13 +42,17 @@ public class CocheDAO {
         BASE_SELECT = sb.toString();
     }
 
-    public Coche findById(Long id) {
+    
+    public CocheDAO() {
+    	
+    }
+    
+    public Coche findById(Connection c, Long id) {
         logger.debug("Buscando coche por id: {}", id);
-        Connection c = null;
+
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            c = JDBCUtils.getConnection();
             ps = c.prepareStatement(BASE_SELECT + " WHERE c.id = ? ");
             DAOUtils.setParameters(ps, id);
             rs = ps.executeQuery();
@@ -60,24 +64,23 @@ public class CocheDAO {
         } catch (Exception e) {
             logger.error("Error buscando coche id: {}", id, e);
         } finally {
-            DAOUtils.close(rs, ps, c);
+        	JDBCUtils.close(rs, ps);
         }
         return null;
     }
 
-    public Results<CocheDTO> findByCriteria(CocheCriteria cr, int from, int pageSize) {
+    public Results<CocheDTO> findByCriteria(Connection c, CocheCriteria cr, int from, int pageSize) 
+    	throws Exception {
 
         logger.info("criteria: {}", cr);
-
-        Connection c = null;
+        
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         Results<CocheDTO> results = new Results<>();
 
         try {
-            c = JDBCUtils.getConnection();
-
+           
             StringBuilder sql = new StringBuilder(BASE_SELECT);
             List<String> condiciones = new ArrayList<>();
             List<Object> parametros = new ArrayList<>();
@@ -202,15 +205,15 @@ public class CocheDAO {
 
         } catch (Exception e) {
             logger.error("Error en findByCriteria: {}", cr, e);
+            throw e;
         } finally {
-            DAOUtils.close(rs, ps, c);
+        	JDBCUtils.close(rs, ps);
         }
 
-        return results;
     }
 
 
-    public Long create(Coche coche) {
+    public Long create(Connection c, Coche coche) throws Exception {
 
         logger.debug("Creando coche: {}", coche);
 
@@ -222,46 +225,44 @@ public class CocheDAO {
         sql.append("VALUES (?,?,?,?,?,?,?,?,?,?,?)");
 
         try {
-            Connection c = JDBCUtils.getConnection();
-            c.setAutoCommit(false);
 
             PreparedStatement ps = c.prepareStatement(sql.toString(), PreparedStatement.RETURN_GENERATED_KEYS);
-            ps.setString(1, coche.getDiagnostico());
-            ps.setString(2, coche.getMatricula());
-            ps.setString(3, coche.getNumeroBastidor());
+            int i = 1;
+            ps.setString(i++, coche.getDiagnostico());
+            ps.setString(i++, coche.getMatricula());
+            ps.setString(i++, coche.getNumeroBastidor());
 
             if (coche.getAno() != null) {
-                ps.setInt(4, coche.getAno());
+                ps.setInt(i++, coche.getAno());
             } else {
-                ps.setNull(4, Types.INTEGER);
+                ps.setNull(i++, Types.INTEGER);
             }
 
-            ps.setDouble(5, coche.getPotenciaCv());
-            ps.setDouble(6, coche.getKilometros());
-            ps.setLong(7, coche.getClienteId());
-            ps.setLong(8, coche.getTipoCombustibleId());
-            ps.setLong(9, coche.getTipoTransmisionId());
-            ps.setLong(10, coche.getModeloId());
-            ps.setLong(11, coche.getTipoMotorId());
+            ps.setDouble(i++, coche.getPotenciaCv());
+            ps.setDouble(i++, coche.getKilometros());
+            ps.setLong(i++, coche.getClienteId());
+            ps.setLong(i++, coche.getTipoCombustibleId());
+            ps.setLong(i++, coche.getTipoTransmisionId());
+            ps.setLong(i++, coche.getModeloId());
+            ps.setLong(i++, coche.getTipoMotorId());
 
             ps.executeUpdate();
-
             ResultSet rs = ps.getGeneratedKeys();
 
             if (rs.next()) {
                 Long id = rs.getLong(1);
                 logger.info("Coche creado con id: {}", id);
                 return id;
+            } else {
+            	return null;
             }
-
         } catch (Exception e) {
             logger.error("Error creando coche: {}", coche, e);
-        }
-
-        return null;
+            throw e;
+        }       
     }
 
-    public boolean update(Coche coche) {
+    public boolean update(Connection c, Coche coche) throws Exception {
 
         logger.debug("Actualizando coche: {}", coche);
 
@@ -272,46 +273,51 @@ public class CocheDAO {
         sql.append("client_id=?, type_fuel_id=?, transmission_type_id=?, ");
         sql.append("model_id=?, type_engine_id=? WHERE id=?");
 
-        try (Connection c = JDBCUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql.toString())) {
+        try (
+        	
+            PreparedStatement ps = c.prepareStatement(sql.toString())) {
 
-            ps.setString(1, coche.getDiagnostico());
-            ps.setString(2, coche.getMatricula());
-            ps.setString(3, coche.getNumeroBastidor());
-            if (coche.getAno() != null) {
-                ps.setInt(4, coche.getAno());
-            } else {
-                ps.setNull(4, Types.INTEGER);
-            }
-            ps.setDouble(5, coche.getPotenciaCv());
-            ps.setDouble(6, coche.getKilometros());
-            ps.setLong(7, coche.getClienteId());
-            ps.setLong(8, coche.getTipoCombustibleId());
-            ps.setLong(9, coche.getTipoTransmisionId());
-            ps.setLong(10, coche.getModeloId());
-            ps.setLong(11, coche.getTipoMotorId());
+        	int i = 1;
+            ps.setString(i++, coche.getDiagnostico());
+            ps.setString(i++, coche.getMatricula());
             
-            ps.setLong(12, coche.getId());
+            ps.setString(i++, coche.getNumeroBastidor());
+            if (coche.getAno() != null) {
+                ps.setInt(i++, coche.getAno());
+            } else {
+                ps.setNull(i++, Types.INTEGER);
+            }
+            ps.setDouble(i++, coche.getPotenciaCv());
+            ps.setDouble(i++, coche.getKilometros());
+            ps.setLong(i++, coche.getClienteId());
+            ps.setLong(i++, coche.getTipoCombustibleId());
+            ps.setLong(i++, coche.getTipoTransmisionId());
+            ps.setLong(i++, coche.getModeloId());
+            ps.setLong(i++, coche.getTipoMotorId());
+            
+            ps.setLong(i++, coche.getId());
 
             return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
             logger.error("Error actualizando coche: {}", coche, e);
+            throw e;
         }
-
-        return false;
     }
 
-    public boolean delete(Long id) {
+    public boolean delete(Connection c, Long id) throws Exception {
         logger.warn("Eliminando coche id: {}", id);
-        try (Connection c = JDBCUtils.getConnection();
-             PreparedStatement ps = c.prepareStatement("DELETE FROM car WHERE id=?")) {
+        try (        	
+            PreparedStatement ps = c.prepareStatement("DELETE FROM car WHERE id=?")) {
             ps.setLong(1, id);
-            return ps.executeUpdate() > 0;
+            boolean eliminado = ps.executeUpdate() > 0;
+            logger.warn("Coche {} {} {}", id, eliminado?"NO":"",  " eliminado.");
+            return eliminado;
         } catch (Exception e) {
             logger.error("Error eliminando coche id: {}", id, e);
+            throw e;
         }
-        return false;
+
     }
 
     private Coche loadNext(ResultSet rs) throws Exception {

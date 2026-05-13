@@ -1,41 +1,105 @@
 package com.paula.checkmc.service.impl;
 
+import java.sql.Connection;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.paula.checkmc.dao.CocheDAO;
 import com.paula.checkmc.model.Coche;
 import com.paula.checkmc.model.CocheCriteria;
 import com.paula.checkmc.model.CocheDTO;
 import com.paula.checkmc.model.Results;
 import com.paula.checkmc.service.CocheService;
+import com.paula.checkmc.util.JDBCUtils;
 
 public class CocheServiceImpl implements CocheService {
+	private Logger logger = LogManager.getLogger(CocheServiceImpl.class.getName());
 
     private CocheDAO dao = new CocheDAO();
 
     @Override
     public Coche findById(Long id) {
         if (id == null || id <= 0) return null;
-        return dao.findById(id);
+        Connection c = JDBCUtils.getConnection();
+        return dao.findById(c, id);
     }
 
     @Override
-    public Results<CocheDTO> findByCriteria(CocheCriteria criteria, int from, int pageSize) {
-        return dao.findByCriteria(criteria, from, pageSize);
+    public Results<CocheDTO> findByCriteria(CocheCriteria criteria, int from, int pageSize) 
+    	throws Exception {
+    	
+    	Connection c = null;
+    	boolean commit = false;
+		try {
+			c = JDBCUtils.getConnection();			
+			c.setAutoCommit(false);			
+			Results<CocheDTO> results = dao.findByCriteria(c, criteria, from, pageSize);
+			commit = true;
+			return results;
+		} catch (Exception e) {
+			logger.error("Buscando {}: {}", criteria, e.getMessage(), e);
+			throw e;
+		} finally {
+			JDBCUtils.close(c, commit);
+		}
     }
 
     @Override
-    public Long create(Coche coche) {
-        return dao.create(coche);
+	public Long create(Coche coche) throws Exception {
+    	Connection c = null;
+    	boolean commit = false;
+		try {
+			c = JDBCUtils.getConnection();			
+			c.setAutoCommit(false);				
+			Long id = dao.create(c, coche);			
+			commit = true;							
+			return id;
+		} catch (Exception e) {
+			logger.error("Creando {}: {}", coche, e.getMessage(), e);
+			throw e;
+		} finally {
+			JDBCUtils.close(c, commit);
+		}
     }
 
     @Override
-    public boolean update(Coche coche) {
+    public boolean update(Coche coche) throws Exception {
         if (coche.getId() == null || coche.getId() <= 0) return false;
-        return dao.update(coche);
+        Connection c = null;
+        boolean commit = false;
+        try {
+        	c = JDBCUtils.getConnection();
+        	c.setAutoCommit(false);        	
+        	boolean updated = dao.update(c, coche);
+        	commit = true;
+        	return updated;
+        } catch (Exception e) {
+        	logger.error("Actualizando {}: {}", coche, e.getMessage(), e);
+        	throw e;
+        } finally {
+        	JDBCUtils.close(c, commit);
+        }
+        	
     }
 
     @Override
-    public boolean delete(Long id) {
+    public boolean delete(Long id) throws Exception {    	
         if (id == null || id <= 0) return false;
-        return dao.delete(id);
+        Connection c = null;
+        boolean commit = false;
+        try {
+        	c = JDBCUtils.getConnection();
+        	c.setAutoCommit(false);       
+        	boolean deleted = dao.delete(c, id);
+        	commit = true;
+        	return deleted;
+        } catch (Exception e) {
+        	logger.error("Error al eliminar coche {}: {}", id, e.getMessage(), e);
+        	return false;
+        } finally {
+        	JDBCUtils.close(c, commit);
+        }
+         
     }
 }

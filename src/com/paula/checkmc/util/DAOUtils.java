@@ -1,19 +1,13 @@
 package com.paula.checkmc.util;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
 
-
 public class DAOUtils {
 	
-	public static Connection getConnection() throws SQLException {
-		return JDBCUtils.getConnection();
-	}
 
 	public static void setParameters(PreparedStatement ps, List<Object> params) throws SQLException {
 	    int i = 1;
@@ -26,9 +20,6 @@ public class DAOUtils {
 	    setParameters(ps, Arrays.asList(params)); // Reutiliza tu método original
 	}
 	
-	public static void close(ResultSet rs, PreparedStatement ps, Connection c) {
-		try { if (rs != null) rs.close(); } catch (Exception ignored) {}
-		try { if (ps != null) ps.close(); } catch (Exception ignored) {}
-		try { if (c != null) c.close(); } catch (Exception ignored) {}
-	}	
+
+	
 }

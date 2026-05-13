@@ -14,7 +14,7 @@ public interface CocheService {
 	 * @param id
 	 * @return
 	 */
-    Coche findById(Long id);
+    Coche findById(Long id) throws Exception;
     
   
     
@@ -23,7 +23,8 @@ public interface CocheService {
 	 * @param criteria
 	 * @return
 	 */ 
-    Results<CocheDTO> findByCriteria(CocheCriteria criteria, int from, int pageSize);
+    Results<CocheDTO> findByCriteria(CocheCriteria criteria, int from, int pageSize)
+    	throws Exception;
     
     
     /**
@@ -31,7 +32,7 @@ public interface CocheService {
      * @param coche
      * @return
      */
-    Long create(Coche coche);
+    Long create(Coche coche) throws Exception;
     
     
     /**
@@ -39,7 +40,7 @@ public interface CocheService {
 	 * @param coche
 	 * @return
 	 */
-    boolean update(Coche coche);
+    boolean update(Coche coche) throws Exception;
 
     
     /**
@@ -47,5 +48,5 @@ public interface CocheService {
      * @param id
      * @return
      */
-    boolean delete(Long id);
+    boolean delete(Long id) throws Exception;
 }
