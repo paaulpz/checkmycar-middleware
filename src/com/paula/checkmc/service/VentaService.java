@@ -1,7 +1,6 @@
 package com.paula.checkmc.service;
 
 import com.paula.checkmc.model.Results;
-import com.paula.checkmc.model.Venta;
 import com.paula.checkmc.model.VentaCriteria;
 import com.paula.checkmc.model.VentaDTO;
 
@@ -33,7 +32,7 @@ public interface VentaService {
    * @return
    * @throws Exception
    */
-  public Venta create(VentaDTO venta) throws Exception;
+  public Long create(VentaDTO venta) throws Exception;
   
   
   /**

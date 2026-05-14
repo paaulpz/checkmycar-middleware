@@ -1,25 +1,69 @@
 package com.paula.checkmc.service.impl;
 
+import java.sql.Connection;
 import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.paula.checkmc.dao.PaisDAO;
 import com.paula.checkmc.model.Pais;
 import com.paula.checkmc.service.PaisService;
+import com.paula.checkmc.util.JDBCUtils;
 
 public class PaisServiceImpl implements PaisService {
 
-    private PaisDAO dao = new PaisDAO();
+    private static final Logger logger = LogManager.getLogger(PaisServiceImpl.class);
+
+    private PaisDAO paisDAO = new PaisDAO();
 
     @Override
-    public Pais findById(Long id) {
+    public Pais findById(Long id) throws Exception {
 
-        if (id == null || id <= 0) return null;
+        if (id == null || id <= 0) {
+            return null;
+        }
 
-        return dao.findById(id);
+        Connection c = null;
+
+        try {
+
+            c = JDBCUtils.getConnection();
+
+            return paisDAO.findById(c, id);
+
+        } catch (Exception e) {
+
+            logger.error("Error buscando pais {}: {}", id, e.getMessage(), e);
+
+            throw e;
+
+        } finally {
+
+            JDBCUtils.close(c, true);
+        }
     }
 
     @Override
-    public List<Pais> findAll() {
-        return dao.findAll();
+    public List<Pais> findAll() throws Exception {
+
+        Connection c = null;
+
+        try {
+
+            c = JDBCUtils.getConnection();
+
+            return paisDAO.findAll(c);
+
+        } catch (Exception e) {
+
+            logger.error("Error listando paises: {}", e.getMessage(), e);
+
+            throw e;
+
+        } finally {
+
+            JDBCUtils.close(c, true);
+        }
     }
 }

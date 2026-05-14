@@ -11,8 +11,9 @@ public interface EstadoPiezaService {
 	 * Busca un estado de pieza por su id
 	 * @param id
 	 * @return
+	 * @throws Exception 
 	 */
-   public  EstadoPieza findById(Long id);
+   public  EstadoPieza findById(Long id) throws Exception;
     
     
     /**

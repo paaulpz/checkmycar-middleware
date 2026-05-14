@@ -92,6 +92,8 @@ public class ProvinciaDAO {
 
         return lista;
     }
+    
+  
 
     private Provincia loadNext(ResultSet rs) throws Exception {
 
@@ -105,4 +107,6 @@ public class ProvinciaDAO {
 
         return p;
     }
+
+	
 }

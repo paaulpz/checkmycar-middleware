@@ -120,15 +120,14 @@ public class PresupuestoEmpleadoDAO {
         return lista;
     }
 
-    public List<Empleado> findEmpleadosByPresupuesto(Connection c ,Long presupuestoId) {
+    public List<Long> findEmpleadosByPresupuesto(Connection c, Long presupuestoId) {
 
-        List<Empleado> lista = new ArrayList<>();
+        List<Long> lista = new ArrayList<>();
 
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
-
 
             StringBuilder sql = new StringBuilder();
 
@@ -144,7 +143,7 @@ public class PresupuestoEmpleadoDAO {
 
             while (rs.next()) {
 
-                lista.add(loadNext(rs));
+                lista.add(rs.getLong("employee_id"));
             }
 
         } catch (Exception e) {

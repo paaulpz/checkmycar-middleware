@@ -1,26 +1,69 @@
 package com.paula.checkmc.service.impl;
 
+import java.sql.Connection;
 import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.paula.checkmc.dao.TipoCombustibleDAO;
 import com.paula.checkmc.model.TipoCombustible;
 import com.paula.checkmc.service.TipoCombustibleService;
+import com.paula.checkmc.util.JDBCUtils;
 
 public class TipoCombustibleServiceImpl implements TipoCombustibleService {
 
-    private TipoCombustibleDAO dao = new TipoCombustibleDAO();
+    private static final Logger logger = LogManager.getLogger(TipoCombustibleServiceImpl.class);
 
-   
+    private TipoCombustibleDAO tipoCombustibleDAO = new TipoCombustibleDAO();
+
     @Override
-    public List<TipoCombustible> findAll() {
+    public TipoCombustible findById(Long id) throws Exception {
 
-        return dao.findAll();
+        if (id == null || id <= 0) {
+            return null;
+        }
+
+        Connection c = null;
+
+        try {
+
+            c = JDBCUtils.getConnection();
+
+            return tipoCombustibleDAO.findById(c, id);
+
+        } catch (Exception e) {
+
+            logger.error("Error buscando tipo combustible {}: {}", id, e.getMessage(), e);
+
+            throw e;
+
+        } finally {
+
+            JDBCUtils.close(c, true);
+        }
     }
 
+    @Override
+    public List<TipoCombustible> findAll() throws Exception {
 
-	@Override
-	public TipoCombustible findById(Long id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        Connection c = null;
+
+        try {
+
+            c = JDBCUtils.getConnection();
+
+            return tipoCombustibleDAO.findAll(c);
+
+        } catch (Exception e) {
+
+            logger.error("Error listando tipos combustible: {}", e.getMessage(), e);
+
+            throw e;
+
+        } finally {
+
+            JDBCUtils.close(c, true);
+        }
+    }
 }

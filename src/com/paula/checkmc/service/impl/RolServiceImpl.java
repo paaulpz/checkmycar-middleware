@@ -1,28 +1,69 @@
 package com.paula.checkmc.service.impl;
 
+import java.sql.Connection;
 import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.paula.checkmc.dao.RolDAO;
 import com.paula.checkmc.model.Rol;
 import com.paula.checkmc.service.RolService;
+import com.paula.checkmc.util.JDBCUtils;
 
 public class RolServiceImpl implements RolService {
 
-    private RolDAO dao = new RolDAO();
+    private static final Logger logger = LogManager.getLogger(RolServiceImpl.class);
 
-   
+    private RolDAO rolDAO = new RolDAO();
 
     @Override
-    public List<Rol> findAll() {
+    public Rol findById(Long id) throws Exception {
 
-        return dao.findAll();
+        if (id == null || id <= 0) {
+            return null;
+        }
+
+        Connection c = null;
+
+        try {
+
+            c = JDBCUtils.getConnection();
+
+            return rolDAO.findById(c, id);
+
+        } catch (Exception e) {
+
+            logger.error("Error buscando rol {}: {}", id, e.getMessage(), e);
+
+            throw e;
+
+        } finally {
+
+            JDBCUtils.close(c, true);
+        }
     }
 
+    @Override
+    public List<Rol> findAll() throws Exception {
 
+        Connection c = null;
 
-	@Override
-	public Rol findById(Long id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        try {
+
+            c = JDBCUtils.getConnection();
+
+            return rolDAO.findAll(c);
+
+        } catch (Exception e) {
+
+            logger.error("Error listando roles: {}", e.getMessage(), e);
+
+            throw e;
+
+        } finally {
+
+            JDBCUtils.close(c, true);
+        }
+    }
 }

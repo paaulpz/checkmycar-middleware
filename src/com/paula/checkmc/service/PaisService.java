@@ -10,14 +10,16 @@ public interface PaisService {
 	 * Busca un país por su ID.
 	 * @param id
 	 * @return
+	 * @throws Exception 
 	 */
 
-    public Pais findById(Long id);
+    public Pais findById(Long id) throws Exception;
     
     
 	/**
 	 * Busca todos los países disponibles.
 	 * @return
+	 * @throws Exception 
 	 */
-    public List<Pais> findAll();
+    public List<Pais> findAll() throws Exception;
 }

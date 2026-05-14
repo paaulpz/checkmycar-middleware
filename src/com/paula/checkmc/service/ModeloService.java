@@ -11,6 +11,7 @@ public interface ModeloService {
      * Obtiene los modelos de coches asociados a una marca específica.
      * @param marcaId
      * @return
+     * @throws Exception 
      */
-   public  List<Modelo> findByMarca(Long marcaId);
+   public  List<Modelo> findByMarca(Long marcaId) throws Exception;
 }

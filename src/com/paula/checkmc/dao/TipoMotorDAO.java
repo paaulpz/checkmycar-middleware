@@ -17,8 +17,21 @@ public class TipoMotorDAO {
 
     private static final Logger logger = LogManager.getLogger(TipoMotorDAO.class);
 
+    private static final String BASE_SELECT;
+
+    static {
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(" SELECT tm.id, tm.name ");
+        sb.append(" FROM type_engine tm ");
+
+        BASE_SELECT = sb.toString();
+    }
+
     public List<TipoMotor> findAll(Connection c) {
-    	
+
+        logger.debug("Listando tipos motor");
 
         List<TipoMotor> lista = new ArrayList<>();
 
@@ -27,12 +40,9 @@ public class TipoMotorDAO {
 
         try {
 
+            StringBuilder sql = new StringBuilder(BASE_SELECT);
 
-            StringBuilder sql = new StringBuilder();
-
-            sql.append("SELECT id, name ");
-            sql.append("FROM type_engine ");
-            sql.append("ORDER BY name");
+            sql.append(" ORDER BY tm.name ");
 
             ps = c.prepareStatement(sql.toString());
 
@@ -43,6 +53,8 @@ public class TipoMotorDAO {
                 lista.add(loadNext(rs));
             }
 
+            logger.debug("Tipos motor encontrados: {}", lista.size());
+
         } catch (Exception e) {
 
             logger.error("Error listando tipos motor", e);
@@ -50,9 +62,49 @@ public class TipoMotorDAO {
         } finally {
 
             JDBCUtils.close(rs, ps);
-    }
+        }
 
         return lista;
+    }
+
+    public TipoMotor findById(Connection c, Long id) {
+
+        logger.debug("Buscando tipo motor por id: {}", id);
+
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+
+            StringBuilder sql = new StringBuilder(BASE_SELECT);
+
+            sql.append(" WHERE tm.id = ? ");
+
+            ps = c.prepareStatement(sql.toString());
+
+            DAOUtils.setParameters(ps, id);
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+
+                TipoMotor tipoMotor = loadNext(rs);
+
+                logger.debug("Tipo motor encontrado: {}", tipoMotor);
+
+                return tipoMotor;
+            }
+
+        } catch (Exception e) {
+
+            logger.error("Error buscando tipo motor id: {}", id, e);
+
+        } finally {
+
+            JDBCUtils.close(rs, ps);
+        }
+
+        return null;
     }
 
     private TipoMotor loadNext(ResultSet rs) throws Exception {

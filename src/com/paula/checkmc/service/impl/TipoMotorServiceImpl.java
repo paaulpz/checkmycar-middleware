@@ -1,32 +1,69 @@
 package com.paula.checkmc.service.impl;
 
+import java.sql.Connection;
 import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.paula.checkmc.dao.TipoMotorDAO;
 import com.paula.checkmc.model.TipoMotor;
 import com.paula.checkmc.service.TipoMotorService;
+import com.paula.checkmc.util.JDBCUtils;
 
 public class TipoMotorServiceImpl implements TipoMotorService {
 
-    private TipoMotorDAO dao = new TipoMotorDAO();
+    private static final Logger logger = LogManager.getLogger(TipoMotorServiceImpl.class);
 
-  
+    private TipoMotorDAO tipoMotorDAO = new TipoMotorDAO();
 
     @Override
-    public List<TipoMotor> findAll() {
+    public TipoMotor findById(Long id) throws Exception {
 
-        return dao.findAll();
+        if (id == null || id <= 0) {
+            return null;
+        }
+
+        Connection c = null;
+
+        try {
+
+            c = JDBCUtils.getConnection();
+
+            return tipoMotorDAO.findById(c, id);
+
+        } catch (Exception e) {
+
+            logger.error("Error buscando tipo motor {}: {}", id, e.getMessage(), e);
+
+            throw e;
+
+        } finally {
+
+            JDBCUtils.close(c, true);
+        }
     }
 
+    @Override
+    public List<TipoMotor> findAll() throws Exception {
 
+        Connection c = null;
 
-	@Override
-	public TipoMotor findById(Long id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        try {
 
+            c = JDBCUtils.getConnection();
 
+            return tipoMotorDAO.findAll(c);
 
-	
+        } catch (Exception e) {
+
+            logger.error("Error listando tipos motor: {}", e.getMessage(), e);
+
+            throw e;
+
+        } finally {
+
+            JDBCUtils.close(c, true);
+        }
+    }
 }
