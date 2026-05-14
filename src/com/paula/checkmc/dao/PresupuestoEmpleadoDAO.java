@@ -11,21 +11,18 @@ import org.apache.logging.log4j.Logger;
 
 import com.paula.checkmc.model.Empleado;
 import com.paula.checkmc.model.PresupuestoEmpleado;
-import com.paula.checkmc.util.DAOUtils;
 import com.paula.checkmc.util.JDBCUtils;
 
 public class PresupuestoEmpleadoDAO {
 
     private static final Logger logger = LogManager.getLogger(PresupuestoEmpleadoDAO.class);
 
-    public boolean create(PresupuestoEmpleado pe) {
+    public boolean create(Connection c ,PresupuestoEmpleado pe) {
 
-        Connection c = null;
         PreparedStatement ps = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -46,20 +43,18 @@ public class PresupuestoEmpleadoDAO {
 
         } finally {
 
-            DAOUtils.close(null, ps, c);
+            JDBCUtils.close(null, ps);
         }
 
         return false;
     }
 
-    public boolean delete(Long empleadoId, Long presupuestoId) {
+    public boolean delete(Connection c ,Long empleadoId, Long presupuestoId) {
 
-        Connection c = null;
         PreparedStatement ps = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -80,23 +75,21 @@ public class PresupuestoEmpleadoDAO {
 
         } finally {
 
-            DAOUtils.close(null, ps, c);
+            JDBCUtils.close(null, ps);
         }
 
         return false;
     }
 
-    public List<Empleado> findPresupuestosByEmpleado(Long empleadoId) {
+    public List<Empleado> findPresupuestosByEmpleado(Connection c ,Long empleadoId) {
 
         List<Empleado> lista = new ArrayList<>();
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -121,23 +114,21 @@ public class PresupuestoEmpleadoDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);
         }
 
         return lista;
     }
 
-    public List<Empleado> findEmpleadosByPresupuesto(Long presupuestoId) {
+    public List<Empleado> findEmpleadosByPresupuesto(Connection c ,Long presupuestoId) {
 
         List<Empleado> lista = new ArrayList<>();
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -162,7 +153,7 @@ public class PresupuestoEmpleadoDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);
         }
 
         return lista;

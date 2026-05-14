@@ -1,5 +1,7 @@
 package com.paula.checkmc.service.impl;
 
+import java.sql.Connection;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -11,36 +13,48 @@ import com.paula.checkmc.model.Results;
 import com.paula.checkmc.service.EmpleadoService;
 import com.paula.checkmc.service.EncryptionService;
 import com.paula.checkmc.service.MailService;
+import com.paula.checkmc.util.JDBCUtils;
 
 public class EmpleadoServiceImpl implements EmpleadoService {
 	
 	private static final Logger logger = LogManager.getLogger(EmpleadoServiceImpl.class);
 	
-	  private EncryptionService encryptionService = new EncryptionServiceImpl();
-	  private EmpleadoDAO empleadoDAO = null; 
-	  private MailService mailService = new MailServiceApacheImpl();
-	  
-	  
- 
+	 private EmpleadoDAO empleadoDAO = new EmpleadoDAO();
+	 private EncryptionService encryptionService =  new EncryptionServiceImpl();
+	 private MailService mailService = new MailServiceApacheImpl();
+	
+	 
 
 
+	    @Override
+	    public Empleado findById(Long id) throws Exception {
 
-	public EmpleadoServiceImpl() {
-		empleadoDAO = new EmpleadoDAO(); 
-		encryptionService = new EncryptionServiceImpl();
-		mailService = new MailServiceApacheImpl();
-	}
+	        if (id == null || id <= 0) {
+	            return null;
+	        }
 
+	        Connection c = null;
 
+	        try {
 
-	@Override
-    public Empleado findById(Long id) {
+	            c = JDBCUtils.getConnection();
 
-        if (id == null || id <= 0) return null;
+	            return empleadoDAO.findById(c, id);
 
-        return empleadoDAO.findById(id);
-    }
+	        } catch (Exception e) {
 
+	            logger.error("Error buscando cliente {}: {}",
+	                    id,
+	                    e.getMessage(),
+	                    e);
+
+	            throw e;
+
+	        } finally {
+
+	            JDBCUtils.close(c, true);
+	        }
+	    }
  
 
     @Override
@@ -50,11 +64,31 @@ public class EmpleadoServiceImpl implements EmpleadoService {
     }
 
     @Override
-    public Empleado create(Empleado empleado) {
+    public Long create(Empleado empledo) throws Exception {
 
-        return empleadoDAO.create(empleado);
+        Connection c = null;
+
+        boolean commit = false;
+
+        try {
+
+            c = JDBCUtils.getConnection();
+            c.setAutoCommit(false);
+            Long id = empleadoDAO.create(c, empledo);
+            commit = true;
+            return id;
+        } catch (Exception e) {
+
+            logger.error("Creando {}: {}",
+                    empledo,
+                    e.getMessage(),
+                    e);
+            throw e;
+        } finally {
+
+            JDBCUtils.close(c, commit);
+        }
     }
-    
     
     
 

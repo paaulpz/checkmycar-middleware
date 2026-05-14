@@ -6,13 +6,13 @@ import com.paula.checkmc.model.Results;
 
 public interface PresupuestoService {
 
-    PresupuestoDTO findById(Long id) throws Exception;
+    public PresupuestoDTO findById(Long id) throws Exception;
 
-    Results<PresupuestoDTO> findByCriteria(PresupuestoCriteria criteria, int from , int pageSize) throws Exception;
+    public Results<PresupuestoDTO> findByCriteria(PresupuestoCriteria criteria, int from , int pageSize) throws Exception;
 
-    Long create(PresupuestoDTO presupuesto) throws Exception;
+    public Long create(PresupuestoDTO presupuesto) throws Exception;
 
-    boolean update(PresupuestoDTO presupuesto) throws Exception;
+    public boolean update(PresupuestoDTO presupuesto) throws Exception;
 
-    boolean delete(Long id) throws Exception;
+    public boolean delete(Long id) throws Exception;
 }

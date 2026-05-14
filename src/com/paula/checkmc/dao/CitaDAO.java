@@ -15,6 +15,7 @@ import com.paula.checkmc.model.CitaCriteria;
 import com.paula.checkmc.model.CitaDTO;
 import com.paula.checkmc.model.Results;
 import com.paula.checkmc.util.DAOUtils;
+import com.paula.checkmc.util.JDBCUtils;
 import com.paula.checkmc.util.SQLUtils;
 
 public class CitaDAO {
@@ -34,6 +35,11 @@ public class CitaDAO {
         BASE_SELECT = sb.toString();
     }
 
+    public Cita findById(Long id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+    
     public Results<CitaDTO> findByCriteria( Connection c ,CitaCriteria cr, int from, int pageSize) {
 
         logger.info("criteria: {}", cr);
@@ -134,7 +140,7 @@ public class CitaDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);     
         }
 
         return results;
@@ -185,7 +191,7 @@ public class CitaDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);     
         }
 
         return null;
@@ -217,21 +223,20 @@ public class CitaDAO {
 
         } finally {
 
-            DAOUtils.close(null, ps, c);
+            JDBCUtils.close(null, ps);     
         }
 
         return false;
     }
 
-    public boolean existeCitaEnFecha(java.time.LocalDateTime fecha) {
+    public boolean existeCitaEnFecha(java.time.LocalDateTime fecha, Connection c) {
+    	
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = DAOUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -255,7 +260,7 @@ public class CitaDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);     
         }
 
         return false;
@@ -299,7 +304,7 @@ public class CitaDAO {
 
         } finally {
 
-            DAOUtils.close(null, ps, c);
+            JDBCUtils.close(null, ps);     
         }
 
         return false;
@@ -320,5 +325,7 @@ public class CitaDAO {
 
         return c;
     }
+
+	
 
 }

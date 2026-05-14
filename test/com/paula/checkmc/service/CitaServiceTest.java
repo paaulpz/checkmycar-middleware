@@ -1,5 +1,7 @@
 package com.paula.checkmc.service;
 
+import java.time.LocalDateTime;
+
 import com.paula.checkmc.model.CitaCriteria;
 import com.paula.checkmc.model.CitaDTO;
 import com.paula.checkmc.model.Results;
@@ -13,7 +15,7 @@ public class CitaServiceTest {
         this.service = new CitaServiceImpl();
     }
 
-  /*  
+  
     public void testCreate() throws Exception {
 
         System.out.println("--- Test: CitaService.create ---");
@@ -68,7 +70,7 @@ public class CitaServiceTest {
     
     */
     
-    public void testPageFindBy() {
+    public void testPageFindBy() throws Exception {
     	CitaCriteria criteria = new CitaCriteria(); 
     	int pageSize = 5 ; 
     	Results<CitaDTO> results = null; 
@@ -95,8 +97,8 @@ public class CitaServiceTest {
 
         CitaServiceTest test = new CitaServiceTest();
 
-           test.testPageFindBy();
-        // test.testCreate();
+         //  test.testPageFindBy();
+         test.testCreate();
         //test.testFindByCriteria();
         //test.testDelete(1L);
     }

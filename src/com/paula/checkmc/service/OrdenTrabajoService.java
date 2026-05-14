@@ -13,7 +13,7 @@ public interface OrdenTrabajoService {
 	 * @throws Exception
 	 */
 
-    OrdenTrabajoDTO findById(Long id) throws Exception;
+    public OrdenTrabajoDTO findById(Long id) throws Exception;
     
     /**
      * Busca todas las ordenes de trabajo
@@ -23,7 +23,7 @@ public interface OrdenTrabajoService {
      */
 
   
-    Results<OrdenTrabajoDTO> findByCriteria(OrdenTrabajoCriteria criteria, int from , int pageSize);
+    public Results<OrdenTrabajoDTO> findByCriteria(OrdenTrabajoCriteria criteria, int from , int pageSize) throws Exception;
     
     
     /**
@@ -33,7 +33,7 @@ public interface OrdenTrabajoService {
      * @throws Exception
      */
 
-    Long create(OrdenTrabajoDTO orden) throws Exception;
+    public Long create(OrdenTrabajoDTO orden) throws Exception;
     
     /**
      * Actualiza una orden de trabajo existente
@@ -41,7 +41,7 @@ public interface OrdenTrabajoService {
      * @return
      * @throws Exception
      */
-    boolean update(OrdenTrabajoDTO orden) throws Exception;
+   public  boolean update(OrdenTrabajoDTO orden) throws Exception;
     
     /**
 	 * Elimina una orden de trabajo por su id
@@ -49,5 +49,5 @@ public interface OrdenTrabajoService {
 	 * @return
 	 * @throws Exception
 	 */
-    boolean delete(Long id) throws Exception;
+   public  boolean delete(Long id) throws Exception;
 }

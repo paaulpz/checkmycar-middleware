@@ -1,6 +1,7 @@
 package com.paula.checkmc.service;
 
 import java.util.List;
+
 import com.paula.checkmc.model.Localidad;
 
 public interface LocalidadService {
@@ -12,7 +13,7 @@ public interface LocalidadService {
 	 * @return La localidad encontrada o null si no existe.
 	 */
 
-    Localidad findById(Long id);
+   public  Localidad findById(Long id) throws Exception;
     
     /**
 	 * Busca todas las localidades disponibles.
@@ -20,7 +21,7 @@ public interface LocalidadService {
 	 * @return Una lista de todas las localidades.
 	 */
 
-    List<Localidad> findAll();
+    public List<Localidad> findAll() throws Exception;
     
     /**
      * Busca las localidades que pertenecen a una provincia específica.
@@ -28,7 +29,7 @@ public interface LocalidadService {
      * @return
      */
 
-    List<Localidad> findByProvincia(Long provinciaId);
+   public  List<Localidad> findByProvincia(Long provinciaId) throws Exception;
     
     /**
 	 * Busca las localidades que coinciden con un nombre específico.
@@ -36,7 +37,7 @@ public interface LocalidadService {
 	 * @return
 	 */
 
-    List<Localidad> findByNombre(String nombre);
+    public List<Localidad> findByNombre(String nombre)throws Exception;
 
 	
 }

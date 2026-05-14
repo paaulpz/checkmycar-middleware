@@ -15,64 +15,75 @@ import com.paula.checkmc.util.JDBCUtils;
 
 public class EstadoPresupuestoDAO {
 
-    private static final Logger logger = LogManager.getLogger(EstadoPresupuestoDAO.class);
+    private static final Logger logger =
+            LogManager.getLogger(EstadoPresupuestoDAO.class);
 
-    public EstadoPresupuesto findById(Long id) {
+    private static final String BASE_SELECT;
 
-        Connection c = null;
+    static {
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(" SELECT qs.id, qs.name ");
+        sb.append(" FROM quotation_status qs ");
+
+        BASE_SELECT = sb.toString();
+    }
+
+
+    public EstadoPresupuesto findById(Connection c, Long id) {
+
+        logger.debug("Buscando estado presupuesto por id: {}", id);
+
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
+            ps = c.prepareStatement(BASE_SELECT + " WHERE qs.id = ? ");
 
-            StringBuilder sql = new StringBuilder();
-
-            sql.append("SELECT id, name ");
-            sql.append("FROM quotation_status ");
-            sql.append("WHERE id=?");
-
-            ps = c.prepareStatement(sql.toString());
-
-            ps.setLong(1, id);
+            DAOUtils.setParameters(ps, id);
 
             rs = ps.executeQuery();
 
             if (rs.next()) {
 
-                return loadNext(rs);
+                EstadoPresupuesto estado = loadNext(rs);
+
+                logger.debug("Estado presupuesto encontrado: {}", estado);
+
+                return estado;
             }
 
         } catch (Exception e) {
 
-            logger.error("Error buscando estado presupuesto: {}", id, e);
+            logger.error(
+                    "Error buscando estado presupuesto id: {}",
+                    id,
+                    e);
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);
         }
 
         return null;
     }
 
-    public List<EstadoPresupuesto> findAll() {
+    public List<EstadoPresupuesto> findAll(Connection c) {
 
-        List<EstadoPresupuesto> lista = new ArrayList<>();
+        logger.debug("Listando estados de presupuesto");
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
+        List<EstadoPresupuesto> lista = new ArrayList<>();
+
         try {
 
-            c = JDBCUtils.getConnection();
+            StringBuilder sql = new StringBuilder(BASE_SELECT);
 
-            StringBuilder sql = new StringBuilder();
-
-            sql.append("SELECT id, name ");
-            sql.append("FROM quotation_status ");
-            sql.append("ORDER BY name");
+            sql.append(" ORDER BY qs.name ");
 
             ps = c.prepareStatement(sql.toString());
 
@@ -83,13 +94,19 @@ public class EstadoPresupuestoDAO {
                 lista.add(loadNext(rs));
             }
 
+            logger.debug(
+                    "Estados presupuesto encontrados: {}",
+                    lista.size());
+
+            return lista;
+
         } catch (Exception e) {
 
             logger.error("Error listando estados presupuesto", e);
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);
         }
 
         return lista;

@@ -14,20 +14,20 @@ public interface PiezaService {
 	 * @param id
 	 * @return
 	 */
-    PiezaDTO findById(Long id);
+    public PiezaDTO findById(Long id);
     
     
     /**
 	 * Busca todas las piezas.
 	 * @return
 	 */
-    List<PiezaDTO> findAll();
+    public List<PiezaDTO> findAll();
     
     
     /**	 * Busca piezas que cumplan con ciertos criterios.
 	 * @param criteria
 	 */
-    List<PiezaDTO> findByCriteria(PiezaCriteria criteria, int from, int pageSize);
+    public List<PiezaDTO> findByCriteria(PiezaCriteria criteria, int from, int pageSize);
 
     /**	 * Crea una nueva pieza.
 	 * @param pieza

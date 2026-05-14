@@ -74,4 +74,12 @@ public class JDBCUtils {
 		}
 	}
 
+	public static void close(ResultSet rsCount, PreparedStatement psCount, Object object) {
+		close(rsCount, psCount);
+		if (object instanceof Connection) {
+			close((Connection) object, false);
+		}
+		
+	}
+
 }

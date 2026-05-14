@@ -17,17 +17,16 @@ public class TipoMotorDAO {
 
     private static final Logger logger = LogManager.getLogger(TipoMotorDAO.class);
 
-    public List<TipoMotor> findAll() {
+    public List<TipoMotor> findAll(Connection c) {
+    	
 
         List<TipoMotor> lista = new ArrayList<>();
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -50,8 +49,8 @@ public class TipoMotorDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
-        }
+            JDBCUtils.close(rs, ps);
+    }
 
         return lista;
     }

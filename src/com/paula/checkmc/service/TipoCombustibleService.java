@@ -1,6 +1,7 @@
 package com.paula.checkmc.service;
 
 import java.util.List;
+
 import com.paula.checkmc.model.TipoCombustible;
 
 public interface TipoCombustibleService {
@@ -12,7 +13,7 @@ public interface TipoCombustibleService {
 	 * @return El tipo de combustible encontrado, o null si no se encuentra.
 	 */
 
-    TipoCombustible findById(Long id);
+    public TipoCombustible findById(Long id) throws Exception;
 
     
     
@@ -21,5 +22,5 @@ public interface TipoCombustibleService {
 	 *
 	 * @return Una lista de todos los tipos de combustible.
 	 */
-    List<TipoCombustible> findAll();
+    public List<TipoCombustible> findAll() throws Exception;
 }

@@ -1,6 +1,7 @@
 package com.paula.checkmc.service;
 
 import java.util.List;
+
 import com.paula.checkmc.model.Provincia;
 
 public interface ProvinciaService {
@@ -10,14 +11,14 @@ public interface ProvinciaService {
  * @param id
  * @return
  */
-    Provincia findById(Long id);
+    public Provincia findById(Long id)throws Exception;
     
     /**
 	 * Busca todas las provincias.
 	 * @return
 	 */
 
-    List<Provincia> findAll();
+    public List<Provincia> findAll() throws Exception;
     
     /**
 	 * Busca las provincias por el ID del país.
@@ -25,5 +26,5 @@ public interface ProvinciaService {
 	 */
 
 
-    List<Provincia> findByPais(Long paisId);
+    public List<Provincia> findByPais(Long paisId) throws Exception;
 }

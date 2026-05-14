@@ -1,6 +1,7 @@
 package com.paula.checkmc.service;
 
 import java.util.List;
+
 import com.paula.checkmc.model.EstadoCita;
 
 public interface EstadoCitaService {
@@ -12,7 +13,7 @@ public interface EstadoCitaService {
 	 * @param id El ID del estado de cita a buscar.
 	 * @return El estado de cita encontrado, o null si no se encuentra.
 	 */
-    EstadoCita findById(Long id);
+  public   EstadoCita findById(Long id) throws Exception;
     
     /**
 	 * Busca todos los estados de cita disponibles.
@@ -20,5 +21,5 @@ public interface EstadoCitaService {
 	 * @return Una lista de todos los estados de cita.
 	 */
 
-    List<EstadoCita> findAll();
+   public  List<EstadoCita> findAll() throws Exception;
 }

@@ -17,62 +17,72 @@ public class GeneroDAO {
 
     private static final Logger logger = LogManager.getLogger(GeneroDAO.class);
 
-    public Genero findById(Long id) {
+    private static final String BASE_SELECT;
 
-        Connection c = null;
+    static {
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(" SELECT g.id, g.name ");
+        sb.append(" FROM gender g ");
+
+        BASE_SELECT = sb.toString();
+    }
+
+    public GeneroDAO() {
+
+    }
+
+    public Genero findById(Connection c, Long id) {
+
+        logger.debug("Buscando genero por id: {}", id);
+
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
+            ps = c.prepareStatement(BASE_SELECT + " WHERE g.id = ? ");
 
-            StringBuilder sql = new StringBuilder();
-
-            sql.append("SELECT id, name ");
-            sql.append("FROM gender ");
-            sql.append("WHERE id=?");
-
-            ps = c.prepareStatement(sql.toString());
-
-            ps.setLong(1, id);
+            DAOUtils.setParameters(ps, id);
 
             rs = ps.executeQuery();
 
             if (rs.next()) {
 
-                return loadNext(rs);
+                Genero genero = loadNext(rs);
+
+                logger.debug("Genero encontrado: {}", genero);
+
+                return genero;
             }
 
         } catch (Exception e) {
 
-            logger.error("Error buscando genero: {}", id, e);
+            logger.error("Error buscando genero id: {}", id, e);
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);
         }
 
         return null;
     }
 
-    public List<Genero> findAll() {
+    public List<Genero> findAll(Connection c) {
 
-        List<Genero> lista = new ArrayList<>();
+        logger.debug("Listando generos");
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
+        List<Genero> lista = new ArrayList<>();
+
         try {
 
-            c = JDBCUtils.getConnection();
+            StringBuilder sql = new StringBuilder(BASE_SELECT);
 
-            StringBuilder sql = new StringBuilder();
-
-            sql.append("SELECT id, name ");
-            sql.append("FROM gender ");
-            sql.append("ORDER BY name");
+            sql.append(" ORDER BY g.name ");
 
             ps = c.prepareStatement(sql.toString());
 
@@ -83,13 +93,17 @@ public class GeneroDAO {
                 lista.add(loadNext(rs));
             }
 
+            logger.debug("Generos encontrados: {}", lista.size());
+
+            return lista;
+
         } catch (Exception e) {
 
             logger.error("Error listando generos", e);
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);
         }
 
         return lista;

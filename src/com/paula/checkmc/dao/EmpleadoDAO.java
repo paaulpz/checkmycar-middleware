@@ -19,514 +19,517 @@ import com.paula.checkmc.util.JDBCUtils;
 
 public class EmpleadoDAO {
 
-	private static final Logger logger = LogManager.getLogger(EmpleadoDAO.class);
+    private static final Logger logger = LogManager.getLogger(EmpleadoDAO.class);
 
-	private static final String BASE_SELECT;
+    private static final String BASE_SELECT;
 
-	static {
+    static {
 
-		StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
-		sb.append("SELECT e.id, e.name, e.first_surname, ");
-		sb.append("e.second_surname, e.dni_nie, e.email, ");
-		sb.append("e.phone, e.rol_id, e.gender_id, ");
-		sb.append("e.locality_id, e.address, e.password ");
-		sb.append("FROM employee e ");
+        sb.append(" SELECT e.id, e.name, e.first_surname, ");
+        sb.append(" e.second_surname, e.dni_nie, e.email, ");
+        sb.append(" e.phone, e.rol_id, e.gender_id, ");
+        sb.append(" e.locality_id, e.address, e.password ");
+        sb.append(" FROM employee e ");
 
-		BASE_SELECT = sb.toString();
-	}
+        BASE_SELECT = sb.toString();
+    }
 
-	public Empleado findById(Connection c, Long id) {
+    public EmpleadoDAO() {
 
-		logger.debug("Buscando empleado id: {}", id);
+    }
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
+    public Empleado findById(Connection c, Long id) {
 
-		try {
+        logger.debug("Buscando empleado por id: {}", id);
 
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
-			StringBuilder sql = new StringBuilder(BASE_SELECT);
+        try {
 
-			sql.append("WHERE e.id = ?");
+            ps = c.prepareStatement(BASE_SELECT + " WHERE e.id = ? ");
 
-			ps = c.prepareStatement(sql.toString());
+            DAOUtils.setParameters(ps, id);
 
-			ps.setLong(1, id);
+            rs = ps.executeQuery();
 
-			rs = ps.executeQuery();
+            if (rs.next()) {
 
-			if (rs.next()) {
+                Empleado empleado = loadNext(rs);
 
-				return loadNext(rs);
-			}
+                logger.debug("Empleado encontrado: {}", empleado);
 
-		} catch (Exception e) {
+                return empleado;
+            }
 
-			logger.error("Error findById: {}", id, e);
+        } catch (Exception e) {
 
-		} finally {
+            logger.error("Error buscando empleado id: {}", id, e);
 
-			DAOUtils.close(rs, ps, c);
-		}
+        } finally {
 
-		return null;
-	}
+            JDBCUtils.close(rs, ps);
+        }
 
-	public Empleado findByEmail(Connection c, String email) {
+        return null;
+    }
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
+    public Empleado findByEmail(Connection c, String email) {
 
-		try {
+        logger.debug("Buscando empleado por email: {}", email);
 
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
-			StringBuilder sql = new StringBuilder(BASE_SELECT);
+        try {
 
-			sql.append("WHERE e.email = ?");
+            ps = c.prepareStatement(BASE_SELECT + " WHERE e.email = ? ");
 
-			ps = c.prepareStatement(sql.toString());
+            DAOUtils.setParameters(ps, email);
 
-			ps.setString(1, email);
+            rs = ps.executeQuery();
 
-			rs = ps.executeQuery();
+            if (rs.next()) {
 
-			if (rs.next()) {
+                Empleado empleado = loadNext(rs);
 
-				return loadNext(rs);
-			}
+                logger.debug("Empleado encontrado: {}", empleado);
 
-		} catch (Exception e) {
+                return empleado;
+            }
 
-			logger.error("Error findByEmail: {}", email, e);
+        } catch (Exception e) {
 
-		} finally {
+            logger.error("Error buscando empleado email: {}", email, e);
 
-			DAOUtils.close(rs, ps, c);
-		}
+        } finally {
 
-		return null;
-	}
+            JDBCUtils.close(rs, ps);
+        }
 
-	public Results<EmpleadoDTO> findByCriteria(Connection c, EmpleadoCriteria cr, int from, int pageSize) {
+        return null;
+    }
 
-		logger.info("criteria: {}", cr);
+    public Results<EmpleadoDTO> findByCriteria(
+            Connection c,
+            EmpleadoCriteria cr,
+            int from,
+            int pageSize) throws Exception {
 
-		PreparedStatement ps = null;
-		PreparedStatement psCount = null;
+        logger.info("criteria: {}", cr);
 
-		ResultSet rs = null;
-		ResultSet rsCount = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
-		Results<EmpleadoDTO> results = new Results<>();
+        Results<EmpleadoDTO> results = new Results<>();
 
-		try {
+        try {
 
-			StringBuilder sql = new StringBuilder(BASE_SELECT);
+            StringBuilder sql = new StringBuilder(BASE_SELECT);
 
-			List<String> condiciones = new ArrayList<>();
-			List<Object> parametros = new ArrayList<>();
+            List<String> condiciones = new ArrayList<>();
+            List<Object> parametros = new ArrayList<>();
 
-			if (cr.getNombre() != null && !cr.getNombre().trim().isEmpty()) {
+            if (cr.getNombre() != null && !cr.getNombre().trim().isEmpty()) {
 
-				condiciones.add("e.name = ?");
-				parametros.add(cr.getNombre());
-			}
+                condiciones.add(" e.name = ? ");
+                parametros.add(cr.getNombre());
+            }
 
-			if (cr.getPrimerApellido() != null && !cr.getPrimerApellido().trim().isEmpty()) {
+            if (cr.getPrimerApellido() != null
+                    && !cr.getPrimerApellido().trim().isEmpty()) {
 
-				condiciones.add("e.first_surname = ?");
-				parametros.add(cr.getPrimerApellido());
-			}
+                condiciones.add(" e.first_surname = ? ");
+                parametros.add(cr.getPrimerApellido());
+            }
 
-			if (cr.getSegundoApellido() != null && !cr.getSegundoApellido().trim().isEmpty()) {
+            if (cr.getSegundoApellido() != null
+                    && !cr.getSegundoApellido().trim().isEmpty()) {
 
-				condiciones.add("e.second_surname = ?");
-				parametros.add(cr.getSegundoApellido());
-			}
+                condiciones.add(" e.second_surname = ? ");
+                parametros.add(cr.getSegundoApellido());
+            }
 
-			if (cr.getDniNie() != null && !cr.getDniNie().trim().isEmpty()) {
+            if (cr.getDniNie() != null
+                    && !cr.getDniNie().trim().isEmpty()) {
 
-				condiciones.add("e.dni_nie = ?");
-				parametros.add(cr.getDniNie());
-			}
+                condiciones.add(" e.dni_nie = ? ");
+                parametros.add(cr.getDniNie());
+            }
 
-			if (cr.getEmail() != null && !cr.getEmail().trim().isEmpty()) {
+            if (cr.getEmail() != null
+                    && !cr.getEmail().trim().isEmpty()) {
 
-				condiciones.add("e.email = ?");
-				parametros.add(cr.getEmail());
-			}
+                condiciones.add(" e.email = ? ");
+                parametros.add(cr.getEmail());
+            }
 
-			if (cr.getRolId() != null) {
+            if (cr.getRolId() != null) {
 
-				condiciones.add("e.rol_id = ?");
-				parametros.add(cr.getRolId());
-			}
+                condiciones.add(" e.rol_id = ? ");
+                parametros.add(cr.getRolId());
+            }
 
-			if (cr.getGeneroId() != null) {
+            if (cr.getGeneroId() != null) {
 
-				condiciones.add("e.gender_id = ?");
-				parametros.add(cr.getGeneroId());
-			}
+                condiciones.add(" e.gender_id = ? ");
+                parametros.add(cr.getGeneroId());
+            }
 
-			if (cr.getLocalidadId() != null) {
+            if (cr.getLocalidadId() != null) {
 
-				condiciones.add("e.locality_id = ?");
-				parametros.add(cr.getLocalidadId());
-			}
+                condiciones.add(" e.locality_id = ? ");
+                parametros.add(cr.getLocalidadId());
+            }
 
-			if (!condiciones.isEmpty()) {
+            if (!condiciones.isEmpty()) {
 
-				sql.append(" WHERE ");
-				sql.append(String.join(" AND ", condiciones));
-			}
+                sql.append(" WHERE ")
+                   .append(String.join(" AND ", condiciones));
+            }
 
-			sql.append(" ORDER BY ");
-			sql.append(cr.getOrderBy());
-			sql.append(cr.isAscDesc() ? " ASC " : " DESC ");
-			sql.append(" LIMIT ? OFFSET ? ");
+            String orderBy = cr.getOrderBy() != null
+                    ? cr.getOrderBy()
+                    : "e.id";
 
-			ps = c.prepareStatement(
-					sql.toString(),
-					ResultSet.TYPE_SCROLL_INSENSITIVE,
-					ResultSet.CONCUR_READ_ONLY);
+            sql.append(" ORDER BY ")
+               .append(orderBy)
+               .append(cr.isAscDesc() ? " ASC " : " DESC ")
+               .append(" LIMIT ? OFFSET ? ");
 
-			int i = 1;
+            logger.debug("SQL: {}", sql);
 
-			for (Object param : parametros) {
+            ps = c.prepareStatement(
+                    sql.toString(),
+                    ResultSet.TYPE_SCROLL_INSENSITIVE,
+                    ResultSet.CONCUR_READ_ONLY);
 
-				ps.setObject(i++, param);
-			}
+            int i = 1;
 
-			ps.setInt(i++, pageSize);
-			ps.setInt(i++, from - 1);
+            for (Object param : parametros) {
 
-			rs = ps.executeQuery();
+                ps.setObject(i++, param);
+            }
 
-			List<EmpleadoDTO> page = new ArrayList<>();
+            ps.setInt(i++, pageSize);
+            ps.setInt(i++, from - 1);
 
-			while (rs.next()) {
+            rs = ps.executeQuery();
 
-				EmpleadoDTO dto = new EmpleadoDTO();
+            List<EmpleadoDTO> page = new ArrayList<>();
 
-				dto.setId(rs.getLong("id"));
-				dto.setNombre(rs.getString("name"));
-				dto.setPrimerApellido(rs.getString("first_surname"));
-				dto.setSegundoApellido(rs.getString("second_surname"));
-				dto.setDniNie(rs.getString("dni_nie"));
-				dto.setEmail(rs.getString("email"));
-				dto.setTelefono(rs.getString("phone"));
-				dto.setPassword(rs.getString("password"));
-				dto.setRolId(rs.getLong("rol_id"));
-				dto.setGeneroId(rs.getLong("gender_id"));
-				dto.setLocalidadId(rs.getLong("locality_id"));
-				dto.setDireccion(rs.getString("address"));
+            while (rs.next()) {
 
-				page.add(dto);
-			}
+                EmpleadoDTO dto = new EmpleadoDTO();
 
-			results.setPage(page);
+                dto.setId(rs.getLong("id"));
+                dto.setNombre(rs.getString("name"));
+                dto.setPrimerApellido(rs.getString("first_surname"));
+                dto.setSegundoApellido(rs.getString("second_surname"));
+                dto.setDniNie(rs.getString("dni_nie"));
+                dto.setEmail(rs.getString("email"));
+                dto.setTelefono(rs.getString("phone"));
+                dto.setRolId(rs.getLong("rol_id"));
+                dto.setGeneroId(rs.getLong("gender_id"));
+                dto.setLocalidadId(rs.getLong("locality_id"));
+                dto.setDireccion(rs.getString("address"));
+                dto.setPassword(rs.getString("password"));
 
-			StringBuilder countSql = new StringBuilder();
+                page.add(dto);
+            }
 
-			countSql.append("SELECT COUNT(*) ");
-			countSql.append("FROM employee e ");
+            results.setPage(page);
 
-			if (!condiciones.isEmpty()) {
+            StringBuilder countSql = new StringBuilder();
 
-				countSql.append(" WHERE ");
-				countSql.append(String.join(" AND ", condiciones));
-			}
+            countSql.append(" SELECT COUNT(*) ");
+            countSql.append(" FROM employee e ");
 
-			psCount = c.prepareStatement(countSql.toString());
+            if (!condiciones.isEmpty()) {
 
-			int j = 1;
+                countSql.append(" WHERE ")
+                        .append(String.join(" AND ", condiciones));
+            }
 
-			for (Object param : parametros) {
+            PreparedStatement psCount = c.prepareStatement(countSql.toString());
 
-				psCount.setObject(j++, param);
-			}
+            int idx = 1;
 
-			rsCount = psCount.executeQuery();
+            for (Object param : parametros) {
 
-			if (rsCount.next()) {
+                psCount.setObject(idx++, param);
+            }
 
-				results.setTotal(rsCount.getInt(1));
-			}
+            ResultSet rsCount = psCount.executeQuery();
 
-		} catch (Exception e) {
+            if (rsCount.next()) {
 
-			logger.error("Error findByCriteria: {}", cr, e);
+                results.setTotal(rsCount.getInt(1));
+            }
 
-		} finally {
+            return results;
 
-			DAOUtils.close(rsCount, psCount, null);
-			DAOUtils.close(rs, ps, c);
-		}
+        } catch (Exception e) {
 
-		return results;
-	}
+            logger.error("Error en findByCriteria: {}", cr, e);
 
-	public Empleado create(Connection c, Empleado e) {
+            throw e;
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
+        } finally {
 
-		try {
+            JDBCUtils.close(rs, ps);
+        }
+    }
 
+    public Long create(Connection c, Empleado empleado) throws Exception {
 
-			StringBuilder sql = new StringBuilder();
+        logger.debug("Creando empleado: {}", empleado);
 
-			sql.append("INSERT INTO employee ");
-			sql.append("(name, first_surname, second_surname, dni_nie, ");
-			sql.append("email, phone, rol_id, gender_id, locality_id, ");
-			sql.append("password, address) ");
-			sql.append("VALUES (?,?,?,?,?,?,?,?,?,?,?)");
+        StringBuilder sql = new StringBuilder();
 
-			ps = c.prepareStatement(
-					sql.toString(),
-					PreparedStatement.RETURN_GENERATED_KEYS);
+        sql.append(" INSERT INTO employee ");
+        sql.append(" (name, first_surname, second_surname, dni_nie, ");
+        sql.append(" email, phone, rol_id, gender_id, locality_id, ");
+        sql.append(" password, address) ");
+        sql.append(" VALUES (?,?,?,?,?,?,?,?,?,?,?) ");
 
-			int i = 1;
+        try {
 
-			ps.setString(i++, e.getNombre());
-			ps.setString(i++, e.getPrimerApellido());
-			ps.setString(i++, e.getSegundoApellido());
-			ps.setString(i++, e.getDniNie());
-			ps.setString(i++, e.getEmail());
-			ps.setString(i++, e.getTelefono());
-			ps.setLong(i++, e.getRolId());
-			ps.setLong(i++, e.getGeneroId());
-			ps.setLong(i++, e.getLocalidadId());
-			ps.setString(i++, e.getPassword());
-			ps.setString(i++, e.getDireccion());
+            PreparedStatement ps = c.prepareStatement(
+                    sql.toString(),
+                    PreparedStatement.RETURN_GENERATED_KEYS);
 
-			ps.executeUpdate();
+            int i = 1;
 
-			rs = ps.getGeneratedKeys();
+            ps.setString(i++, empleado.getNombre());
+            ps.setString(i++, empleado.getPrimerApellido());
+            ps.setString(i++, empleado.getSegundoApellido());
+            ps.setString(i++, empleado.getDniNie());
+            ps.setString(i++, empleado.getEmail());
+            ps.setString(i++, empleado.getTelefono());
+            ps.setLong(i++, empleado.getRolId());
+            ps.setLong(i++, empleado.getGeneroId());
+            ps.setLong(i++, empleado.getLocalidadId());
+            ps.setString(i++, empleado.getPassword());
+            ps.setString(i++, empleado.getDireccion());
 
-			if (rs.next()) {
+            ps.executeUpdate();
 
-				e.setId(rs.getLong(1));
+            ResultSet rs = ps.getGeneratedKeys();
 
-				return e;
-			}
+            if (rs.next()) {
 
-		} catch (Exception ex) {
+                Long id = rs.getLong(1);
 
-			logger.error("Error creando empleado", ex);
+                logger.info("Empleado creado con id: {}", id);
 
-		} finally {
+                return id;
 
-			DAOUtils.close(rs, ps, c);
-		}
+            } else {
 
-		return null;
-	}
+                return null;
+            }
 
-	public boolean update(Connection c, Empleado e) {
+        } catch (Exception e) {
 
-		PreparedStatement ps = null;
+            logger.error("Error creando empleado: {}", empleado, e);
 
-		try {
+            throw e;
+        }
+    }
 
+    public boolean update(Connection c, Empleado empleado) throws Exception {
 
-			StringBuilder sql = new StringBuilder();
+        logger.debug("Actualizando empleado: {}", empleado);
 
-			sql.append("UPDATE employee SET ");
-			sql.append("name=?, first_surname=?, second_surname=?, ");
-			sql.append("dni_nie=?, email=?, phone=?, rol_id=?, ");
-			sql.append("gender_id=?, locality_id=?, address=? ");
-			sql.append("WHERE id=?");
+        StringBuilder sql = new StringBuilder();
 
-			ps = c.prepareStatement(sql.toString());
+        sql.append(" UPDATE employee SET ");
+        sql.append(" name=?, first_surname=?, second_surname=?, ");
+        sql.append(" dni_nie=?, email=?, phone=?, rol_id=?, ");
+        sql.append(" gender_id=?, locality_id=?, address=? ");
+        sql.append(" WHERE id=? ");
 
-			int i = 1;
+        try (PreparedStatement ps = c.prepareStatement(sql.toString())) {
 
-			ps.setString(i++, e.getNombre());
-			ps.setString(i++, e.getPrimerApellido());
-			ps.setString(i++, e.getSegundoApellido());
-			ps.setString(i++, e.getDniNie());
-			ps.setString(i++, e.getEmail());
-			ps.setString(i++, e.getTelefono());
-			ps.setLong(i++, e.getRolId());
-			ps.setLong(i++, e.getGeneroId());
-			ps.setLong(i++, e.getLocalidadId());
-			ps.setString(i++, e.getDireccion());
-			ps.setLong(i++, e.getId());
+            int i = 1;
 
-			return ps.executeUpdate() > 0;
+            ps.setString(i++, empleado.getNombre());
+            ps.setString(i++, empleado.getPrimerApellido());
+            ps.setString(i++, empleado.getSegundoApellido());
+            ps.setString(i++, empleado.getDniNie());
+            ps.setString(i++, empleado.getEmail());
+            ps.setString(i++, empleado.getTelefono());
+            ps.setLong(i++, empleado.getRolId());
+            ps.setLong(i++, empleado.getGeneroId());
+            ps.setLong(i++, empleado.getLocalidadId());
+            ps.setString(i++, empleado.getDireccion());
 
-		} catch (Exception ex) {
+            ps.setLong(i++, empleado.getId());
 
-			logger.error("Error update empleado", ex);
+            return ps.executeUpdate() > 0;
 
-		} finally {
+        } catch (Exception e) {
 
-			DAOUtils.close(null, ps, c);
-		}
+            logger.error("Error actualizando empleado: {}", empleado, e);
 
-		return false;
-	}
+            throw e;
+        }
+    }
 
-	public boolean delete(Connection c, Long id) {
+    public boolean delete(Connection c, Long id) throws Exception {
 
-		PreparedStatement ps = null;
+        logger.warn("Eliminando empleado id: {}", id);
 
-		try {
+        try (PreparedStatement ps =
+                     c.prepareStatement("DELETE FROM employee WHERE id=?")) {
 
+            ps.setLong(1, id);
 
-			StringBuilder sql = new StringBuilder();
+            boolean eliminado = ps.executeUpdate() > 0;
 
-			sql.append("DELETE FROM employee ");
-			sql.append("WHERE id=?");
+            logger.warn("Empleado {} {} {}",
+                    id,
+                    eliminado ? "" : "NO",
+                    "eliminado.");
 
-			ps = c.prepareStatement(sql.toString());
+            return eliminado;
 
-			ps.setLong(1, id);
+        } catch (Exception e) {
 
-			return ps.executeUpdate() > 0;
+            logger.error("Error eliminando empleado id: {}", id, e);
 
-		} catch (Exception e) {
+            throw e;
+        }
+    }
 
-			logger.error("Error delete empleado: {}", id, e);
+    public boolean login(
+            Connection c,
+            String dni,
+            String password,
+            Long rolId) {
 
-		} finally {
+        logger.debug("Login empleado: {}", dni);
 
-			DAOUtils.close(null, ps, c);
-		}
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
-		return false;
-	}
+        try {
 
-	public boolean login(Connection c, String dni, String password, Long rolId) {
+            StringBuilder sql = new StringBuilder();
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
+            sql.append(" SELECT password ");
+            sql.append(" FROM employee ");
+            sql.append(" WHERE dni_nie = ? ");
+            sql.append(" AND rol_id = ? ");
 
-		try {
+            ps = c.prepareStatement(sql.toString());
 
+            ps.setString(1, dni);
+            ps.setLong(2, rolId);
 
-			StringBuilder sql = new StringBuilder();
+            rs = ps.executeQuery();
 
-			sql.append("SELECT password ");
-			sql.append("FROM employee ");
-			sql.append("WHERE dni_nie=? ");
-			sql.append("AND rol_id=?");
+            if (rs.next()) {
 
-			ps = c.prepareStatement(sql.toString());
+                String hashedPassword = rs.getString("password");
 
-			ps.setString(1, dni);
-			ps.setLong(2, rolId);
+                return BCrypt.checkpw(password, hashedPassword);
+            }
 
-			rs = ps.executeQuery();
+        } catch (Exception e) {
 
-			if (rs.next()) {
+            logger.error("Error login empleado: {}", dni, e);
 
-				String hashedPassword = rs.getString("password");
+        } finally {
 
-				return BCrypt.checkpw(password, hashedPassword);
-			}
+            JDBCUtils.close(rs, ps);
+        }
 
-		} catch (Exception e) {
+        return false;
+    }
 
-			logger.error("Error login empleado: {}", dni, e);
+    public boolean existeCorreo(Connection c, String email) {
 
-		} finally {
+        logger.debug("Comprobando email existente: {}", email);
 
-			DAOUtils.close(rs, ps, c);
-		}
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
-		return false;
-	}
+        try {
 
-	public boolean existeCorreo(Connection c, String email) {
+            ps = c.prepareStatement(
+                    "SELECT id FROM employee WHERE email = ?");
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
+            ps.setString(1, email);
 
-		try {
+            rs = ps.executeQuery();
 
+            return rs.next();
 
-			StringBuilder sql = new StringBuilder();
+        } catch (Exception e) {
 
-			sql.append("SELECT id ");
-			sql.append("FROM employee ");
-			sql.append("WHERE email=?");
+            logger.error("Error comprobando correo: {}", email, e);
 
-			ps = c.prepareStatement(sql.toString());
+        } finally {
 
-			ps.setString(1, email);
+            JDBCUtils.close(rs, ps);
+        }
 
-			rs = ps.executeQuery();
+        return false;
+    }
 
-			return rs.next();
+    public boolean existeDni(Connection c, String dni) {
 
-		} catch (Exception e) {
+        logger.debug("Comprobando dni existente: {}", dni);
 
-			logger.error("Error comprobando correo: {}", email, e);
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
-		} finally {
+        try {
 
-			DAOUtils.close(rs, ps, c);
-		}
+            ps = c.prepareStatement(
+                    "SELECT id FROM employee WHERE dni_nie = ?");
 
-		return false;
-	}
+            ps.setString(1, dni);
 
-	public boolean existeDni(Connection c, String dni) {
+            rs = ps.executeQuery();
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
+            return rs.next();
 
-		try {
+        } catch (Exception e) {
 
+            logger.error("Error comprobando dni: {}", dni, e);
 
-			StringBuilder sql = new StringBuilder();
+        } finally {
 
-			sql.append("SELECT id ");
-			sql.append("FROM employee ");
-			sql.append("WHERE dni_nie=?");
+            JDBCUtils.close(rs, ps);
+        }
 
-			ps = c.prepareStatement(sql.toString());
+        return false;
+    }
 
-			ps.setString(1, dni);
+    private Empleado loadNext(ResultSet rs) throws Exception {
 
-			rs = ps.executeQuery();
+        int i = 1;
 
-			return rs.next();
+        Empleado e = new Empleado();
 
-		} catch (Exception e) {
+        e.setId(rs.getLong(i++));
+        e.setNombre(rs.getString(i++));
+        e.setPrimerApellido(rs.getString(i++));
+        e.setSegundoApellido(rs.getString(i++));
+        e.setDniNie(rs.getString(i++));
+        e.setEmail(rs.getString(i++));
+        e.setTelefono(rs.getString(i++));
+        e.setRolId(rs.getLong(i++));
+        e.setGeneroId(rs.getLong(i++));
+        e.setLocalidadId(rs.getLong(i++));
+        e.setDireccion(rs.getString(i++));
+        e.setPassword(rs.getString(i++));
 
-			logger.error("Error comprobando dni: {}", dni, e);
-
-		} finally {
-
-			DAOUtils.close(rs, ps, c);
-		}
-
-		return false;
-	}
-
-	private Empleado loadNext(ResultSet rs) throws Exception {
-
-		int i = 1;
-
-		Empleado e = new Empleado();
-
-		e.setId(rs.getLong(i++));
-		e.setNombre(rs.getString(i++));
-		e.setPrimerApellido(rs.getString(i++));
-		e.setSegundoApellido(rs.getString(i++));
-		e.setDniNie(rs.getString(i++));
-		e.setEmail(rs.getString(i++));
-		e.setTelefono(rs.getString(i++));
-		e.setRolId(rs.getLong(i++));
-		e.setGeneroId(rs.getLong(i++));
-		e.setLocalidadId(rs.getLong(i++));
-		e.setDireccion(rs.getString(i++));
-		e.setPassword(rs.getString(i++));
-
-		return e;
-	}
+        return e;
+    }
 }

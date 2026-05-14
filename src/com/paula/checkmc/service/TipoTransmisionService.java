@@ -1,6 +1,7 @@
 package com.paula.checkmc.service;
 
 import java.util.List;
+
 import com.paula.checkmc.model.TipoTransmision;
 
 public interface TipoTransmisionService {
@@ -12,7 +13,7 @@ public interface TipoTransmisionService {
 	 * @return El tipo de transmisión encontrado, o null si no se encuentra.
 	 */
 
-    TipoTransmision findById(Long id);
+   public  TipoTransmision findById(Long id) throws Exception;
     
     
     /**	 * Busca todos los tipos de transmisión disponibles.
@@ -20,5 +21,5 @@ public interface TipoTransmisionService {
      * @return
      */
 
-    List<TipoTransmision> findAll();
+    public List<TipoTransmision> findAll() throws Exception;
 }

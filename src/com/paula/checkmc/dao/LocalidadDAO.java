@@ -10,7 +10,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.paula.checkmc.model.Localidad;
-import com.paula.checkmc.util.DAOUtils;
 import com.paula.checkmc.util.JDBCUtils;
 
 public class LocalidadDAO {
@@ -20,15 +19,13 @@ public class LocalidadDAO {
     public LocalidadDAO() {
     }
 
-    public Localidad findById(Long id) {
+    public Localidad findById(Connection c ,Long id) {
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -53,23 +50,22 @@ public class LocalidadDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);     
         }
 
         return null;
     }
 
-    public List<Localidad> findAll() {
+    public List<Localidad> findAll(Connection c) {
+    	
 
         List<Localidad> resultados = new ArrayList<>();
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -92,23 +88,21 @@ public class LocalidadDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);     
         }
 
         return resultados;
     }
 
-    public List<Localidad> findByProvince(Long provinceId) {
+    public List<Localidad> findByProvince(Connection c ,Long provinceId) {
 
         List<Localidad> resultados = new ArrayList<>();
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -134,23 +128,21 @@ public class LocalidadDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);     
         }
 
         return resultados;
     }
 
-    public List<Localidad> findByNombre(String nombre) {
+    public List<Localidad> findByNombre(Connection c ,String nombre) {
 
         List<Localidad> resultados = new ArrayList<>();
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -176,7 +168,7 @@ public class LocalidadDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);     
         }
 
         return resultados;

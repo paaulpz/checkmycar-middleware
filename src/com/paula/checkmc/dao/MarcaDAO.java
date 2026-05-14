@@ -10,22 +10,19 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.paula.checkmc.model.Marca;
-import com.paula.checkmc.util.DAOUtils;
 import com.paula.checkmc.util.JDBCUtils;
 
 public class MarcaDAO {
 
     private static final Logger logger = LogManager.getLogger(MarcaDAO.class);
 
-    public Marca findById(Long id) {
+    public Marca findById(Connection c ,Long id) {
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -50,23 +47,22 @@ public class MarcaDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);     
         }
 
         return null;
     }
 
-    public List<Marca> findAll() {
+    public List<Marca> findAll(Connection c) {
+    	
 
         List<Marca> lista = new ArrayList<>();
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -89,7 +85,7 @@ public class MarcaDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);     
         }
 
         return lista;

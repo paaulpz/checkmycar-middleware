@@ -1,6 +1,7 @@
 package com.paula.checkmc.service;
 
 import java.util.List;
+
 import com.paula.checkmc.model.TipoMotor;
 
 public interface TipoMotorService {
@@ -12,7 +13,7 @@ public interface TipoMotorService {
 	 * @return El tipo de motor encontrado, o null si no se encuentra.
 	 */
 
-    TipoMotor findById(Long id);
+    public TipoMotor findById(Long id) throws Exception;
     
     
     /**	 * Busca todos los tipos de motor disponibles.
@@ -20,5 +21,5 @@ public interface TipoMotorService {
      * @return
      */
 
-    List<TipoMotor> findAll();
+    public List<TipoMotor> findAll() throws Exception;
 }

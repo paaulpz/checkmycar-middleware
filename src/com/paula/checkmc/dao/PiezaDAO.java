@@ -11,7 +11,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.paula.checkmc.model.Pieza;
 import com.paula.checkmc.model.PiezaCriteria;
-import com.paula.checkmc.util.DAOUtils;
 import com.paula.checkmc.util.JDBCUtils;
 
 public class PiezaDAO {
@@ -31,15 +30,13 @@ public class PiezaDAO {
         BASE_SELECT = sb.toString();
     }
 
-    public Pieza findById(Long id) {
+    public Pieza findById(Connection c ,Long id) {
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder(BASE_SELECT);
 
@@ -62,23 +59,22 @@ public class PiezaDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);
         }
 
         return null;
     }
 
-    public List<Pieza> findAll() {
+    public List<Pieza> findAll(Connection c) {
+    	
 
         List<Pieza> lista = new ArrayList<>();
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder(BASE_SELECT);
 
@@ -99,23 +95,21 @@ public class PiezaDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);
         }
 
         return lista;
     }
 
-    public List<Pieza> findByCriteria(PiezaCriteria cr) {
+    public List<Pieza> findByCriteria(Connection c ,PiezaCriteria cr) {
 
         List<Pieza> lista = new ArrayList<>();
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder(BASE_SELECT);
 
@@ -162,7 +156,7 @@ public class PiezaDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);
         }
 
         return lista;

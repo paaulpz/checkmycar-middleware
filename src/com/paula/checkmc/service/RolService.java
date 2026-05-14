@@ -13,7 +13,7 @@ public interface RolService {
 	 * @return El rol encontrado o null si no existe.
 	 */
 
-    Rol findById(Long id);
+    public Rol findById(Long id) throws Exception;
     
     
     /**    * Busca todos los roles disponibles.
@@ -21,5 +21,5 @@ public interface RolService {
 	 * @return Una lista de todos los roles.
 	 */
 
-    List<Rol> findAll();
+    public List<Rol> findAll() throws Exception;
 }

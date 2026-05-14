@@ -1,6 +1,7 @@
 package com.paula.checkmc.service;
 
 import java.util.List;
+
 import com.paula.checkmc.model.Genero;
 
 public interface GeneroService {
@@ -12,11 +13,11 @@ public interface GeneroService {
 	 * @param id
 	 * @return
 	 */
-    Genero findById(Long id);
+  public Genero findById(Long id) throws Exception;
     
     
     /**	 * Busca todos los géneros disponibles.
 	 * @return 
 	 */
-    List<Genero> findAll();
+   public  List<Genero> findAll() throws Exception;
 }

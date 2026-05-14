@@ -10,22 +10,19 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.paula.checkmc.model.Provincia;
-import com.paula.checkmc.util.DAOUtils;
 import com.paula.checkmc.util.JDBCUtils;
 
 public class ProvinciaDAO {
 
     private static final Logger logger = LogManager.getLogger(ProvinciaDAO.class);
 
-    public Provincia findById(Long id) {
+    public Provincia findById(Connection c ,Long id) {
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -50,23 +47,21 @@ public class ProvinciaDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);
         }
 
         return null;
     }
 
-    public List<Provincia> findByPais(Long paisId) {
+    public List<Provincia> findByPais(Connection c ,Long paisId) {
 
         List<Provincia> lista = new ArrayList<>();
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -92,7 +87,7 @@ public class ProvinciaDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);
         }
 
         return lista;

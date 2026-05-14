@@ -13,7 +13,6 @@ import com.paula.checkmc.model.Results;
 import com.paula.checkmc.model.Venta;
 import com.paula.checkmc.model.VentaCriteria;
 import com.paula.checkmc.model.VentaDTO;
-import com.paula.checkmc.util.DAOUtils;
 import com.paula.checkmc.util.JDBCUtils;
 
 public class VentaDAO {
@@ -58,17 +57,15 @@ public class VentaDAO {
         BASE_SELECT = sb.toString();
     }
 
-    public VentaDTO findById(Long id) {
+    public VentaDTO findById(Connection c,Long id) {
 
         logger.debug("Buscando venta id: {}", id);
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder(BASE_SELECT);
 
@@ -91,17 +88,16 @@ public class VentaDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);
         }
 
         return null;
     }
 
-    public Results<VentaDTO> findByCriteria(VentaCriteria cr, int from, int pageSize) {
+    public Results<VentaDTO> findByCriteria(Connection c ,VentaCriteria cr, int from, int pageSize) {
 
         logger.info("criteria: {}", cr);
 
-        Connection c = null;
 
         PreparedStatement ps = null;
         PreparedStatement psCount = null;
@@ -113,7 +109,6 @@ public class VentaDAO {
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder(BASE_SELECT);
 
@@ -235,24 +230,22 @@ public class VentaDAO {
 
         } finally {
 
-            DAOUtils.close(rsCount, psCount, null);
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rsCount, psCount, null);
+            JDBCUtils.close(rs, ps);
         }
 
         return results;
     }
 
-    public Venta create(Venta v) {
+    public Long create(Connection c ,Venta v) {
 
         logger.debug("Creando venta: {}", v);
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -286,7 +279,7 @@ public class VentaDAO {
 
                 logger.info("Venta creada con id: {}", v.getId());
 
-                return v;
+                return v.getId();
             }
 
         } catch (Exception e) {
@@ -295,22 +288,20 @@ public class VentaDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);
         }
 
         return null;
     }
 
-    public boolean update(Venta v) {
+    public boolean update(Connection c ,Venta v) {
 
         logger.debug("Actualizando venta: {}", v);
 
-        Connection c = null;
         PreparedStatement ps = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -345,22 +336,20 @@ public class VentaDAO {
 
         } finally {
 
-            DAOUtils.close(null, ps, c);
+            JDBCUtils.close(null, ps);
         }
 
         return false;
     }
 
-    public boolean delete(Long id) {
+    public boolean delete(Connection c ,Long id) {
 
         logger.warn("Eliminando venta id: {}", id);
 
-        Connection c = null;
         PreparedStatement ps = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -379,7 +368,7 @@ public class VentaDAO {
 
         } finally {
 
-            DAOUtils.close(null, ps, c);
+            JDBCUtils.close(null, ps);
         }
 
         return false;

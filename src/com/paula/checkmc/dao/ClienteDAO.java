@@ -15,6 +15,7 @@ import com.paula.checkmc.model.ClienteCriteria;
 import com.paula.checkmc.model.ClienteDTO;
 import com.paula.checkmc.model.Results;
 import com.paula.checkmc.util.DAOUtils;
+import com.paula.checkmc.util.JDBCUtils;
 
 public class ClienteDAO {
 
@@ -34,43 +35,47 @@ public class ClienteDAO {
 
 		BASE_SELECT = sb.toString();
 	}
+	
+	  public ClienteDAO() {
+	    	
+	    }
+	    
 
-	public Cliente findById(Connection c, Long id) {
+	  public Cliente findById(Connection c, Long id) {
 
-		logger.debug("Buscando cliente por id: {}", id);
+		    logger.debug("Buscando cliente por id: {}", id);
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
+		    PreparedStatement ps = null;
+		    ResultSet rs = null;
 
-		try {
+		    try {
 
+		        ps = c.prepareStatement(BASE_SELECT + " WHERE c.id = ? ");
 
-			StringBuilder sql = new StringBuilder(BASE_SELECT);
+		        DAOUtils.setParameters(ps, id);
 
-			sql.append(" WHERE c.id = ? ");
+		        rs = ps.executeQuery();
 
-			ps = c.prepareStatement(sql.toString());
+		        if (rs.next()) {
 
-			ps.setLong(1, id);
+		            Cliente cliente = loadNext(rs);
 
-			rs = ps.executeQuery();
+		            logger.debug("Cliente encontrado: {}", cliente);
 
-			if (rs.next()) {
+		            return cliente;
+		        }
 
-				return loadNext(rs);
-			}
+		    } catch (Exception e) {
 
-		} catch (Exception e) {
+		        logger.error("Error buscando cliente id: {}", id, e);
 
-			logger.error("Error buscando cliente: {}", id, e);
+		    } finally {
 
-		} finally {
+		        JDBCUtils.close(rs, ps);
+		    }
 
-			DAOUtils.close(rs, ps, c);
+		    return null;
 		}
-
-		return null;
-	}
 
 	public Results<ClienteDTO> findByCriteria(Connection c, ClienteCriteria cr, int from, int pageSize) {
 
@@ -202,68 +207,66 @@ public class ClienteDAO {
 
 		} finally {
 
-			DAOUtils.close(rsCount, psCount, null);
-			DAOUtils.close(rs, ps, c);
+			JDBCUtils.close(rsCount, psCount, null);
+            JDBCUtils.close(rs, ps);     
 		}
 
 		return results;
 	}
 
-	public Cliente create(Connection c , Cliente cliente) {
+	public Long create(Connection c, Cliente cliente) throws Exception {
 
-		logger.debug("Creando cliente: {}", cliente);
+	    logger.debug("Creando cliente: {}", cliente);
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
+	    StringBuilder sql = new StringBuilder();
 
-		try {
+	    sql.append("INSERT INTO client ");
+	    sql.append("(dni_nie, name, first_surname, second_surname, ");
+	    sql.append("email, locality_id, gender_id, phone, password, address) ");
+	    sql.append("VALUES (?,?,?,?,?,?,?,?,?,?)");
 
+	    try {
 
-			StringBuilder sql = new StringBuilder();
+	        PreparedStatement ps = c.prepareStatement(
+	                sql.toString(),
+	                PreparedStatement.RETURN_GENERATED_KEYS);
 
-			sql.append("INSERT INTO client ");
-			sql.append("(dni_nie, name, first_surname, second_surname, ");
-			sql.append("email, locality_id, gender_id, phone, password, address) ");
-			sql.append("VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+	        int i = 1;
 
-			ps = c.prepareStatement(sql.toString(), PreparedStatement.RETURN_GENERATED_KEYS);
+	        ps.setString(i++, cliente.getDniNie());
+	        ps.setString(i++, cliente.getNombre());
+	        ps.setString(i++, cliente.getPrimerApellido());
+	        ps.setString(i++, cliente.getSegundoApellido());
+	        ps.setString(i++, cliente.getEmail());
+	        ps.setLong(i++, cliente.getLocalidadId());
+	        ps.setLong(i++, cliente.getGeneroId());
+	        ps.setString(i++, cliente.getTelefono());
+	        ps.setString(i++, cliente.getPassword());
+	        ps.setString(i++, cliente.getDireccion());
 
-			int i = 1;
+	        ps.executeUpdate();
 
-			ps.setString(i++, cliente.getDniNie());
-			ps.setString(i++, cliente.getNombre());
-			ps.setString(i++, cliente.getPrimerApellido());
-			ps.setString(i++, cliente.getSegundoApellido());
-			ps.setString(i++, cliente.getEmail());
-			ps.setLong(i++, cliente.getLocalidadId());
-			ps.setLong(i++, cliente.getGeneroId());
-			ps.setString(i++, cliente.getTelefono());
-			ps.setString(i++, cliente.getPassword());
-			ps.setString(i++, cliente.getDireccion());
+	        ResultSet rs = ps.getGeneratedKeys();
 
-			ps.executeUpdate();
+	        if (rs.next()) {
 
-			rs = ps.getGeneratedKeys();
+	            Long id = rs.getLong(1);
 
-			if (rs.next()) {
+	            logger.info("Cliente creado con id: {}", id);
 
-				cliente.setId(rs.getLong(1));
+	            return id;
 
-				logger.info("Cliente creado con id: {}", cliente.getId());
+	        } else {
 
-				return cliente;
-			}
+	            return null;
+	        }
 
-		} catch (Exception e) {
+	    } catch (Exception e) {
 
-			logger.error("Error creando cliente: {}", cliente, e);
+	        logger.error("Error creando cliente: {}", cliente, e);
 
-		} finally {
-
-			DAOUtils.close(rs, ps, c);
-		}
-
-		return null;
+	        throw e;
+	    }
 	}
 
 	public boolean update(Connection c, Cliente cliente) {
@@ -307,7 +310,7 @@ public class ClienteDAO {
 
 		} finally {
 
-			DAOUtils.close(null, ps, c);
+            JDBCUtils.close(null, ps);     
 		}
 
 		return false;
@@ -339,7 +342,7 @@ public class ClienteDAO {
 
 		} finally {
 
-			DAOUtils.close(null, ps, c);
+            JDBCUtils.close(null, ps);     
 		}
 
 		return false;
@@ -383,7 +386,7 @@ public class ClienteDAO {
 
 		} finally {
 
-			DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);     
 		}
 
 		return false;
@@ -417,7 +420,7 @@ public class ClienteDAO {
 
 		} finally {
 
-			DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);     
 		}
 
 		return false;
@@ -451,7 +454,7 @@ public class ClienteDAO {
 
 		} finally {
 
-			DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);     
 		}
 
 		return false;

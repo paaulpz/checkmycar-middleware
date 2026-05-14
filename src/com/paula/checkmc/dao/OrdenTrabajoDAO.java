@@ -33,17 +33,15 @@ public class OrdenTrabajoDAO {
         BASE_SELECT = sb.toString();
     }
 
-    public OrdenTrabajo findById(Long id) {
+    public OrdenTrabajo findById(Connection c ,Long id) {
 
         logger.debug("Buscando orden trabajo id: {}", id);
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = DAOUtils.getConnection();
 
             StringBuilder sql = new StringBuilder(BASE_SELECT);
 
@@ -66,17 +64,16 @@ public class OrdenTrabajoDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);
         }
 
         return null;
     }
 
-    public Results<OrdenTrabajoDTO> findByCriteria(OrdenTrabajoCriteria cr, int from, int pageSize) {
+    public Results<OrdenTrabajoDTO> findByCriteria(Connection c ,OrdenTrabajoCriteria cr, int from, int pageSize) {
 
         logger.info("criteria: {}", cr);
 
-        Connection c = null;
         PreparedStatement ps = null;
         PreparedStatement psCount = null;
 
@@ -87,7 +84,6 @@ public class OrdenTrabajoDAO {
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder(BASE_SELECT);
 
@@ -201,24 +197,22 @@ public class OrdenTrabajoDAO {
 
         } finally {
 
-            DAOUtils.close(rsCount, psCount, null);
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rsCount, psCount, null);
+            JDBCUtils.close(rs, ps);     
         }
 
         return results;
     }
 
-    public Long create(OrdenTrabajo ot) {
+    public Long create(Connection c ,OrdenTrabajo ot) {
 
         logger.debug("Creando orden trabajo: {}", ot);
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = DAOUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -257,22 +251,20 @@ public class OrdenTrabajoDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);     
         }
 
         return null;
     }
 
-    public boolean update(OrdenTrabajo ot) {
+    public boolean update(Connection c ,OrdenTrabajo ot) {
 
         logger.debug("Actualizando orden trabajo: {}", ot);
 
-        Connection c = null;
         PreparedStatement ps = null;
 
         try {
 
-            c = DAOUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -300,22 +292,20 @@ public class OrdenTrabajoDAO {
 
         } finally {
 
-            DAOUtils.close(null, ps, c);
+            JDBCUtils.close(null, ps);     
         }
 
         return false;
     }
 
-    public boolean delete(Long id) {
+    public boolean delete(Connection c ,Long id) {
 
         logger.warn("Eliminando orden trabajo id: {}", id);
 
-        Connection c = null;
         PreparedStatement ps = null;
 
         try {
 
-            c = DAOUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -334,7 +324,7 @@ public class OrdenTrabajoDAO {
 
         } finally {
 
-            DAOUtils.close(null, ps, c);
+            JDBCUtils.close(null, ps);
         }
 
         return false;

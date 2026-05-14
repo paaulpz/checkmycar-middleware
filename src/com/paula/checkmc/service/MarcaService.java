@@ -12,11 +12,13 @@ public interface MarcaService {
 	 * @param id
 	 * @return
 	 */
-    Marca findById(Long id);
+   public  Marca findById(Long id) throws Exception;
 
     
-    /**
-		 * 	Busca todas las marcas
-		 */
-    List<Marca> findAll();
+   /**
+    * Busca todas las marcas
+    * @return
+    * @throws Exception
+    */
+    public List<Marca> findAll() throws Exception;
 }

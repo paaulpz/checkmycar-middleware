@@ -10,22 +10,19 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.paula.checkmc.model.Pais;
-import com.paula.checkmc.util.DAOUtils;
 import com.paula.checkmc.util.JDBCUtils;
 
 public class PaisDAO {
 
     private static final Logger logger = LogManager.getLogger(PaisDAO.class);
 
-    public Pais findById(Long id) {
+    public Pais findById(Connection c,Long id) {
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -50,23 +47,21 @@ public class PaisDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);
         }
 
         return null;
     }
 
-    public List<Pais> findAll() {
+    public List<Pais> findAll(	Connection c) {
 
         List<Pais> lista = new ArrayList<>();
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -89,8 +84,8 @@ public class PaisDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
-        }
+            JDBCUtils.close(rs, ps);
+		}
 
         return lista;
     }

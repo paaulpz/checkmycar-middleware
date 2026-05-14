@@ -14,7 +14,7 @@ public interface EmpleadoService {
 	 * @return
 	 */
 
-   public  Empleado findById(Long id);
+   public  Empleado findById(Long id) throws Exception;
     
 
     
@@ -24,16 +24,23 @@ public interface EmpleadoService {
      * @return
      */
 
- public  Results<EmpleadoDTO> findByCriteria(EmpleadoCriteria criteria , int from, int pageSize);
+ public  Results<EmpleadoDTO> findByCriteria(EmpleadoCriteria criteria , int from, int pageSize) throws Exception;
     
- public Long register(Empleado empleado);
+ 
+ /**
+	 * Registra un nuevo empleado.
+	 * @param empleado
+	 * @return El ID del empleado registrado.
+	 */
+ public Long register(Empleado empleado) throws Exception;
+ 
     /**
 	 * Crea un nuevo empleado.
 	 * @param empleado
 	 * @return El ID del empleado creado.
 	 */
 
-   public Empleado create(Empleado empleado);
+   public Long create(Empleado empleado) throws Exception;
     
     /**
      * Actualiza un empleado existente.
@@ -41,15 +48,24 @@ public interface EmpleadoService {
      * @return
      */
 
-   public  boolean update(Empleado empleado);
+   public  boolean update(Empleado empleado) throws Exception;
     
     /**
 	 * Elimina un empleado por su ID.
 	 * @param id
 	 * @return
 	 */
-  public   boolean delete(Long id);
+  public   boolean delete(Long id) throws Exception;
 
 
-public EmpleadoDTO login(String dni, String password, Long rolId);
+  /**
+   * Inicia sesión para un empleado dado su DNI, contraseña y rol.
+   * @param dni
+   * @param password
+   * @param rolId
+   * @return
+   */
+public EmpleadoDTO login(String dni, String password, Long rolId) throws Exception ;
+
+
 }

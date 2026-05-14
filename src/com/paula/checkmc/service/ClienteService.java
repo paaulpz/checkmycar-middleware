@@ -12,7 +12,7 @@ public interface ClienteService {
 	 * @param id
 	 * @return
 	 */
-    Cliente findById(Long id);
+   public Cliente findById(Long id) throws Exception;;
     
     
     
@@ -22,7 +22,7 @@ public interface ClienteService {
 	  * @param criteria
 	  * @return
 	  */
-      Results<ClienteDTO> findByCriteria(ClienteCriteria criteria, int from , int pageSize);
+     public Results<ClienteDTO> findByCriteria(ClienteCriteria criteria, int from , int pageSize) 	throws Exception;;
     
     
     /**
@@ -30,7 +30,7 @@ public interface ClienteService {
 	 * @param cliente
 	 * @return El ID del cliente creado.
 	 */
-    Cliente create(Cliente cliente);
+   public  Long create(Cliente cliente) 	throws Exception;;
     
     
     /**
@@ -38,14 +38,14 @@ public interface ClienteService {
      * @param cliente
      * @return
      */
-    public Long register(Cliente cliente);
+    public Long register(Cliente cliente) throws Exception;;
     
           /**
 	  * Actualiza un cliente existente.
 	  * @param cliente
 	  * @return true si la actualización fue exitosa, false de lo contrario.
 	  */
-      boolean update(Cliente cliente);
+  public boolean update(Cliente cliente)	throws Exception;
       
       
       
@@ -55,10 +55,16 @@ public interface ClienteService {
        * @return
        */
 
-    boolean delete(Long id);
+  public boolean delete(Long id)throws Exception;
 
 
 
-
-	  ClienteDTO login(String email, String password);
+/**
+ * Inicia sesión para un cliente dado su correo electrónico y contraseña.
+ * @param email
+ * @param password
+ * @return
+ * @throws Exception
+ */
+	public ClienteDTO login(String email, String password) throws Exception;
 }

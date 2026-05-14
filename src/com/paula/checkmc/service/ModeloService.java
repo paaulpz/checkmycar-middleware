@@ -12,5 +12,5 @@ public interface ModeloService {
      * @param marcaId
      * @return
      */
-    List<Modelo> findByMarca(Long marcaId);
+   public  List<Modelo> findByMarca(Long marcaId);
 }

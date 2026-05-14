@@ -13,7 +13,7 @@ public interface PresupuestoEmpleadoService {
 	 * @param pe
 	 * @return true si la asociación se creó correctamente, false en caso contrario.
 	 */
-    boolean create(PresupuestoEmpleado pe);
+   public  boolean create(PresupuestoEmpleado pe);
 
     /**
      * Elimina la asociación entre un presupuesto y un empleado.
@@ -21,7 +21,7 @@ public interface PresupuestoEmpleadoService {
      * @param presupuestoId
      * @return
      */
-    boolean delete(Long empleadoId, Long presupuestoId);
+    public boolean delete(Long empleadoId, Long presupuestoId);
     
     
     /**
@@ -29,7 +29,7 @@ public interface PresupuestoEmpleadoService {
 	 * @param empleadoId
 	 * @return Lista de IDs de presupuestos asociados al empleado.
 	 */
-    List<Empleado> findPresupuestosByEmpleado(Long empleadoId);
+    public List<Empleado> findPresupuestosByEmpleado(Long empleadoId);
     
     
     /**
@@ -37,5 +37,5 @@ public interface PresupuestoEmpleadoService {
      * @param presupuestoId
      * @return
      */
-    List<Long> findEmpleadosByPresupuesto(Long presupuestoId);
+    public List<Long> findEmpleadosByPresupuesto(Long presupuestoId);
 }

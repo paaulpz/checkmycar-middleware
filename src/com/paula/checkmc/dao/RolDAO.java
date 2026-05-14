@@ -10,24 +10,22 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.paula.checkmc.model.Rol;
-import com.paula.checkmc.util.DAOUtils;
 import com.paula.checkmc.util.JDBCUtils;
 
 public class RolDAO {
 
     private static final Logger logger = LogManager.getLogger(RolDAO.class);
 
-    public List<Rol> findAll() {
+    public List<Rol> findAll(Connection c) {
+    	
 
         List<Rol> lista = new ArrayList<>();
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder();
 
@@ -50,7 +48,7 @@ public class RolDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);
         }
 
         return lista;

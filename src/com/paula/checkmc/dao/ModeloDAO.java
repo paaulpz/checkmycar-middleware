@@ -10,7 +10,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.paula.checkmc.model.Modelo;
-import com.paula.checkmc.util.DAOUtils;
 import com.paula.checkmc.util.JDBCUtils;
 
 public class ModeloDAO {
@@ -29,17 +28,15 @@ public class ModeloDAO {
         BASE_SELECT = sb.toString();
     }
 
-    public List<Modelo> findByMarca(Long marcaId) {
+    public List<Modelo> findByMarca(Connection c ,Long marcaId) {
 
         List<Modelo> lista = new ArrayList<>();
 
-        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
 
-            c = JDBCUtils.getConnection();
 
             StringBuilder sql = new StringBuilder(BASE_SELECT);
 
@@ -63,7 +60,7 @@ public class ModeloDAO {
 
         } finally {
 
-            DAOUtils.close(rs, ps, c);
+            JDBCUtils.close(rs, ps);     
         }
 
         return lista;

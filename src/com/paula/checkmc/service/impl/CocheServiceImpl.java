@@ -16,13 +16,13 @@ import com.paula.checkmc.util.JDBCUtils;
 public class CocheServiceImpl implements CocheService {
 	private Logger logger = LogManager.getLogger(CocheServiceImpl.class.getName());
 
-    private CocheDAO dao = new CocheDAO();
+    private CocheDAO cocheDAO = new CocheDAO();
 
     @Override
     public Coche findById(Long id) {
         if (id == null || id <= 0) return null;
         Connection c = JDBCUtils.getConnection();
-        return dao.findById(c, id);
+        return cocheDAO .findById(c, id);
     }
 
     @Override
@@ -34,7 +34,7 @@ public class CocheServiceImpl implements CocheService {
 		try {
 			c = JDBCUtils.getConnection();			
 			c.setAutoCommit(false);			
-			Results<CocheDTO> results = dao.findByCriteria(c, criteria, from, pageSize);
+			Results<CocheDTO> results = cocheDAO .findByCriteria(c, criteria, from, pageSize);
 			commit = true;
 			return results;
 		} catch (Exception e) {
@@ -52,7 +52,7 @@ public class CocheServiceImpl implements CocheService {
 		try {
 			c = JDBCUtils.getConnection();			
 			c.setAutoCommit(false);				
-			Long id = dao.create(c, coche);			
+			Long id = cocheDAO .create(c, coche);			
 			commit = true;							
 			return id;
 		} catch (Exception e) {
@@ -71,7 +71,7 @@ public class CocheServiceImpl implements CocheService {
         try {
         	c = JDBCUtils.getConnection();
         	c.setAutoCommit(false);        	
-        	boolean updated = dao.update(c, coche);
+        	boolean updated = cocheDAO .update(c, coche);
         	commit = true;
         	return updated;
         } catch (Exception e) {
@@ -91,7 +91,7 @@ public class CocheServiceImpl implements CocheService {
         try {
         	c = JDBCUtils.getConnection();
         	c.setAutoCommit(false);       
-        	boolean deleted = dao.delete(c, id);
+        	boolean deleted = cocheDAO .delete(c, id);
         	commit = true;
         	return deleted;
         } catch (Exception e) {

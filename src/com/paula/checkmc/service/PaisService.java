@@ -1,6 +1,7 @@
 package com.paula.checkmc.service;
 
 import java.util.List;
+
 import com.paula.checkmc.model.Pais;
 
 public interface PaisService {
@@ -11,10 +12,12 @@ public interface PaisService {
 	 * @return
 	 */
 
-    Pais findById(Long id);
+    public Pais findById(Long id);
+    
+    
 	/**
 	 * Busca todos los países disponibles.
 	 * @return
 	 */
-    List<Pais> findAll();
+    public List<Pais> findAll();
 }
