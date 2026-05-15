@@ -1,51 +1,113 @@
 package com.paula.checkmc.service;
 
-import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import com.paula.checkmc.model.Venta;
+import com.paula.checkmc.model.Results;
 import com.paula.checkmc.model.VentaCriteria;
 import com.paula.checkmc.model.VentaDTO;
 import com.paula.checkmc.service.impl.VentaServiceImpl;
 
 public class VentaServiceTest {
 
-    private VentaService service = null;
+	private static final Logger logger = LogManager.getLogger(VentaServiceTest.class);
 
-    public VentaServiceTest() {
-        this.service = new VentaServiceImpl();
-    }
+	private VentaService service;
 
-    public void testFindById(Long id) throws Exception {
-        VentaDTO venta = service.findById(id);
-    }
+	public VentaServiceTest() {
 
-    public void testFindByCriteria() throws Exception {
-        VentaCriteria criteria = new VentaCriteria();
-        List<VentaDTO> ventas = (List<VentaDTO>) service.findByCriteria(criteria, 0, 10);
-    }
+		this.service = new VentaServiceImpl();
+	}
 
-    public void testCreate() throws Exception {
-        VentaDTO venta = new VentaDTO();
-        Venta id = service.create(venta);
-    }
+	public void testFindById(Long id) {
 
-    public void testUpdate() throws Exception {
-        VentaDTO venta = new VentaDTO();
-        boolean updated = service.update(venta);
-    }
+		try {
 
-    public void testDelete(Long id) throws Exception {
-        boolean deleted = service.delete(id);
-    }
+			VentaDTO venta = service.findById(id);
 
-    public static void main(String[] args) throws Exception {
+			if (venta != null) {
+				logger.info("Venta encontrada: {}", venta);
 
-        VentaServiceTest test = new VentaServiceTest();
+			} else {
+				logger.warn("No existe venta con id {}", id);
+			}
+		} catch (Exception e) {
+			logger.error("Error en testFindById {}: {}", id, e.getMessage(), e);
+		}
+	}
 
-        test.testFindById(1L);
-        //test.testFindByCriteria();
-        //test.testCreate();
-        //test.testUpdate();
-        //test.testDelete(1L);
-    }
+	public void testFindByCriteria() {
+
+		try {
+
+			VentaCriteria criteria = new VentaCriteria();
+			Results<VentaDTO> results = service.findByCriteria(criteria, 1, 10);
+			logger.info("Ventas encontradas: {}", results.getTotal());
+			for (VentaDTO venta : results.getPage()) {
+				logger.info(venta);
+			}
+		} catch (Exception e) {
+
+			logger.error("Error en testFindByCriteria: {}", e.getMessage(), e);
+		}
+	}
+
+	public void testCreate() {
+
+		try {
+
+			VentaDTO venta = new VentaDTO();
+
+			venta.setClienteCompradorId(1L);
+			venta.setClienteVendedorId(2L);
+			venta.setEmpleadoId(1L);
+			venta.setCocheId(1L);
+
+			Long id = service.create(venta);
+			logger.info("Venta creada con id {}", id);
+
+		} catch (Exception e) {
+			logger.error("Error en testCreate: {}", e.getMessage(), e);
+		}
+	}
+
+	public void testUpdate() {
+
+		try {
+
+			VentaDTO venta = service.findById(1L);
+
+			if (venta == null) {
+				logger.warn("No existe venta para actualizar");
+				return;
+			}
+
+			boolean updated = service.update(venta);
+			logger.info("Venta actualizada: {}", updated);
+		} catch (Exception e) {
+			logger.error("Error en testUpdate: {}", e.getMessage(), e);
+		}
+	}
+
+	public void testDelete(Long id) {
+
+		try {
+
+			boolean deleted = service.delete(id);
+			logger.info("Venta eliminada: {}", deleted);
+		} catch (Exception e) {
+			logger.error("Error en testDelete {}: {}", id, e.getMessage(), e);
+		}
+	}
+
+	public static void main(String[] args) {
+
+		VentaServiceTest test = new VentaServiceTest();
+
+		test.testFindById(1L);
+		// test.testFindByCriteria();
+		// test.testCreate();
+		// test.testUpdate();
+		// test.testDelete(1L);
+	}
 }
