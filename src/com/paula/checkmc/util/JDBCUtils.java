@@ -17,7 +17,7 @@ public class JDBCUtils {
 		try {
 			// TODO: Pasar a configuracion
 			Class.forName("com.mysql.cj.jdbc.Driver");
-			return DriverManager.getConnection("jdbc:mysql://10.63.11.129:3306/checkmycar", "root", "abc123.");
+			return DriverManager.getConnection("jdbc:mysql://localhost:3306/checkmycar", "root", "abc123.");
 		} catch (Exception e) {
 			logger.fatal(e);
 		}
@@ -43,6 +43,7 @@ public class JDBCUtils {
 
 	/**
 	 * Factoriza el (commit o rollback) + cierre de conexión.
+	 * 
 	 * @param c
 	 * @param commitOrRollback
 	 */
@@ -79,7 +80,7 @@ public class JDBCUtils {
 		if (object instanceof Connection) {
 			close((Connection) object, false);
 		}
-		
+
 	}
 
 }
