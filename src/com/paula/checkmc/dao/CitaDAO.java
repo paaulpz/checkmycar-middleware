@@ -234,7 +234,7 @@ public class CitaDAO {
 			        cita.getFecha(),
 			        cita.getClienteId(),
 			        cita.getCocheId(),
-			        1L);
+			        2L);
 
 			ps.executeUpdate();
 
