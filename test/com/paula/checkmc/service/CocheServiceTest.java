@@ -1,23 +1,31 @@
 package com.paula.checkmc.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.paula.checkmc.model.Coche;
+import com.paula.checkmc.model.CocheCriteria;
+import com.paula.checkmc.model.CocheDTO;
+import com.paula.checkmc.model.Results;
 import com.paula.checkmc.service.impl.CocheServiceImpl;
 
 public class CocheServiceTest {
 
+    private static final Logger logger =
+            LogManager.getLogger(CocheServiceTest.class);
+
     private CocheService service = null;
 
     public CocheServiceTest() {
+
         this.service = new CocheServiceImpl();
     }
 
-  /*
-    public void testCreate() {
-
-        System.out.println("--- Test: CocheService.create ---");
+    public void testCreate() throws Exception {
 
         Coche coche = new Coche();
 
-        coche.setDiagnostico("Revisión general");
+        coche.setDiagnostico("Revision general");
         coche.setMatricula("1234ABC");
         coche.setNumeroBastidor("VF1ABC12345678901");
         coche.setAno(2018);
@@ -33,50 +41,83 @@ public class CocheServiceTest {
         Long id = service.create(coche);
 
         if (id != null) {
-            System.out.println("Coche creado con ID: " + id);
+
+            logger.info("Coche creado correctamente con ID: {}", id);
+
         } else {
-            System.out.println("Error al crear coche");
+
+            logger.warn("Error al crear coche");
         }
     }
 
- 
-   
-    
-    public void testFindByCriteria() {
-
-        System.out.println("\n--- Test: CocheService.findByCriteria ---");
+    public void testFindByCriteria() throws Exception {
 
         CocheCriteria criteria = new CocheCriteria();
 
         criteria.setMatricula("1234ABC");
 
-        List<Coche> resultados = service.findByCriteria(criteria, 0, 10);
+        Results<CocheDTO> results =
+                service.findByCriteria(criteria, 1, 10);
 
-        System.out.println("Resultados encontrados: " + resultados.size());
+        print(results);
     }
 
-   
-    public void testDelete(Long id) {
-
-        System.out.println("\n--- Test: CocheService.delete ---");
+    public void testDelete(Long id) throws Exception {
 
         boolean eliminado = service.delete(id);
 
         if (eliminado) {
-            System.out.println("Coche eliminado correctamente");
+
+            logger.info("Coche eliminado correctamente");
+
         } else {
-            System.out.println("No se pudo eliminar el coche");
+
+            logger.warn("No se pudo eliminar el coche");
         }
     }
-    */
 
-    public static void main(String[] args) {
+    public void testPageFindBy() throws Exception {
+
+        CocheCriteria criteria = new CocheCriteria();
+
+        int pageSize = 5;
+
+        Results<CocheDTO> results = null;
+
+        int from = 1;
+
+        do {
+
+            results = service.findByCriteria(criteria, from, pageSize);
+
+            print(results);
+
+            from = from + pageSize;
+
+        } while (from <= results.getTotal());
+    }
+
+    private void print(Results<CocheDTO> results) {
+
+        logger.info("Imprimiendo página...");
+        logger.info("Total resultados: {}", results.getTotal());
+
+        for (CocheDTO c : results.getPage()) {
+
+            logger.info("{}", c);
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
 
         CocheServiceTest test = new CocheServiceTest();
 
-        
-         //test.testCreate();
-         //test.testFindByCriteria();
-        //test.testDelete(1L);
+        // test.testCreate();
+
+        test.testPageFindBy();
+
+        // test.testFindByCriteria();
+
+        // test.testDelete(1L);
     }
 }

@@ -14,111 +14,144 @@ import com.paula.checkmc.util.JDBCUtils;
 
 public class LocalidadServiceImpl implements LocalidadService {
 
-    private static final Logger logger = LogManager.getLogger(LocalidadServiceImpl.class);
+	private static final Logger logger = LogManager.getLogger(LocalidadServiceImpl.class);
 
-    private LocalidadDAO localidadDAO = new LocalidadDAO();
+	private LocalidadDAO localidadDAO = new LocalidadDAO();
 
-    @Override
-    public Localidad findById(Long id) throws Exception {
+	@Override
+	public Localidad findById(Long id) throws Exception {
 
-        if (id == null || id <= 0) {
-            return null;
-        }
+		if (id == null || id <= 0) {
+			return null;
+		}
 
-        Connection c = null;
+		Connection c = null;
 
-        try {
+		boolean commit = false;
 
-            c = JDBCUtils.getConnection();
+		try {
 
-            return localidadDAO.findById(c, id);
+			c = JDBCUtils.getConnection();
 
-        } catch (Exception e) {
+			c.setAutoCommit(false);
 
-            logger.error("Error buscando localidad {}: {}", id, e.getMessage(), e);
+			Localidad localidad = localidadDAO.findById(c, id);
 
-            throw e;
+			commit = true;
 
-        } finally {
+			return localidad;
 
-            JDBCUtils.close(c, true);
-        }
-    }
+		} catch (Exception e) {
 
-    @Override
-    public List<Localidad> findAll() throws Exception {
+			logger.error("Error buscando localidad {}: {}", id, e.getMessage(), e);
 
-        Connection c = null;
+			throw e;
 
-        try {
+		} finally {
 
-            c = JDBCUtils.getConnection();
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            return localidadDAO.findAll(c);
+	@Override
+	public List<Localidad> findAll() throws Exception {
 
-        } catch (Exception e) {
+		Connection c = null;
 
-            logger.error("Error listando localidades: {}", e.getMessage(), e);
+		boolean commit = false;
 
-            throw e;
+		try {
 
-        } finally {
+			c = JDBCUtils.getConnection();
 
-            JDBCUtils.close(c, true);
-        }
-    }
+			c.setAutoCommit(false);
 
-    @Override
-    public List<Localidad> findByProvincia(Long provinciaId) throws Exception {
+			List<Localidad> localidades = localidadDAO.findAll(c);
 
-        if (provinciaId == null || provinciaId <= 0) {
-            return new ArrayList<>();
-        }
+			commit = true;
 
-        Connection c = null;
+			return localidades;
 
-        try {
+		} catch (Exception e) {
 
-            c = JDBCUtils.getConnection();
+			logger.error("Error listando localidades: {}", e.getMessage(), e);
 
-            return localidadDAO.findByProvince(c, provinciaId);
+			throw e;
 
-        } catch (Exception e) {
+		} finally {
 
-            logger.error("Error buscando localidades provincia {}: {}", provinciaId, e.getMessage(), e);
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            throw e;
+	@Override
+	public List<Localidad> findByProvincia(Long provinciaId) throws Exception {
 
-        } finally {
+		if (provinciaId == null || provinciaId <= 0) {
+			return new ArrayList<>();
+		}
 
-            JDBCUtils.close(c, true);
-        }
-    }
+		Connection c = null;
 
-    @Override
-    public List<Localidad> findByNombre(String nombre) throws Exception {
+		boolean commit = false;
 
-        if (nombre == null || nombre.trim().isEmpty()) {
-            return new ArrayList<>();
-        }
+		try {
 
-        Connection c = null;
+			c = JDBCUtils.getConnection();
 
-        try {
+			c.setAutoCommit(false);
 
-            c = JDBCUtils.getConnection();
+			List<Localidad> localidades = localidadDAO.findByProvince(c, provinciaId);
 
-            return localidadDAO.findByNombre(c, nombre);
+			commit = true;
 
-        } catch (Exception e) {
+			return localidades;
 
-            logger.error("Error buscando localidad nombre {}: {}", nombre, e.getMessage(), e);
+		} catch (Exception e) {
 
-            throw e;
+			logger.error("Error buscando localidades provincia {}: {}", provinciaId, e.getMessage(), e);
 
-        } finally {
+			throw e;
 
-            JDBCUtils.close(c, true);
-        }
-    }
+		} finally {
+
+			JDBCUtils.close(c, commit);
+		}
+	}
+
+	@Override
+	public List<Localidad> findByNombre(String nombre) throws Exception {
+
+		if (nombre == null || nombre.trim().isEmpty()) {
+
+			return new ArrayList<>();
+		}
+
+		Connection c = null;
+
+		boolean commit = false;
+
+		try {
+
+			c = JDBCUtils.getConnection();
+
+			c.setAutoCommit(false);
+
+			List<Localidad> localidades = localidadDAO.findByNombre(c, nombre);
+
+			commit = true;
+
+			return localidades;
+
+		} catch (Exception e) {
+
+			logger.error("Error buscando localidad nombre {}: {}", nombre, e.getMessage(), e);
+
+			throw e;
+
+		} finally {
+
+			JDBCUtils.close(c, commit);
+		}
+	}
 }

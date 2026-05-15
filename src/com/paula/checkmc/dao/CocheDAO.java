@@ -47,26 +47,42 @@ public class CocheDAO {
     	
     }
     
-    public Coche findById(Connection c, Long id) {
+    public Coche findById(Connection c, Long id) throws Exception {
+
         logger.debug("Buscando coche por id: {}", id);
 
         PreparedStatement ps = null;
         ResultSet rs = null;
+
         try {
+
             ps = c.prepareStatement(BASE_SELECT + " WHERE c.id = ? ");
+
             DAOUtils.setParameters(ps, id);
+
             rs = ps.executeQuery();
+
             if (rs.next()) {
+
                 Coche coche = loadNext(rs);
+
                 logger.debug("Coche encontrado: {}", coche);
+
                 return coche;
             }
+
+            return null;
+
         } catch (Exception e) {
+
             logger.error("Error buscando coche id: {}", id, e);
+
+            throw e;
+
         } finally {
-        	JDBCUtils.close(rs, ps);
+
+            JDBCUtils.close(rs, ps);
         }
-        return null;
     }
 
     public Results<CocheDTO> findByCriteria(Connection c, CocheCriteria cr, int from, int pageSize) 

@@ -2,47 +2,57 @@ package com.paula.checkmc.service;
 
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.paula.checkmc.model.Pais;
-import com.paula.checkmc.service.PaisService;
 import com.paula.checkmc.service.impl.PaisServiceImpl;
 
 public class PaisServiceTest {
 
+    private static final Logger logger =
+            LogManager.getLogger(PaisServiceTest.class);
+
     private PaisService service = null;
 
     public PaisServiceTest() {
+
         this.service = new PaisServiceImpl();
     }
 
-    
-    public void testFindById(Long id) {
-
+    public void testFindById(Long id) throws Exception {
 
         Pais pais = service.findById(id);
 
         if (pais != null) {
-            System.out.println("Pais encontrado: " + pais.getNombre());
+
+            logger.info("Id: {}", pais.getId());
+            logger.info("Nombre: {}", pais.getNombre());
+
         } else {
-            System.out.println("No se encontró el pais");
+
+            logger.warn("No se encontró el pais");
         }
     }
 
-   
-    public void testFindAll() {
-
+    public void testFindAll() throws Exception {
 
         List<Pais> paises = service.findAll();
 
-        System.out.println("Paises encontrados: " + paises.size());
+        logger.info("Total paises encontrados: {}", paises.size());
+
+        for (Pais p : paises) {
+
+            logger.info("{} - {}", p.getId(), p.getNombre());
+        }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
         PaisServiceTest test = new PaisServiceTest();
 
-       
         test.testFindById(1L);
 
-        //test.testFindAll();
+        // test.testFindAll();
     }
 }

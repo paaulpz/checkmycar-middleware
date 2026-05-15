@@ -2,20 +2,25 @@ package com.paula.checkmc.service;
 
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.paula.checkmc.model.PresupuestoEmpleado;
 import com.paula.checkmc.service.impl.PresupuestoEmpleadoServiceImpl;
 
 public class PresupuestoEmpleadoServiceTest {
 
+    private static final Logger logger =
+            LogManager.getLogger(PresupuestoEmpleadoServiceTest.class);
+
     private PresupuestoEmpleadoService service = null;
 
     public PresupuestoEmpleadoServiceTest() {
+
         this.service = new PresupuestoEmpleadoServiceImpl();
     }
 
-   
-    public void testCreate() {
-
+    public void testCreate() throws Exception {
 
         PresupuestoEmpleado pe = new PresupuestoEmpleado();
 
@@ -25,46 +30,52 @@ public class PresupuestoEmpleadoServiceTest {
         boolean creado = service.create(pe);
 
         if (creado) {
-            System.out.println("Relación creada correctamente");
+
+            logger.info("Relación creada correctamente");
+
         } else {
-            System.out.println("Error al crear la relación");
+
+            logger.warn("Error al crear la relación");
         }
     }
 
-   
- 
+    public void testFindEmpleadosByPresupuesto(Long presupuestoId) throws Exception {
 
-   
-    public void testFindEmpleadosByPresupuesto(Long presupuestoId) {
+        List<Long> empleados =
+                service.findEmpleadosByPresupuesto(presupuestoId);
 
+        logger.info("Empleados encontrados: {}", empleados.size());
 
-        List<Long> empleados = service.findEmpleadosByPresupuesto(presupuestoId);
+        for (Long id : empleados) {
 
-        System.out.println("Empleados encontrados: " + empleados.size());
+            logger.info("Empleado id: {}", id);
+        }
     }
 
-    public void testDelete(Long empleadoId, Long presupuestoId) {
+    public void testDelete(Long empleadoId, Long presupuestoId) throws Exception {
 
-
-        boolean eliminado = service.delete(empleadoId, presupuestoId);
+        boolean eliminado =
+                service.delete(empleadoId, presupuestoId);
 
         if (eliminado) {
-            System.out.println("Relación eliminada correctamente");
+
+            logger.info("Relación eliminada correctamente");
+
         } else {
-            System.out.println("No se pudo eliminar la relación");
+
+            logger.warn("No se pudo eliminar la relación");
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
-        PresupuestoEmpleadoServiceTest test = new PresupuestoEmpleadoServiceTest();
+        PresupuestoEmpleadoServiceTest test =
+                new PresupuestoEmpleadoServiceTest();
 
         test.testCreate();
 
-        //test.testFindPresupuestosByEmpleado(1L);
+        // test.testFindEmpleadosByPresupuesto(1L);
 
-        //test.testFindEmpleadosByPresupuesto(1L);
-
-        //test.testDelete(1L, 1L);
+        // test.testDelete(1L, 1L);
     }
 }

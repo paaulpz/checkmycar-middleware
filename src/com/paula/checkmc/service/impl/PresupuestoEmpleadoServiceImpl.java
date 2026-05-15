@@ -15,155 +15,162 @@ import com.paula.checkmc.util.JDBCUtils;
 
 public class PresupuestoEmpleadoServiceImpl implements PresupuestoEmpleadoService {
 
-    private static final Logger logger = LogManager.getLogger(PresupuestoEmpleadoServiceImpl.class);
+	private static final Logger logger = LogManager.getLogger(PresupuestoEmpleadoServiceImpl.class);
 
-    private PresupuestoEmpleadoDAO presupuestoEmpleadoDAO = new PresupuestoEmpleadoDAO();
+	private PresupuestoEmpleadoDAO presupuestoEmpleadoDAO = new PresupuestoEmpleadoDAO();
 
-    @Override
-    public boolean create(PresupuestoEmpleado pe) throws Exception {
+	@Override
+	public boolean create(PresupuestoEmpleado pe) throws Exception {
 
-        if (pe == null) {
-            return false;
-        }
+		if (pe == null) {
+			return false;
+		}
 
-        if (pe.getEmpleadoId() == null || pe.getEmpleadoId() <= 0) {
-            return false;
-        }
+		if (pe.getEmpleadoId() == null || pe.getEmpleadoId() <= 0) {
 
-        if (pe.getPresupuestoId() == null || pe.getPresupuestoId() <= 0) {
-            return false;
-        }
+			return false;
+		}
 
-        Connection c = null;
-        boolean commit = false;
+		if (pe.getPresupuestoId() == null || pe.getPresupuestoId() <= 0) {
 
-        try {
+			return false;
+		}
 
-            c = JDBCUtils.getConnection();
-            c.setAutoCommit(false);
+		Connection c = null;
 
-            boolean created = presupuestoEmpleadoDAO.create(c, pe);
+		boolean commit = false;
 
-            commit = true;
+		try {
 
-            return created;
+			c = JDBCUtils.getConnection();
 
-        } catch (Exception e) {
+			c.setAutoCommit(false);
 
-            logger.error("Error creando presupuesto empleado {}: {}", pe, e.getMessage(), e);
+			boolean created = presupuestoEmpleadoDAO.create(c, pe);
 
-            throw e;
+			commit = true;
 
-        } finally {
+			return created;
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+		} catch (Exception e) {
 
-    @Override
-    public boolean delete(Long empleadoId, Long presupuestoId) throws Exception {
+			logger.error("Error creando presupuesto empleado {}: {}", pe, e.getMessage(), e);
 
-        if (empleadoId == null || empleadoId <= 0) {
-            return false;
-        }
+			throw e;
 
-        if (presupuestoId == null || presupuestoId <= 0) {
-            return false;
-        }
+		} finally {
 
-        Connection c = null;
-        boolean commit = false;
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-        try {
+	@Override
+	public boolean delete(Long empleadoId, Long presupuestoId) throws Exception {
 
-            c = JDBCUtils.getConnection();
-            c.setAutoCommit(false);
+		if (empleadoId == null || empleadoId <= 0) {
+			return false;
+		}
 
-            boolean deleted =
-                    presupuestoEmpleadoDAO.delete(c, empleadoId, presupuestoId);
+		if (presupuestoId == null || presupuestoId <= 0) {
+			return false;
+		}
 
-            commit = true;
+		Connection c = null;
 
-            return deleted;
+		boolean commit = false;
 
-        } catch (Exception e) {
+		try {
 
-            logger.error(
-                    "Error eliminando presupuesto empleado {} {}: {}",
-                    empleadoId,
-                    presupuestoId,
-                    e.getMessage(),
-                    e);
+			c = JDBCUtils.getConnection();
 
-            throw e;
+			c.setAutoCommit(false);
 
-        } finally {
+			boolean deleted = presupuestoEmpleadoDAO.delete(c, empleadoId, presupuestoId);
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+			commit = true;
 
-    @Override
-    public List<Empleado> findPresupuestosByEmpleado(Long empleadoId)
-            throws Exception {
+			return deleted;
 
-        if (empleadoId == null || empleadoId <= 0) {
-            return new ArrayList<>();
-        }
+		} catch (Exception e) {
 
-        Connection c = null;
+			logger.error("Error eliminando presupuesto empleado {} {}: {}", empleadoId, presupuestoId, e.getMessage(),
+					e);
 
-        try {
+			throw e;
 
-            c = JDBCUtils.getConnection();
+		} finally {
 
-            return presupuestoEmpleadoDAO.findPresupuestosByEmpleado(c, empleadoId);
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-        } catch (Exception e) {
+	@Override
+	public List<Empleado> findPresupuestosByEmpleado(Long empleadoId) throws Exception {
 
-            logger.error(
-                    "Error buscando presupuestos empleado {}: {}",
-                    empleadoId,
-                    e.getMessage(),
-                    e);
+		if (empleadoId == null || empleadoId <= 0) {
+			return new ArrayList<>();
+		}
 
-            throw e;
+		Connection c = null;
 
-        } finally {
+		boolean commit = false;
 
-            JDBCUtils.close(c, true);
-        }
-    }
+		try {
 
-    @Override
-    public List<Long> findEmpleadosByPresupuesto(Long presupuestoId)
-            throws Exception {
+			c = JDBCUtils.getConnection();
 
-        if (presupuestoId == null || presupuestoId <= 0) {
-            return new ArrayList<>();
-        }
+			c.setAutoCommit(false);
 
-        Connection c = null;
+			List<Empleado> empleados = presupuestoEmpleadoDAO.findPresupuestosByEmpleado(c, empleadoId);
 
-        try {
+			commit = true;
 
-            c = JDBCUtils.getConnection();
+			return empleados;
 
-            return presupuestoEmpleadoDAO.findEmpleadosByPresupuesto(c, presupuestoId);
+		} catch (Exception e) {
 
-        } catch (Exception e) {
+			logger.error("Error buscando presupuestos empleado {}: {}", empleadoId, e.getMessage(), e);
 
-            logger.error(
-                    "Error buscando empleados presupuesto {}: {}",
-                    presupuestoId,
-                    e.getMessage(),
-                    e);
+			throw e;
 
-            throw e;
+		} finally {
 
-        } finally {
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            JDBCUtils.close(c, true);
-        }
-    }
+	@Override
+	public List<Long> findEmpleadosByPresupuesto(Long presupuestoId) throws Exception {
+
+		if (presupuestoId == null || presupuestoId <= 0) {
+			return new ArrayList<>();
+		}
+
+		Connection c = null;
+
+		boolean commit = false;
+
+		try {
+
+			c = JDBCUtils.getConnection();
+
+			c.setAutoCommit(false);
+
+			List<Long> empleados = presupuestoEmpleadoDAO.findEmpleadosByPresupuesto(c, presupuestoId);
+
+			commit = true;
+
+			return empleados;
+
+		} catch (Exception e) {
+
+			logger.error("Error buscando empleados presupuesto {}: {}", presupuestoId, e.getMessage(), e);
+
+			throw e;
+
+		} finally {
+
+			JDBCUtils.close(c, commit);
+		}
+	}
 }

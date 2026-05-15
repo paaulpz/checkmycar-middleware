@@ -17,299 +17,163 @@ import com.paula.checkmc.util.JDBCUtils;
 
 public class EmpleadoServiceImpl implements EmpleadoService {
 
-    private static final Logger logger = LogManager.getLogger(EmpleadoServiceImpl.class);
+	private static final Logger logger = LogManager.getLogger(EmpleadoServiceImpl.class);
 
-    private EmpleadoDAO empleadoDAO = new EmpleadoDAO();
-    private EncryptionService encryptionService = new EncryptionServiceImpl();
-    private MailService mailService = new MailServiceApacheImpl();
+	private EmpleadoDAO empleadoDAO = new EmpleadoDAO();
 
-    @Override
-    public Empleado findById(Long id) throws Exception {
+	private EncryptionService encryptionService = new EncryptionServiceImpl();
 
-        if (id == null || id <= 0) {
-            return null;
-        }
+	private MailService mailService = new MailServiceApacheImpl();
 
-        Connection c = null;
+	@Override
+	public Empleado findById(Long id) throws Exception {
 
-        try {
+		if (id == null || id <= 0) {
+			return null;
+		}
 
-            c = JDBCUtils.getConnection();
+		Connection c = null;
 
-            return empleadoDAO.findById(c, id);
+		boolean commit = false;
 
-        } catch (Exception e) {
+		try {
 
-            logger.error("Error buscando empleado {}: {}", id, e.getMessage(), e);
+			c = JDBCUtils.getConnection();
 
-            throw e;
+			c.setAutoCommit(false);
 
-        } finally {
+			Empleado empleado = empleadoDAO.findById(c, id);
 
-            JDBCUtils.close(c, true);
-        }
-    }
+			commit = true;
 
-    @Override
-    public Results<EmpleadoDTO> findByCriteria(EmpleadoCriteria criteria, int from, int pageSize)
-            throws Exception {
+			return empleado;
 
-        Connection c = null;
-        boolean commit = false;
+		} catch (Exception e) {
 
-        try {
+			logger.error("Error buscando empleado {}: {}", id, e.getMessage(), e);
 
-            c = JDBCUtils.getConnection();
-            c.setAutoCommit(false);
+			throw e;
 
-            Results<EmpleadoDTO> results =
-                    empleadoDAO.findByCriteria(c, criteria, from, pageSize);
+		} finally {
 
-            commit = true;
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            return results;
+	@Override
+	public Results<EmpleadoDTO> findByCriteria(EmpleadoCriteria criteria, int from, int pageSize) throws Exception {
 
-        } catch (Exception e) {
+		Connection c = null;
 
-            logger.error("Buscando {}: {}", criteria, e.getMessage(), e);
+		boolean commit = false;
 
-            throw e;
+		try {
 
-        } finally {
+			c = JDBCUtils.getConnection();
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+			c.setAutoCommit(false);
 
-    @Override
-    public Long create(Empleado empleado) throws Exception {
+			Results<EmpleadoDTO> results = empleadoDAO.findByCriteria(c, criteria, from, pageSize);
 
-        Connection c = null;
-        boolean commit = false;
+			commit = true;
 
-        try {
+			return results;
 
-            c = JDBCUtils.getConnection();
-            c.setAutoCommit(false);
+		} catch (Exception e) {
 
-            Long id = empleadoDAO.create(c, empleado);
+			logger.error("Buscando {}: {}", criteria, e.getMessage(), e);
 
-            commit = true;
+			throw e;
 
-            return id;
+		} finally {
 
-        } catch (Exception e) {
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            logger.error("Creando {}: {}", empleado, e.getMessage(), e);
+	@Override
+	public Long create(Empleado empleado) throws Exception {
 
-            throw e;
+		Connection c = null;
 
-        } finally {
+		boolean commit = false;
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+		try {
 
-    @Override
-    public boolean update(Empleado empleado) throws Exception {
+			c = JDBCUtils.getConnection();
 
-        if (empleado.getId() == null || empleado.getId() <= 0) {
-            return false;
-        }
+			c.setAutoCommit(false);
 
-        Connection c = null;
-        boolean commit = false;
+			Long id = empleadoDAO.create(c, empleado);
 
-        try {
+			commit = true;
 
-            c = JDBCUtils.getConnection();
-            c.setAutoCommit(false);
+			return id;
 
-            boolean updated = empleadoDAO.update(c, empleado);
+		} catch (Exception e) {
 
-            commit = true;
+			logger.error("Creando {}: {}", empleado, e.getMessage(), e);
 
-            return updated;
+			throw e;
 
-        } catch (Exception e) {
+		} finally {
 
-            logger.error("Actualizando {}: {}", empleado, e.getMessage(), e);
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            throw e;
+	@Override
+	public boolean update(Empleado empleado) throws Exception {
 
-        } finally {
+		if (empleado.getId() == null || empleado.getId() <= 0) {
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+			return false;
+		}
 
-    @Override
-    public boolean delete(Long id) throws Exception {
+		Connection c = null;
 
-        if (id == null || id <= 0) {
-            return false;
-        }
+		boolean commit = false;
 
-        Connection c = null;
-        boolean commit = false;
+		try {
 
-        try {
+			c = JDBCUtils.getConnection();
 
-            c = JDBCUtils.getConnection();
-            c.setAutoCommit(false);
+			c.setAutoCommit(false);
 
-            boolean deleted = empleadoDAO.delete(c, id);
+			boolean updated = empleadoDAO.update(c, empleado);
 
-            commit = true;
+			commit = true;
 
-            return deleted;
+			return updated;
 
-        } catch (Exception e) {
+		} catch (Exception e) {
 
-            logger.error("Error eliminando empleado {}: {}", id, e.getMessage(), e);
+			logger.error("Actualizando {}: {}", empleado, e.getMessage(), e);
 
-            throw e;
+			throw e;
 
-        } finally {
+		} finally {
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+			JDBCUtils.close(c, commit);
 
-    @Override
-    public Long register(Empleado empleado) throws Exception {
+		}
+	}
 
-        logger.info("Registrando empleado: {}", empleado);
+	@Override
+	public Long register(Empleado empleado) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-        if (empleado == null) {
+	@Override
+	public boolean delete(Long id) throws Exception {
+		// TODO Auto-generated method stub
+		return false;
+	}
 
-            logger.warn("Empleado null");
-
-            return null;
-        }
-
-        if (empleado.getPassword() == null
-                || empleado.getPassword().trim().isEmpty()) {
-
-            logger.warn("Password invalida");
-
-            return null;
-        }
-
-        if (empleado.getEmail() != null) {
-            empleado.setEmail(empleado.getEmail().trim());
-        }
-
-        if (empleado.getNombre() != null) {
-            empleado.setNombre(empleado.getNombre().trim());
-        }
-
-        if (empleado.getPrimerApellido() != null) {
-            empleado.setPrimerApellido(empleado.getPrimerApellido().trim());
-        }
-
-        String passwordEncriptada =
-                encryptionService.encrypt(empleado.getPassword().trim());
-
-        empleado.setPassword(passwordEncriptada);
-
-        Connection c = null;
-        boolean commit = false;
-
-        try {
-
-            c = JDBCUtils.getConnection();
-            c.setAutoCommit(false);
-
-            Long id = empleadoDAO.create(c, empleado);
-
-            if (id != null) {
-
-                try {
-
-                    mailService.sendEmail(
-                            empleado.getEmail(),
-                            "Bienvenido a CheckMyCar",
-                            "Hola " + empleado.getNombre()
-                                    + ", tu cuenta de empleado ha sido creada correctamente.",
-                            "®Desde hoy perteneces al equipo de checkmycar");
-
-                } catch (Exception e) {
-
-                    logger.warn("Error enviando email a {}", empleado.getEmail());
-                }
-
-                commit = true;
-
-                logger.info("Empleado registrado con id: {}", id);
-
-                return id;
-            }
-
-        } catch (Exception e) {
-
-            logger.error("Error registrando empleado {}: {}", empleado, e.getMessage(), e);
-
-            throw e;
-
-        } finally {
-
-            JDBCUtils.close(c, commit);
-        }
-
-        logger.error("No se pudo registrar el empleado");
-
-        return null;
-    }
-
-    @Override
-    public EmpleadoDTO login(String dni, String password, Long rolId) throws Exception {
-
-        Connection c = null;
-
-        try {
-
-            c = JDBCUtils.getConnection();
-
-            Empleado empleado = empleadoDAO.findByEmail(c, dni);
-
-            if (empleado == null) {
-                return null;
-            }
-
-            boolean loginCorrecto =
-                    empleadoDAO.login(c, dni, password, rolId);
-
-            if (!loginCorrecto) {
-                return null;
-            }
-
-            EmpleadoCriteria criteria = new EmpleadoCriteria();
-
-            criteria.setDniNie(dni);
-            criteria.setRolId(rolId);
-
-            Results<EmpleadoDTO> resultados =
-                    empleadoDAO.findByCriteria(c, criteria, 1, 1);
-
-            if (resultados != null
-                    && resultados.getPage() != null
-                    && !resultados.getPage().isEmpty()) {
-
-                return resultados.getPage().get(0);
-            }
-
-        } catch (Exception e) {
-
-            logger.error("Error login empleado {}: {}", dni, e.getMessage(), e);
-
-            throw e;
-
-        } finally {
-
-            JDBCUtils.close(c, true);
-        }
-
-        return null;
-    }
+	@Override
+	public EmpleadoDTO login(String dni, String password, Long rolId) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

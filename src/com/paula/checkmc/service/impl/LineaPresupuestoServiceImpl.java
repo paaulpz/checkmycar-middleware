@@ -15,154 +15,175 @@ import com.paula.checkmc.util.JDBCUtils;
 
 public class LineaPresupuestoServiceImpl implements LineaPresupuestoService {
 
-    private static final Logger logger = LogManager.getLogger(LineaPresupuestoServiceImpl.class);
+	private static final Logger logger = LogManager.getLogger(LineaPresupuestoServiceImpl.class);
 
-    private LineaPresupuestoDAO lineaPresupuestoDAO = new LineaPresupuestoDAO();
+	private LineaPresupuestoDAO lineaPresupuestoDAO = new LineaPresupuestoDAO();
 
-    @Override
-    public List<LineaPresupuestoDTO> findByPresupuesto(Long presupuestoId) throws Exception {
+	@Override
+	public List<LineaPresupuestoDTO> findByPresupuesto(Long presupuestoId) throws Exception {
 
-        if (presupuestoId == null || presupuestoId <= 0) {
-            return new ArrayList<>();
-        }
+		if (presupuestoId == null || presupuestoId <= 0) {
 
-        Connection c = null;
+			return new ArrayList<>();
+		}
 
-        try {
+		Connection c = null;
 
-            c = JDBCUtils.getConnection();
+		boolean commit = false;
 
-            List<LineaPresupuesto> lineas =
-                    lineaPresupuestoDAO.findByPresupuesto(c, presupuestoId);
+		try {
 
-            List<LineaPresupuestoDTO> res = new ArrayList<>();
+			c = JDBCUtils.getConnection();
 
-            for (LineaPresupuesto l : lineas) {
+			c.setAutoCommit(false);
 
-                LineaPresupuestoDTO dto = new LineaPresupuestoDTO();
+			List<LineaPresupuesto> lineas = lineaPresupuestoDAO.findByPresupuesto(c, presupuestoId);
 
-                dto.setId(l.getId());
-                dto.setUnidades(l.getUnidades());
-                dto.setPrecioUnitario(l.getPrecioUnitario());
-                dto.setPrecioFinal(l.getPrecioFinal());
-                dto.setPiezaId(l.getPiezaId());
-                dto.setPresupuestoId(l.getPresupuestoId());
+			List<LineaPresupuestoDTO> res = new ArrayList<>();
 
-                res.add(dto);
-            }
+			for (LineaPresupuesto l : lineas) {
 
-            return res;
+				LineaPresupuestoDTO dto = new LineaPresupuestoDTO();
 
-        } catch (Exception e) {
+				dto.setId(l.getId());
 
-            logger.error("Error buscando lineas presupuesto {}: {}", presupuestoId, e.getMessage(), e);
+				dto.setUnidades(l.getUnidades());
 
-            throw e;
+				dto.setPrecioUnitario(l.getPrecioUnitario());
 
-        } finally {
+				dto.setPrecioFinal(l.getPrecioFinal());
 
-            JDBCUtils.close(c, true);
-        }
-    }
+				dto.setPiezaId(l.getPiezaId());
 
-    @Override
-    public Long create(LineaPresupuestoDTO dto) throws Exception {
+				dto.setPresupuestoId(l.getPresupuestoId());
 
-        if (!validar(dto)) {
-            return null;
-        }
+				res.add(dto);
+			}
 
-        Connection c = null;
-        boolean commit = false;
+			commit = true;
 
-        try {
+			return res;
 
-            c = JDBCUtils.getConnection();
-            c.setAutoCommit(false);
+		} catch (Exception e) {
 
-            dto.setPrecioFinal(dto.getUnidades() * dto.getPrecioUnitario());
+			logger.error("Error buscando lineas presupuesto {}: {}", presupuestoId, e.getMessage(), e);
 
-            LineaPresupuesto l = new LineaPresupuesto();
+			throw e;
 
-            l.setUnidades(dto.getUnidades());
-            l.setPrecioUnitario(dto.getPrecioUnitario());
-            l.setPrecioFinal(dto.getPrecioFinal());
-            l.setPiezaId(dto.getPiezaId());
-            l.setPresupuestoId(dto.getPresupuestoId());
+		} finally {
 
-            Long id = lineaPresupuestoDAO.create(c, l);
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            commit = true;
+	@Override
+	public Long create(LineaPresupuestoDTO dto) throws Exception {
 
-            return id;
+		if (!validar(dto)) {
+			return null;
+		}
 
-        } catch (Exception e) {
+		Connection c = null;
 
-            logger.error("Error creando linea presupuesto {}: {}", dto, e.getMessage(), e);
+		boolean commit = false;
 
-            throw e;
+		try {
 
-        } finally {
+			c = JDBCUtils.getConnection();
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+			c.setAutoCommit(false);
 
-    @Override
-    public boolean delete(Long id) throws Exception {
+			dto.setPrecioFinal(dto.getUnidades() * dto.getPrecioUnitario());
 
-        if (id == null || id <= 0) {
-            return false;
-        }
+			LineaPresupuesto l = new LineaPresupuesto();
 
-        Connection c = null;
-        boolean commit = false;
+			l.setUnidades(dto.getUnidades());
 
-        try {
+			l.setPrecioUnitario(dto.getPrecioUnitario());
 
-            c = JDBCUtils.getConnection();
-            c.setAutoCommit(false);
+			l.setPrecioFinal(dto.getPrecioFinal());
 
-            boolean deleted = lineaPresupuestoDAO.delete(c, id);
+			l.setPiezaId(dto.getPiezaId());
 
-            commit = true;
+			l.setPresupuestoId(dto.getPresupuestoId());
 
-            return deleted;
+			Long id = lineaPresupuestoDAO.create(c, l);
 
-        } catch (Exception e) {
+			commit = true;
 
-            logger.error("Error eliminando linea presupuesto {}: {}", id, e.getMessage(), e);
+			return id;
 
-            throw e;
+		} catch (Exception e) {
 
-        } finally {
+			logger.error("Error creando linea presupuesto {}: {}", dto, e.getMessage(), e);
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+			throw e;
 
-    private boolean validar(LineaPresupuestoDTO l) {
+		} finally {
 
-        if (l == null) {
-            return false;
-        }
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-        if (l.getUnidades() == null || l.getUnidades() <= 0) {
-            return false;
-        }
+	@Override
+	public boolean delete(Long id) throws Exception {
 
-        if (l.getPrecioUnitario() == null || l.getPrecioUnitario() < 0) {
-            return false;
-        }
+		if (id == null || id <= 0) {
+			return false;
+		}
 
-        if (l.getPiezaId() == null) {
-            return false;
-        }
+		Connection c = null;
 
-        if (l.getPresupuestoId() == null) {
-            return false;
-        }
+		boolean commit = false;
 
-        return true;
-    }
+		try {
+
+			c = JDBCUtils.getConnection();
+
+			c.setAutoCommit(false);
+
+			boolean deleted = lineaPresupuestoDAO.delete(c, id);
+
+			commit = true;
+
+			return deleted;
+
+		} catch (Exception e) {
+
+			logger.error("Error eliminando linea presupuesto {}: {}", id, e.getMessage(), e);
+
+			throw e;
+
+		} finally {
+
+			JDBCUtils.close(c, commit);
+		}
+	}
+
+	private boolean validar(LineaPresupuestoDTO l) {
+
+		if (l == null) {
+			return false;
+		}
+
+		if (l.getUnidades() == null || l.getUnidades() <= 0) {
+
+			return false;
+		}
+
+		if (l.getPrecioUnitario() == null || l.getPrecioUnitario() < 0) {
+
+			return false;
+		}
+
+		if (l.getPiezaId() == null) {
+			return false;
+		}
+
+		if (l.getPresupuestoId() == null) {
+			return false;
+		}
+
+		return true;
+	}
 }

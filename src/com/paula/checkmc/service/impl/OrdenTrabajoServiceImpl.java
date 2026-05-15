@@ -15,235 +15,247 @@ import com.paula.checkmc.util.JDBCUtils;
 
 public class OrdenTrabajoServiceImpl implements OrdenTrabajoService {
 
-    private static final Logger logger = LogManager.getLogger(OrdenTrabajoServiceImpl.class);
+	private static final Logger logger = LogManager.getLogger(OrdenTrabajoServiceImpl.class);
 
-    private OrdenTrabajoDAO ordenTrabajoDAO = new OrdenTrabajoDAO();
+	private OrdenTrabajoDAO ordenTrabajoDAO = new OrdenTrabajoDAO();
 
-    @Override
-    public OrdenTrabajoDTO findById(Long id) throws Exception {
+	@Override
+	public OrdenTrabajoDTO findById(Long id) throws Exception {
 
-        if (id == null || id <= 0) {
-            return null;
-        }
+		if (id == null || id <= 0) {
+			return null;
+		}
 
-        Connection c = null;
+		Connection c = null;
 
-        try {
+		boolean commit = false;
 
-            c = JDBCUtils.getConnection();
+		try {
 
-            OrdenTrabajo ot = ordenTrabajoDAO.findById(c, id);
+			c = JDBCUtils.getConnection();
 
-            return ot != null ? toDTO(ot) : null;
+			c.setAutoCommit(false);
 
-        } catch (Exception e) {
+			OrdenTrabajo ot = ordenTrabajoDAO.findById(c, id);
 
-            logger.error("Error buscando orden trabajo {}: {}", id, e.getMessage(), e);
+			commit = true;
 
-            throw e;
+			return ot != null ? toDTO(ot) : null;
 
-        } finally {
+		} catch (Exception e) {
 
-            JDBCUtils.close(c, true);
-        }
-    }
+			logger.error("Error buscando orden trabajo {}: {}", id, e.getMessage(), e);
 
-    @Override
-    public Results<OrdenTrabajoDTO> findByCriteria(OrdenTrabajoCriteria criteria, int from, int pageSize)
-            throws Exception {
+			throw e;
 
-        Connection c = null;
-        boolean commit = false;
+		} finally {
 
-        try {
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            c = JDBCUtils.getConnection();
-            c.setAutoCommit(false);
+	@Override
+	public Results<OrdenTrabajoDTO> findByCriteria(OrdenTrabajoCriteria criteria, int from, int pageSize)
+			throws Exception {
 
-            Results<OrdenTrabajoDTO> results =
-                    ordenTrabajoDAO.findByCriteria(c, criteria, from, pageSize);
+		Connection c = null;
 
-            commit = true;
+		boolean commit = false;
 
-            return results;
+		try {
 
-        } catch (Exception e) {
+			c = JDBCUtils.getConnection();
 
-            logger.error("Buscando {}: {}", criteria, e.getMessage(), e);
+			c.setAutoCommit(false);
 
-            throw e;
+			Results<OrdenTrabajoDTO> results = ordenTrabajoDAO.findByCriteria(c, criteria, from, pageSize);
 
-        } finally {
+			commit = true;
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+			return results;
 
-    @Override
-    public Long create(OrdenTrabajoDTO dto) throws Exception {
+		} catch (Exception e) {
 
-        if (!validarOrden(dto)) {
-            return null;
-        }
+			logger.error("Buscando {}: {}", criteria, e.getMessage(), e);
 
-        Connection c = null;
-        boolean commit = false;
+			throw e;
 
-        try {
+		} finally {
 
-            c = JDBCUtils.getConnection();
-            c.setAutoCommit(false);
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            OrdenTrabajo ot = toEntity(dto);
+	@Override
+	public Long create(OrdenTrabajoDTO dto) throws Exception {
 
-            Long id = ordenTrabajoDAO.create(c, ot);
+		if (!validarOrden(dto)) {
+			return null;
+		}
 
-            commit = true;
+		Connection c = null;
 
-            return id;
+		boolean commit = false;
 
-        } catch (Exception e) {
+		try {
 
-            logger.error("Creando orden trabajo {}: {}", dto, e.getMessage(), e);
+			c = JDBCUtils.getConnection();
 
-            throw e;
+			c.setAutoCommit(false);
 
-        } finally {
+			OrdenTrabajo ot = toEntity(dto);
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+			Long id = ordenTrabajoDAO.create(c, ot);
 
-    @Override
-    public boolean update(OrdenTrabajoDTO dto) throws Exception {
+			commit = true;
 
-        if (dto == null || dto.getId() == null || dto.getId() <= 0) {
-            return false;
-        }
+			return id;
 
-        if (!validarOrden(dto)) {
-            return false;
-        }
+		} catch (Exception e) {
 
-        Connection c = null;
-        boolean commit = false;
+			logger.error("Creando orden trabajo {}: {}", dto, e.getMessage(), e);
 
-        try {
+			throw e;
 
-            c = JDBCUtils.getConnection();
-            c.setAutoCommit(false);
+		} finally {
 
-            OrdenTrabajo ot = toEntity(dto);
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            boolean updated = ordenTrabajoDAO.update(c, ot);
+	@Override
+	public boolean update(OrdenTrabajoDTO dto) throws Exception {
 
-            commit = true;
+		if (dto == null || dto.getId() == null || dto.getId() <= 0) {
 
-            return updated;
+			return false;
+		}
 
-        } catch (Exception e) {
+		if (!validarOrden(dto)) {
+			return false;
+		}
 
-            logger.error("Actualizando orden trabajo {}: {}", dto, e.getMessage(), e);
+		Connection c = null;
 
-            throw e;
+		boolean commit = false;
 
-        } finally {
+		try {
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+			c = JDBCUtils.getConnection();
 
-    @Override
-    public boolean delete(Long id) throws Exception {
+			c.setAutoCommit(false);
 
-        if (id == null || id <= 0) {
-            return false;
-        }
+			OrdenTrabajo ot = toEntity(dto);
 
-        Connection c = null;
-        boolean commit = false;
+			boolean updated = ordenTrabajoDAO.update(c, ot);
 
-        try {
+			commit = true;
 
-            c = JDBCUtils.getConnection();
-            c.setAutoCommit(false);
+			return updated;
 
-            boolean deleted = ordenTrabajoDAO.delete(c, id);
+		} catch (Exception e) {
 
-            commit = true;
+			logger.error("Actualizando orden trabajo {}: {}", dto, e.getMessage(), e);
 
-            return deleted;
+			throw e;
 
-        } catch (Exception e) {
+		} finally {
 
-            logger.error("Error eliminando orden trabajo {}: {}", id, e.getMessage(), e);
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            throw e;
+	@Override
+	public boolean delete(Long id) throws Exception {
 
-        } finally {
+		if (id == null || id <= 0) {
+			return false;
+		}
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+		Connection c = null;
 
-    private OrdenTrabajoDTO toDTO(OrdenTrabajo ot) {
+		boolean commit = false;
 
-        OrdenTrabajoDTO dto = new OrdenTrabajoDTO();
+		try {
 
-        dto.setId(ot.getId());
-        dto.setDiagnostico(ot.getDiagnostico());
-        dto.setFechaInicio(ot.getFechaInicio());
-        dto.setFechaFin(ot.getFechaFin());
-        dto.setPresupuestoId(ot.getPresupuestoId());
-        dto.setCocheId(ot.getCocheId());
+			c = JDBCUtils.getConnection();
 
-        return dto;
-    }
+			c.setAutoCommit(false);
 
-    private OrdenTrabajo toEntity(OrdenTrabajoDTO dto) {
+			boolean deleted = ordenTrabajoDAO.delete(c, id);
 
-        OrdenTrabajo ot = new OrdenTrabajo();
+			commit = true;
 
-        ot.setId(dto.getId());
-        ot.setDiagnostico(dto.getDiagnostico());
-        ot.setFechaInicio(dto.getFechaInicio());
-        ot.setFechaFin(dto.getFechaFin());
-        ot.setPresupuestoId(dto.getPresupuestoId());
-        ot.setCocheId(dto.getCocheId());
+			return deleted;
 
-        return ot;
-    }
+		} catch (Exception e) {
 
-    private boolean validarOrden(OrdenTrabajoDTO orden) {
+			logger.error("Error eliminando orden trabajo {}: {}", id, e.getMessage(), e);
 
-        if (orden == null) {
-            return false;
-        }
+			throw e;
 
-        if (orden.getDiagnostico() == null
-                || orden.getDiagnostico().trim().isEmpty()) {
+		} finally {
 
-            return false;
-        }
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-        if (orden.getFechaInicio() == null) {
-            return false;
-        }
+	private OrdenTrabajoDTO toDTO(OrdenTrabajo ot) {
 
-        if (orden.getFechaFin() != null
-                && orden.getFechaFin().isBefore(orden.getFechaInicio())) {
+		OrdenTrabajoDTO dto = new OrdenTrabajoDTO();
 
-            return false;
-        }
+		dto.setId(ot.getId());
+		dto.setDiagnostico(ot.getDiagnostico());
+		dto.setFechaInicio(ot.getFechaInicio());
+		dto.setFechaFin(ot.getFechaFin());
+		dto.setPresupuestoId(ot.getPresupuestoId());
+		dto.setCocheId(ot.getCocheId());
 
-        if (orden.getPresupuestoId() == null) {
-            return false;
-        }
+		return dto;
+	}
 
-        if (orden.getCocheId() == null) {
-            return false;
-        }
+	private OrdenTrabajo toEntity(OrdenTrabajoDTO dto) {
 
-        return true;
-    }
+		OrdenTrabajo ot = new OrdenTrabajo();
+
+		ot.setId(dto.getId());
+		ot.setDiagnostico(dto.getDiagnostico());
+		ot.setFechaInicio(dto.getFechaInicio());
+		ot.setFechaFin(dto.getFechaFin());
+		ot.setPresupuestoId(dto.getPresupuestoId());
+		ot.setCocheId(dto.getCocheId());
+
+		return ot;
+	}
+
+	private boolean validarOrden(OrdenTrabajoDTO orden) {
+
+		if (orden == null) {
+			return false;
+		}
+
+		if (orden.getDiagnostico() == null || orden.getDiagnostico().trim().isEmpty()) {
+
+			return false;
+		}
+
+		if (orden.getFechaInicio() == null) {
+			return false;
+		}
+
+		if (orden.getFechaFin() != null && orden.getFechaFin().isBefore(orden.getFechaInicio())) {
+
+			return false;
+		}
+
+		if (orden.getPresupuestoId() == null) {
+			return false;
+		}
+
+		if (orden.getCocheId() == null) {
+			return false;
+		}
+
+		return true;
+	}
 }

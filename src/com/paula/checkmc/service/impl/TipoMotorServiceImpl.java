@@ -13,57 +13,73 @@ import com.paula.checkmc.util.JDBCUtils;
 
 public class TipoMotorServiceImpl implements TipoMotorService {
 
-    private static final Logger logger = LogManager.getLogger(TipoMotorServiceImpl.class);
+	private static final Logger logger = LogManager.getLogger(TipoMotorServiceImpl.class);
 
-    private TipoMotorDAO tipoMotorDAO = new TipoMotorDAO();
+	private TipoMotorDAO tipoMotorDAO = new TipoMotorDAO();
 
-    @Override
-    public TipoMotor findById(Long id) throws Exception {
+	@Override
+	public TipoMotor findById(Long id) throws Exception {
 
-        if (id == null || id <= 0) {
-            return null;
-        }
+		if (id == null || id <= 0) {
+			return null;
+		}
 
-        Connection c = null;
+		Connection c = null;
 
-        try {
+		boolean commit = false;
 
-            c = JDBCUtils.getConnection();
+		try {
 
-            return tipoMotorDAO.findById(c, id);
+			c = JDBCUtils.getConnection();
 
-        } catch (Exception e) {
+			c.setAutoCommit(false);
 
-            logger.error("Error buscando tipo motor {}: {}", id, e.getMessage(), e);
+			TipoMotor tipoMotor = tipoMotorDAO.findById(c, id);
 
-            throw e;
+			commit = true;
 
-        } finally {
+			return tipoMotor;
 
-            JDBCUtils.close(c, true);
-        }
-    }
+		} catch (Exception e) {
 
-    @Override
-    public List<TipoMotor> findAll() throws Exception {
+			logger.error("Error buscando tipo motor {}: {}", id, e.getMessage(), e);
 
-        Connection c = null;
+			throw e;
 
-        try {
+		} finally {
 
-            c = JDBCUtils.getConnection();
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            return tipoMotorDAO.findAll(c);
+	@Override
+	public List<TipoMotor> findAll() throws Exception {
 
-        } catch (Exception e) {
+		Connection c = null;
 
-            logger.error("Error listando tipos motor: {}", e.getMessage(), e);
+		boolean commit = false;
 
-            throw e;
+		try {
 
-        } finally {
+			c = JDBCUtils.getConnection();
 
-            JDBCUtils.close(c, true);
-        }
-    }
+			c.setAutoCommit(false);
+
+			List<TipoMotor> tiposMotor = tipoMotorDAO.findAll(c);
+
+			commit = true;
+
+			return tiposMotor;
+
+		} catch (Exception e) {
+
+			logger.error("Error listando tipos motor: {}", e.getMessage(), e);
+
+			throw e;
+
+		} finally {
+
+			JDBCUtils.close(c, commit);
+		}
+	}
 }

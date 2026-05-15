@@ -16,235 +16,249 @@ import com.paula.checkmc.util.JDBCUtils;
 
 public class PresupuestoServiceImpl implements PresupuestoService {
 
-    private static final Logger logger = LogManager.getLogger(PresupuestoServiceImpl.class);
+	private static final Logger logger = LogManager.getLogger(PresupuestoServiceImpl.class);
 
-    private PresupuestoDAO presupuestoDAO = new PresupuestoDAO();
+	private PresupuestoDAO presupuestoDAO = new PresupuestoDAO();
 
-    @Override
-    public PresupuestoDTO findById(Long id) throws Exception {
+	@Override
+	public PresupuestoDTO findById(Long id) throws Exception {
 
-        if (id == null || id <= 0) {
-            return null;
-        }
+		if (id == null || id <= 0) {
+			return null;
+		}
 
-        Connection c = null;
+		Connection c = null;
 
-        try {
+		boolean commit = false;
 
-            c = JDBCUtils.getConnection();
+		try {
 
-            Presupuesto p = presupuestoDAO.findById(c, id);
+			c = JDBCUtils.getConnection();
 
-            if (p == null) {
-                return null;
-            }
+			c.setAutoCommit(false);
 
-            PresupuestoDTO dto = new PresupuestoDTO();
+			Presupuesto p = presupuestoDAO.findById(c, id);
 
-            dto.setId(p.getId());
-            dto.setFecha(p.getFecha());
-            dto.setPrecioFinal(p.getPrecioFinal());
-            dto.setClienteId(p.getClienteId());
-            dto.setEstadoPresupuestoId(p.getEstadoPresupuestoId());
-            dto.setNombre(p.getNombre());
+			if (p == null) {
+				return null;
+			}
 
-            return dto;
+			PresupuestoDTO dto = new PresupuestoDTO();
 
-        } catch (Exception e) {
+			dto.setId(p.getId());
+			dto.setFecha(p.getFecha());
+			dto.setPrecioFinal(p.getPrecioFinal());
+			dto.setClienteId(p.getClienteId());
+			dto.setEstadoPresupuestoId(p.getEstadoPresupuestoId());
+			dto.setNombre(p.getNombre());
 
-            logger.error("Error buscando presupuesto {}: {}", id, e.getMessage(), e);
+			commit = true;
 
-            throw e;
+			return dto;
 
-        } finally {
+		} catch (Exception e) {
 
-            JDBCUtils.close(c, true);
-        }
-    }
+			logger.error("Error buscando presupuesto {}: {}", id, e.getMessage(), e);
 
-    @Override
-    public Results<PresupuestoDTO> findByCriteria(
-            PresupuestoCriteria criteria,
-            int from,
-            int pageSize) throws Exception {
+			throw e;
 
-        Connection c = null;
-        boolean commit = false;
+		} finally {
 
-        try {
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            c = JDBCUtils.getConnection();
-            c.setAutoCommit(false);
+	@Override
+	public Results<PresupuestoDTO> findByCriteria(PresupuestoCriteria criteria, int from, int pageSize)
+			throws Exception {
 
-            Results<PresupuestoDTO> results =
-                    presupuestoDAO.findByCriteria(c, criteria, from, pageSize);
+		Connection c = null;
 
-            commit = true;
+		boolean commit = false;
 
-            return results;
+		try {
 
-        } catch (Exception e) {
+			c = JDBCUtils.getConnection();
 
-            logger.error("Buscando {}: {}", criteria, e.getMessage(), e);
+			c.setAutoCommit(false);
 
-            throw e;
+			Results<PresupuestoDTO> results = presupuestoDAO.findByCriteria(c, criteria, from, pageSize);
 
-        } finally {
+			commit = true;
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+			return results;
 
-    @Override
-    public Long create(PresupuestoDTO dto) throws Exception {
+		} catch (Exception e) {
 
-        if (!validar(dto)) {
-            return null;
-        }
+			logger.error("Buscando {}: {}", criteria, e.getMessage(), e);
 
-        Connection c = null;
-        boolean commit = false;
+			throw e;
 
-        try {
+		} finally {
 
-            c = JDBCUtils.getConnection();
-            c.setAutoCommit(false);
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            Presupuesto p = new Presupuesto();
+	@Override
+	public Long create(PresupuestoDTO dto) throws Exception {
 
-            p.setFecha(dto.getFecha());
-            p.setPrecioFinal(dto.getPrecioFinal());
-            p.setClienteId(dto.getClienteId());
-            p.setEstadoPresupuestoId(dto.getEstadoPresupuestoId());
-            p.setNombre(dto.getNombre());
+		if (!validar(dto)) {
+			return null;
+		}
 
-            Long id = presupuestoDAO.create(c, p);
+		Connection c = null;
 
-            commit = true;
+		boolean commit = false;
 
-            return id;
+		try {
 
-        } catch (Exception e) {
+			c = JDBCUtils.getConnection();
 
-            logger.error("Creando presupuesto {}: {}", dto, e.getMessage(), e);
+			c.setAutoCommit(false);
 
-            throw e;
+			Presupuesto p = new Presupuesto();
 
-        } finally {
+			p.setFecha(dto.getFecha());
+			p.setPrecioFinal(dto.getPrecioFinal());
+			p.setClienteId(dto.getClienteId());
+			p.setEstadoPresupuestoId(dto.getEstadoPresupuestoId());
+			p.setNombre(dto.getNombre());
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+			Long id = presupuestoDAO.create(c, p);
 
-    @Override
-    public boolean update(PresupuestoDTO dto) throws Exception {
+			commit = true;
 
-        if (dto == null || dto.getId() == null || dto.getId() <= 0) {
-            return false;
-        }
+			return id;
 
-        if (!validar(dto)) {
-            return false;
-        }
+		} catch (Exception e) {
 
-        Connection c = null;
-        boolean commit = false;
+			logger.error("Creando presupuesto {}: {}", dto, e.getMessage(), e);
 
-        try {
+			throw e;
 
-            c = JDBCUtils.getConnection();
-            c.setAutoCommit(false);
+		} finally {
 
-            Presupuesto p = new Presupuesto();
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            p.setId(dto.getId());
-            p.setFecha(dto.getFecha());
-            p.setPrecioFinal(dto.getPrecioFinal());
-            p.setClienteId(dto.getClienteId());
-            p.setEstadoPresupuestoId(dto.getEstadoPresupuestoId());
-            p.setNombre(dto.getNombre());
+	@Override
+	public boolean update(PresupuestoDTO dto) throws Exception {
 
-            boolean updated = presupuestoDAO.update(c, p);
+		if (dto == null || dto.getId() == null || dto.getId() <= 0) {
 
-            commit = true;
+			return false;
+		}
 
-            return updated;
+		if (!validar(dto)) {
+			return false;
+		}
 
-        } catch (Exception e) {
+		Connection c = null;
 
-            logger.error("Actualizando presupuesto {}: {}", dto, e.getMessage(), e);
+		boolean commit = false;
 
-            throw e;
+		try {
 
-        } finally {
+			c = JDBCUtils.getConnection();
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+			c.setAutoCommit(false);
 
-    @Override
-    public boolean delete(Long id) throws Exception {
+			Presupuesto p = new Presupuesto();
 
-        if (id == null || id <= 0) {
-            return false;
-        }
+			p.setId(dto.getId());
+			p.setFecha(dto.getFecha());
+			p.setPrecioFinal(dto.getPrecioFinal());
+			p.setClienteId(dto.getClienteId());
+			p.setEstadoPresupuestoId(dto.getEstadoPresupuestoId());
+			p.setNombre(dto.getNombre());
 
-        Connection c = null;
-        boolean commit = false;
+			boolean updated = presupuestoDAO.update(c, p);
 
-        try {
+			commit = true;
 
-            c = JDBCUtils.getConnection();
-            c.setAutoCommit(false);
+			return updated;
 
-            boolean deleted = presupuestoDAO.delete(c, id);
+		} catch (Exception e) {
 
-            commit = true;
+			logger.error("Actualizando presupuesto {}: {}", dto, e.getMessage(), e);
 
-            return deleted;
+			throw e;
 
-        } catch (Exception e) {
+		} finally {
 
-            logger.error("Error eliminando presupuesto {}: {}", id, e.getMessage(), e);
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            throw e;
+	@Override
+	public boolean delete(Long id) throws Exception {
 
-        } finally {
+		if (id == null || id <= 0) {
+			return false;
+		}
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+		Connection c = null;
 
-    private boolean validar(PresupuestoDTO p) {
+		boolean commit = false;
 
-        if (p == null) {
-            return false;
-        }
+		try {
 
-        if (p.getFecha() == null) {
-            return false;
-        }
+			c = JDBCUtils.getConnection();
 
-        if (p.getFecha().isAfter(LocalDate.now())) {
-            return false;
-        }
+			c.setAutoCommit(false);
 
-        if (p.getClienteId() == null) {
-            return false;
-        }
+			boolean deleted = presupuestoDAO.delete(c, id);
 
-        if (p.getEstadoPresupuestoId() == null) {
-            return false;
-        }
+			commit = true;
 
-        if (p.getNombre() == null || p.getNombre().trim().isEmpty()) {
-            return false;
-        }
+			return deleted;
 
-        if (p.getPrecioFinal() == null || p.getPrecioFinal() < 0) {
-            return false;
-        }
+		} catch (Exception e) {
 
-        return true;
-    }
+			logger.error("Error eliminando presupuesto {}: {}", id, e.getMessage(), e);
+
+			throw e;
+
+		} finally {
+
+			JDBCUtils.close(c, commit);
+		}
+	}
+
+	private boolean validar(PresupuestoDTO p) {
+
+		if (p == null) {
+			return false;
+		}
+
+		if (p.getFecha() == null) {
+			return false;
+		}
+
+		if (p.getFecha().isAfter(LocalDate.now())) {
+			return false;
+		}
+
+		if (p.getClienteId() == null) {
+			return false;
+		}
+
+		if (p.getEstadoPresupuestoId() == null) {
+			return false;
+		}
+
+		if (p.getNombre() == null || p.getNombre().trim().isEmpty()) {
+
+			return false;
+		}
+
+		if (p.getPrecioFinal() == null || p.getPrecioFinal() < 0) {
+
+			return false;
+		}
+
+		return true;
+	}
 }

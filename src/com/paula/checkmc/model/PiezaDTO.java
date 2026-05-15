@@ -10,8 +10,10 @@ public class PiezaDTO extends AbstracValueObject {
     private Long estadoId;
     private String nombreEstado;
     private BigDecimal precio;
+    private String numeroReferencia;
 
-    public PiezaDTO() {
+  
+	public PiezaDTO() {
     }
 
     public Long getId() { 
@@ -75,4 +77,13 @@ public class PiezaDTO extends AbstracValueObject {
     	    this.precio = precio; 
     
     }
+    
+    public String getNumeroReferencia() {
+  		return numeroReferencia;
+  	}
+
+  	public void setNumeroReferencia(String numeroReferencia) {
+  		this.numeroReferencia = numeroReferencia;
+  	}
+
 }

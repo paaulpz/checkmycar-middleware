@@ -13,57 +13,73 @@ import com.paula.checkmc.util.JDBCUtils;
 
 public class TipoTransmisionServiceImpl implements TipoTransmisionService {
 
-    private static final Logger logger = LogManager.getLogger(TipoTransmisionServiceImpl.class);
+	private static final Logger logger = LogManager.getLogger(TipoTransmisionServiceImpl.class);
 
-    private TipoTransmisionDAO tipoTransmisionDAO = new TipoTransmisionDAO();
+	private TipoTransmisionDAO tipoTransmisionDAO = new TipoTransmisionDAO();
 
-    @Override
-    public TipoTransmision findById(Long id) throws Exception {
+	@Override
+	public TipoTransmision findById(Long id) throws Exception {
 
-        if (id == null || id <= 0) {
-            return null;
-        }
+		if (id == null || id <= 0) {
+			return null;
+		}
 
-        Connection c = null;
+		Connection c = null;
 
-        try {
+		boolean commit = false;
 
-            c = JDBCUtils.getConnection();
+		try {
 
-            return tipoTransmisionDAO.findById(c, id);
+			c = JDBCUtils.getConnection();
 
-        } catch (Exception e) {
+			c.setAutoCommit(false);
 
-            logger.error("Error buscando tipo transmision {}: {}", id, e.getMessage(), e);
+			TipoTransmision tipoTransmision = tipoTransmisionDAO.findById(c, id);
 
-            throw e;
+			commit = true;
 
-        } finally {
+			return tipoTransmision;
 
-            JDBCUtils.close(c, true);
-        }
-    }
+		} catch (Exception e) {
 
-    @Override
-    public List<TipoTransmision> findAll() throws Exception {
+			logger.error("Error buscando tipo transmision {}: {}", id, e.getMessage(), e);
 
-        Connection c = null;
+			throw e;
 
-        try {
+		} finally {
 
-            c = JDBCUtils.getConnection();
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            return tipoTransmisionDAO.findAll(c);
+	@Override
+	public List<TipoTransmision> findAll() throws Exception {
 
-        } catch (Exception e) {
+		Connection c = null;
 
-            logger.error("Error listando tipos transmision: {}", e.getMessage(), e);
+		boolean commit = false;
 
-            throw e;
+		try {
 
-        } finally {
+			c = JDBCUtils.getConnection();
 
-            JDBCUtils.close(c, true);
-        }
-    }
+			c.setAutoCommit(false);
+
+			List<TipoTransmision> tiposTransmision = tipoTransmisionDAO.findAll(c);
+
+			commit = true;
+
+			return tiposTransmision;
+
+		} catch (Exception e) {
+
+			logger.error("Error listando tipos transmision: {}", e.getMessage(), e);
+
+			throw e;
+
+		} finally {
+
+			JDBCUtils.close(c, commit);
+		}
+	}
 }

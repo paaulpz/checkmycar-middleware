@@ -13,57 +13,73 @@ import com.paula.checkmc.util.JDBCUtils;
 
 public class PaisServiceImpl implements PaisService {
 
-    private static final Logger logger = LogManager.getLogger(PaisServiceImpl.class);
+	private static final Logger logger = LogManager.getLogger(PaisServiceImpl.class);
 
-    private PaisDAO paisDAO = new PaisDAO();
+	private PaisDAO paisDAO = new PaisDAO();
 
-    @Override
-    public Pais findById(Long id) throws Exception {
+	@Override
+	public Pais findById(Long id) throws Exception {
 
-        if (id == null || id <= 0) {
-            return null;
-        }
+		if (id == null || id <= 0) {
+			return null;
+		}
 
-        Connection c = null;
+		Connection c = null;
 
-        try {
+		boolean commit = false;
 
-            c = JDBCUtils.getConnection();
+		try {
 
-            return paisDAO.findById(c, id);
+			c = JDBCUtils.getConnection();
 
-        } catch (Exception e) {
+			c.setAutoCommit(false);
 
-            logger.error("Error buscando pais {}: {}", id, e.getMessage(), e);
+			Pais pais = paisDAO.findById(c, id);
 
-            throw e;
+			commit = true;
 
-        } finally {
+			return pais;
 
-            JDBCUtils.close(c, true);
-        }
-    }
+		} catch (Exception e) {
 
-    @Override
-    public List<Pais> findAll() throws Exception {
+			logger.error("Error buscando pais {}: {}", id, e.getMessage(), e);
 
-        Connection c = null;
+			throw e;
 
-        try {
+		} finally {
 
-            c = JDBCUtils.getConnection();
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            return paisDAO.findAll(c);
+	@Override
+	public List<Pais> findAll() throws Exception {
 
-        } catch (Exception e) {
+		Connection c = null;
 
-            logger.error("Error listando paises: {}", e.getMessage(), e);
+		boolean commit = false;
 
-            throw e;
+		try {
 
-        } finally {
+			c = JDBCUtils.getConnection();
 
-            JDBCUtils.close(c, true);
-        }
-    }
+			c.setAutoCommit(false);
+
+			List<Pais> paises = paisDAO.findAll(c);
+
+			commit = true;
+
+			return paises;
+
+		} catch (Exception e) {
+
+			logger.error("Error listando paises: {}", e.getMessage(), e);
+
+			throw e;
+
+		} finally {
+
+			JDBCUtils.close(c, commit);
+		}
+	}
 }

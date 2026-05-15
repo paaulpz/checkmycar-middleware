@@ -4,6 +4,8 @@ public class PiezaCriteria {
 
     private String nombre;
     private Long estadoId;
+    private Integer estadonombre;
+    private String numeroReferencia;
 
     public PiezaCriteria() {
     }
@@ -25,4 +27,22 @@ public class PiezaCriteria {
     public void setEstadoId(Long estadoId) { 
     	this.estadoId = estadoId; 
     	}
+
+	public Integer getEstadonombre() {
+		return estadonombre;
+	}
+
+	public void setEstadonombre(Integer estadonombre) {
+		this.estadonombre = estadonombre;
+	}
+
+	public String getNumeroReferencia() {
+		return numeroReferencia;
+	}
+
+	public void setNumeroReferencia(String numeroReferencia) {
+		this.numeroReferencia = numeroReferencia;
+	}
+    
+    
 }

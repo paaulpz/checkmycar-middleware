@@ -13,57 +13,73 @@ import com.paula.checkmc.util.JDBCUtils;
 
 public class EstadoPiezaServiceImpl implements EstadoPiezaService {
 
-    private static final Logger logger = LogManager.getLogger(EstadoPiezaServiceImpl.class);
+	private static final Logger logger = LogManager.getLogger(EstadoPiezaServiceImpl.class);
 
-    private EstadoPiezaDAO estadoPiezaDAO = new EstadoPiezaDAO();
+	private EstadoPiezaDAO estadoPiezaDAO = new EstadoPiezaDAO();
 
-    @Override
-    public EstadoPieza findById(Long id) throws Exception {
+	@Override
+	public EstadoPieza findById(Long id) throws Exception {
 
-        if (id == null || id <= 0) {
-            return null;
-        }
+		if (id == null || id <= 0) {
+			return null;
+		}
 
-        Connection c = null;
+		Connection c = null;
 
-        try {
+		boolean commit = false;
 
-            c = JDBCUtils.getConnection();
+		try {
 
-            return estadoPiezaDAO.findById(c, id);
+			c = JDBCUtils.getConnection();
 
-        } catch (Exception e) {
+			c.setAutoCommit(false);
 
-            logger.error("Error buscando estado pieza {}: {}", id, e.getMessage(), e);
+			EstadoPieza estado = estadoPiezaDAO.findById(c, id);
 
-            throw e;
+			commit = true;
 
-        } finally {
+			return estado;
 
-            JDBCUtils.close(c, true);
-        }
-    }
+		} catch (Exception e) {
 
-    @Override
-    public List<EstadoPieza> findAll() throws Exception {
+			logger.error("Error buscando estado pieza {}: {}", id, e.getMessage(), e);
 
-        Connection c = null;
+			throw e;
 
-        try {
+		} finally {
 
-            c = JDBCUtils.getConnection();
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            return estadoPiezaDAO.findAll(c);
+	@Override
+	public List<EstadoPieza> findAll() throws Exception {
 
-        } catch (Exception e) {
+		Connection c = null;
 
-            logger.error("Error listando estados pieza: {}", e.getMessage(), e);
+		boolean commit = false;
 
-            throw e;
+		try {
 
-        } finally {
+			c = JDBCUtils.getConnection();
 
-            JDBCUtils.close(c, true);
-        }
-    }
+			c.setAutoCommit(false);
+
+			List<EstadoPieza> estados = estadoPiezaDAO.findAll(c);
+
+			commit = true;
+
+			return estados;
+
+		} catch (Exception e) {
+
+			logger.error("Error listando estados pieza: {}", e.getMessage(), e);
+
+			throw e;
+
+		} finally {
+
+			JDBCUtils.close(c, commit);
+		}
+	}
 }

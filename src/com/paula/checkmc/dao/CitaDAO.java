@@ -20,312 +20,376 @@ import com.paula.checkmc.util.SQLUtils;
 
 public class CitaDAO {
 
-    private Logger logger = LogManager.getLogger(CitaDAO.class);
+	private Logger logger = LogManager.getLogger(CitaDAO.class);
 
-    private static final String BASE_SELECT;
+	private static final String BASE_SELECT;
 
-    static {
+	static {
 
-        StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 
-        sb.append(" SELECT a.id, a.description, a.date, ");
-        sb.append(" a.client_id, a.car_id, a.appointment_status_id ");
-        sb.append(" FROM appointment a ");
+		sb.append(" SELECT a.id, a.description, a.date, ");
 
-        BASE_SELECT = sb.toString();
-    }
+		sb.append(" a.client_id, a.car_id, a.appointment_status_id ");
 
-    public Cita findById(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+		sb.append(" FROM appointment a ");
+
+		BASE_SELECT = sb.toString();
 	}
-    
-    public Results<CitaDTO> findByCriteria( Connection c ,CitaCriteria cr, int from, int pageSize) {
 
-        logger.info("criteria: {}", cr);
+	public Cita findById(Connection c, Long id) throws Exception {
 
-       
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+		logger.debug("Buscando cita por id: {}", id);
 
-        Results<CitaDTO> results = new Results<CitaDTO>();
+		PreparedStatement ps = null;
 
-        try {
+		ResultSet rs = null;
 
-            
+		try {
 
-            StringBuilder sql = new StringBuilder(BASE_SELECT);
+			StringBuilder sql = new StringBuilder(BASE_SELECT);
 
-            List<String> condiciones = new ArrayList<>();
-            List<Object> parametros = new ArrayList<>();
+			sql.append(" WHERE a.id = ? ");
 
-            if (cr.getClienteId() != null) {
-                condiciones.add(" a.client_id = ?");
-                parametros.add(cr.getClienteId());
-            }
+			ps = c.prepareStatement(sql.toString());
 
-            if (cr.getCocheId() != null) {
-                condiciones.add(" a.car_id = ?");
-                parametros.add(cr.getCocheId());
-            }
+			DAOUtils.setParameters(ps, id);
 
-            if (cr.getEstadoCitaId() != null) {
-                condiciones.add(" a.appointment_status_id = ?");
-                parametros.add(cr.getEstadoCitaId());
-            }
+			rs = ps.executeQuery();
 
-            if (cr.getFechaDesde() != null) {
-                condiciones.add(" a.date >= ?");
-                parametros.add(cr.getFechaDesde());
-            }
+			if (rs.next()) {
 
-            if (cr.getFechaHasta() != null) {
-                condiciones.add(" a.date <= ?");
-                parametros.add(cr.getFechaHasta());
-            }
+				Cita cita = loadNext(rs);
 
-            if (!condiciones.isEmpty()) {
+				logger.debug("Cita encontrada: {}", cita);
 
-                sql.append(" WHERE ");
-                sql.append(String.join(" AND ", condiciones));
-            }
+				return cita;
+			}
 
-            sql.append(" ORDER BY ");
-            sql.append(cr.getOrderBy());
-            sql.append(cr.isAscDesc() ? " ASC " : " DESC ");
-            sql.append(" LIMIT ? OFFSET ? ");
+			return null;
 
-            logger.info("SQL: {}", sql);
+		} catch (Exception e) {
 
-            ps = c.prepareStatement(
-                    sql.toString(),
-                    ResultSet.TYPE_SCROLL_INSENSITIVE,
-                    ResultSet.CONCUR_READ_ONLY);
+			logger.error("Error buscando cita id: {}", id, e);
 
-            int i = 1;
+			throw e;
 
-            for (Object param : parametros) {
-                ps.setObject(i++, param);
-            }
+		} finally {
 
-            ps.setInt(i++, pageSize);
-            ps.setInt(i++, from - 1);
+			JDBCUtils.close(rs, ps);
+		}
+	}
 
-            rs = ps.executeQuery();
+	public Results<CitaDTO> findByCriteria(Connection c, CitaCriteria cr, int from, int pageSize) throws Exception {
 
-            List<CitaDTO> lista = new ArrayList<>();
+		logger.info("criteria: {}", cr);
 
-            while (rs.next()) {
+		PreparedStatement ps = null;
 
-                CitaDTO dto = new CitaDTO();
+		ResultSet rs = null;
 
-                dto.setId(rs.getLong("id"));
-                dto.setDescripcion(rs.getString("description"));
-                dto.setFecha(rs.getTimestamp("date").toLocalDateTime());
-                dto.setClienteId(rs.getLong("client_id"));
-                dto.setCocheId(rs.getLong("car_id"));
-                dto.setEstadoCitaId(rs.getLong("appointment_status_id"));
+		Results<CitaDTO> results = new Results<CitaDTO>();
 
-                lista.add(dto);
-            }
+		try {
 
-            int totalResults = SQLUtils.getTotalRows(rs);
+			StringBuilder sql = new StringBuilder(BASE_SELECT);
 
-            results.setPage(lista);
-            results.setTotal(totalResults);
+			List<String> condiciones = new ArrayList<>();
 
-        } catch (Exception e) {
+			List<Object> parametros = new ArrayList<>();
 
-            logger.error("Error buscando citas: {}", cr, e);
+			if (cr.getClienteId() != null) {
 
-        } finally {
+				condiciones.add(" a.client_id = ?");
 
-            JDBCUtils.close(rs, ps);     
-        }
+				parametros.add(cr.getClienteId());
+			}
 
-        return results;
-    }
+			if (cr.getCocheId() != null) {
 
-    public Long create(Connection c, Cita cita) {
+				condiciones.add(" a.car_id = ?");
 
-        logger.debug("Creando cita: {}", cita);
+				parametros.add(cr.getCocheId());
+			}
 
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+			if (cr.getEstadoCitaId() != null) {
 
-        try {
+				condiciones.add(" a.appointment_status_id = ?");
 
+				parametros.add(cr.getEstadoCitaId());
+			}
 
-            StringBuilder sql = new StringBuilder();
+			if (cr.getFechaDesde() != null) {
 
-            sql.append("INSERT INTO appointment ");
-            sql.append("(description, date, client_id, car_id, appointment_status_id) ");
-            sql.append("VALUES (?,?,?,?,?)");
+				condiciones.add(" a.date >= ?");
 
-            ps = c.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS);
+				parametros.add(cr.getFechaDesde());
+			}
 
-            DAOUtils.setParameters(
-                    ps,
-                    cita.getDescripcion(),
-                    cita.getFecha(),
-                    cita.getClienteId(),
-                    cita.getCocheId(),
-                    cita.getEstadoCitaId());
+			if (cr.getFechaHasta() != null) {
 
-            ps.executeUpdate();
+				condiciones.add(" a.date <= ?");
 
-            rs = ps.getGeneratedKeys();
+				parametros.add(cr.getFechaHasta());
+			}
 
-            if (rs.next()) {
+			if (!condiciones.isEmpty()) {
 
-                Long id = rs.getLong(1);
+				sql.append(" WHERE ");
 
-                logger.info("Cita creada con id: {}", id);
+				sql.append(String.join(" AND ", condiciones));
+			}
 
-                return id;
-            }
+			sql.append(" ORDER BY ");
 
-        } catch (Exception e) {
+			String orderBy = cr.getOrderBy() != null ? cr.getOrderBy() : "a.id";
 
-            logger.error("Error creando cita: {}", cita, e);
+			sql.append(orderBy);
 
-        } finally {
+			sql.append(cr.isAscDesc() ? " ASC " : " DESC ");
 
-            JDBCUtils.close(rs, ps);     
-        }
+			sql.append(" LIMIT ? OFFSET ? ");
 
-        return null;
-    }
+			logger.info("SQL: {}", sql);
 
-    public boolean delete(Connection c, Long id) {
+			ps = c.prepareStatement(sql.toString(), ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
-        logger.warn("Eliminando cita id: {}", id);
+			int i = 1;
 
-        PreparedStatement ps = null;
+			for (Object param : parametros) {
 
-        try {
+				ps.setObject(i++, param);
+			}
 
+			ps.setInt(i++, pageSize);
 
-            StringBuilder sql = new StringBuilder();
+			ps.setInt(i++, from - 1);
 
-            sql.append("DELETE FROM appointment ");
-            sql.append("WHERE id=?");
+			rs = ps.executeQuery();
 
-            ps = c.prepareStatement(sql.toString());
+			List<CitaDTO> lista = new ArrayList<>();
 
-            DAOUtils.setParameters(ps, id);
+			while (rs.next()) {
 
-            return ps.executeUpdate() > 0;
+				CitaDTO dto = new CitaDTO();
 
-        } catch (Exception e) {
+				dto.setId(rs.getLong("id"));
 
-            logger.error("Error eliminando cita id: {}", id, e);
+				dto.setDescripcion(rs.getString("description"));
 
-        } finally {
+				dto.setFecha(rs.getTimestamp("date").toLocalDateTime());
 
-            JDBCUtils.close(null, ps);     
-        }
+				dto.setClienteId(rs.getLong("client_id"));
 
-        return false;
-    }
+				dto.setCocheId(rs.getLong("car_id"));
 
-    public boolean existeCitaEnFecha(java.time.LocalDateTime fecha, Connection c) {
-    	
+				dto.setEstadoCitaId(rs.getLong("appointment_status_id"));
 
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+				lista.add(dto);
+			}
 
-        try {
+			int totalResults = SQLUtils.getTotalRows(rs);
 
+			results.setPage(lista);
 
-            StringBuilder sql = new StringBuilder();
+			results.setTotal(totalResults);
 
-            sql.append("SELECT COUNT(*) ");
-            sql.append("FROM appointment ");
-            sql.append("WHERE date=?");
+		} catch (Exception e) {
 
-            ps = c.prepareStatement(sql.toString());
+			logger.error("Error buscando citas: {}", cr, e);
 
-            ps.setObject(1, fecha);
+			throw e;
 
-            rs = ps.executeQuery();
+		} finally {
 
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
+			JDBCUtils.close(rs, ps);
+		}
 
-        } catch (Exception e) {
+		return results;
+	}
 
-            logger.error("Error comprobando cita en fecha: {}", fecha, e);
+	public Long create(Connection c, Cita cita) throws Exception {
 
-        } finally {
+		logger.debug("Creando cita: {}", cita);
 
-            JDBCUtils.close(rs, ps);     
-        }
+		PreparedStatement ps = null;
 
-        return false;
-    }
-    
-    public boolean update(Connection c , Cita cita) {
+		ResultSet rs = null;
 
-        logger.debug("Actualizando cita: {}", cita);
+		try {
 
-        PreparedStatement ps = null;
+			StringBuilder sql = new StringBuilder();
 
-        try {
+			sql.append("INSERT INTO appointment ");
 
+			sql.append("(description, date, client_id, car_id, appointment_status_id) ");
 
-            StringBuilder sql = new StringBuilder();
+			sql.append("VALUES (?,?,?,?,?)");
 
-            sql.append("UPDATE appointment SET ");
-            sql.append("description=?, ");
-            sql.append("date=?, ");
-            sql.append("client_id=?, ");
-            sql.append("car_id=?, ");
-            sql.append("appointment_status_id=? ");
-            sql.append("WHERE id=?");
+			ps = c.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS);
 
-            ps = c.prepareStatement(sql.toString());
+			DAOUtils.setParameters(ps, cita.getDescripcion(), cita.getFecha(), cita.getClienteId(), cita.getCocheId(),
+					cita.getEstadoCitaId());
 
-            DAOUtils.setParameters(
-                    ps,
-                    cita.getDescripcion(),
-                    cita.getFecha(),
-                    cita.getClienteId(),
-                    cita.getCocheId(),
-                    cita.getEstadoCitaId(),
-                    cita.getId());
+			ps.executeUpdate();
 
-            return ps.executeUpdate() > 0;
+			rs = ps.getGeneratedKeys();
 
-        } catch (Exception e) {
+			if (rs.next()) {
 
-            logger.error("Error actualizando cita: {}", cita, e);
+				Long id = rs.getLong(1);
 
-        } finally {
+				logger.info("Cita creada con id: {}", id);
 
-            JDBCUtils.close(null, ps);     
-        }
+				return id;
+			}
 
-        return false;
-    }
+			return null;
 
-    private Cita loadNext(ResultSet rs) throws Exception {
+		} catch (Exception e) {
 
-        int i = 1;
+			logger.error("Error creando cita: {}", cita, e);
 
-        Cita c = new Cita();
+			throw e;
 
-        c.setId(rs.getLong(i++));
-        c.setDescripcion(rs.getString(i++));
-        c.setFecha(rs.getTimestamp(i++).toLocalDateTime());
-        c.setClienteId(rs.getLong(i++));
-        c.setCocheId(rs.getLong(i++));
-        c.setEstadoCitaId(rs.getLong(i++));
+		} finally {
 
-        return c;
-    }
+			JDBCUtils.close(rs, ps);
+		}
+	}
 
-	
+	public boolean delete(Connection c, Long id) throws Exception {
 
+		logger.warn("Eliminando cita id: {}", id);
+
+		PreparedStatement ps = null;
+
+		try {
+
+			StringBuilder sql = new StringBuilder();
+
+			sql.append("DELETE FROM appointment ");
+
+			sql.append("WHERE id=?");
+
+			ps = c.prepareStatement(sql.toString());
+
+			DAOUtils.setParameters(ps, id);
+
+			return ps.executeUpdate() > 0;
+
+		} catch (Exception e) {
+
+			logger.error("Error eliminando cita id: {}", id, e);
+
+			throw e;
+
+		} finally {
+
+			JDBCUtils.close(null, ps);
+		}
+	}
+
+	public boolean existeCitaEnFecha(java.time.LocalDateTime fecha, Connection c) {
+
+		PreparedStatement ps = null;
+
+		ResultSet rs = null;
+
+		try {
+
+			StringBuilder sql = new StringBuilder();
+
+			sql.append("SELECT COUNT(*) ");
+
+			sql.append("FROM appointment ");
+
+			sql.append("WHERE date=?");
+
+			ps = c.prepareStatement(sql.toString());
+
+			ps.setObject(1, fecha);
+
+			rs = ps.executeQuery();
+
+			if (rs.next()) {
+
+				return rs.getInt(1) > 0;
+			}
+
+		} catch (Exception e) {
+
+			logger.error("Error comprobando cita en fecha: {}", fecha, e);
+
+		} finally {
+
+			JDBCUtils.close(rs, ps);
+		}
+
+		return false;
+	}
+
+	public boolean update(Connection c, Cita cita) throws Exception {
+
+		logger.debug("Actualizando cita: {}", cita);
+
+		PreparedStatement ps = null;
+
+		try {
+
+			StringBuilder sql = new StringBuilder();
+
+			sql.append("UPDATE appointment SET ");
+
+			sql.append("description=?, ");
+
+			sql.append("date=?, ");
+
+			sql.append("client_id=?, ");
+
+			sql.append("car_id=?, ");
+
+			sql.append("appointment_status_id=? ");
+
+			sql.append("WHERE id=?");
+
+			ps = c.prepareStatement(sql.toString());
+
+			DAOUtils.setParameters(ps, cita.getDescripcion(), cita.getFecha(), cita.getClienteId(), cita.getCocheId(),
+					cita.getEstadoCitaId(), cita.getId());
+
+			return ps.executeUpdate() > 0;
+
+		} catch (Exception e) {
+
+			logger.error("Error actualizando cita: {}", cita, e);
+
+			throw e;
+
+		} finally {
+
+			JDBCUtils.close(null, ps);
+		}
+	}
+
+	private Cita loadNext(ResultSet rs) throws Exception {
+
+		int i = 1;
+
+		Cita c = new Cita();
+
+		c.setId(rs.getLong(i++));
+
+		c.setDescripcion(rs.getString(i++));
+
+		c.setFecha(rs.getTimestamp(i++).toLocalDateTime());
+
+		c.setClienteId(rs.getLong(i++));
+
+		c.setCocheId(rs.getLong(i++));
+
+		c.setEstadoCitaId(rs.getLong(i++));
+
+		return c;
+	}
 }

@@ -2,72 +2,84 @@ package com.paula.checkmc.service;
 
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.paula.checkmc.model.Localidad;
-import com.paula.checkmc.service.LocalidadService;
 import com.paula.checkmc.service.impl.LocalidadServiceImpl;
 
 public class LocalidadServiceTest {
 
-    private LocalidadService service = null;
+    private static final Logger logger = LogManager.getLogger(LocalidadServiceTest.class);
+
+    private LocalidadService service;
 
     public LocalidadServiceTest() {
-        this.service = new LocalidadServiceImpl();
+
+        service = new LocalidadServiceImpl();
     }
 
-    public void testFindById(Long id) {
+    public void testFindById(Long id) throws Exception {
 
+        Localidad localidad = service.findById(id);
 
-        Localidad l = service.findById(id);
+        if (localidad != null) {
 
-        if (l != null) {
-            System.out.println("Localidad encontrada: " + l.getNombre());
+            logger.info("Id: {}", localidad.getId());
+            logger.info("Nombre: {}", localidad.getNombre());
+
         } else {
-            System.out.println("No se encontró la localidad");
+
+            logger.warn("No existe la localidad");
         }
     }
 
-  
-    public void testFindAll() {
+    public void testFindAll() throws Exception {
 
+        List<Localidad> lista = service.findAll();
 
-        List<Localidad> localidades = service.findAll();
+        logger.info("Total localidades: {}", lista.size());
 
-        System.out.println("Localidades encontradas: " + localidades.size());
+        for (Localidad l : lista) {
+
+            logger.info("{} - {}", l.getId(), l.getNombre());
+        }
     }
 
-   
-    public void testFindByProvincia(Long provinciaId) {
+    public void testFindByProvincia(Long provinciaId) throws Exception {
 
-       
+        List<Localidad> lista = service.findByProvincia(provinciaId);
 
-        List<Localidad> localidades = service.findByProvincia(provinciaId);
+        logger.info("Resultados encontrados: {}", lista.size());
 
-        System.out.println("Localidades encontradas: " + localidades.size());
+        for (Localidad l : lista) {
+
+            logger.info("{} - {}", l.getId(), l.getNombre());
+        }
     }
 
-    
-    public void testFindByNombre(String nombre) {
+    public void testFindByNombre(String nombre) throws Exception {
 
-        
+        List<Localidad> lista = service.findByNombre(nombre);
 
-        List<Localidad> localidades = service.findByNombre(nombre);
+        logger.info("Resultados encontrados: {}", lista.size());
 
-        System.out.println("Localidades encontradas: " + localidades.size());
+        for (Localidad l : lista) {
+
+            logger.info("{} - {}", l.getId(), l.getNombre());
+        }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
         LocalidadServiceTest test = new LocalidadServiceTest();
 
-       
         test.testFindById(1L);
 
-     
-        //test.testFindAll();
+        // test.testFindAll();
 
-     
-         //test.testFindByProvincia(1L);
+        // test.testFindByProvincia(1L);
 
-        //test.testFindByNombre("Lugo");
+        // test.testFindByNombre("Lugo");
     }
 }

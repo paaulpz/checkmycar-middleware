@@ -13,57 +13,73 @@ import com.paula.checkmc.util.JDBCUtils;
 
 public class RolServiceImpl implements RolService {
 
-    private static final Logger logger = LogManager.getLogger(RolServiceImpl.class);
+	private static final Logger logger = LogManager.getLogger(RolServiceImpl.class);
 
-    private RolDAO rolDAO = new RolDAO();
+	private RolDAO rolDAO = new RolDAO();
 
-    @Override
-    public Rol findById(Long id) throws Exception {
+	@Override
+	public Rol findById(Long id) throws Exception {
 
-        if (id == null || id <= 0) {
-            return null;
-        }
+		if (id == null || id <= 0) {
+			return null;
+		}
 
-        Connection c = null;
+		Connection c = null;
 
-        try {
+		boolean commit = false;
 
-            c = JDBCUtils.getConnection();
+		try {
 
-            return rolDAO.findById(c, id);
+			c = JDBCUtils.getConnection();
 
-        } catch (Exception e) {
+			c.setAutoCommit(false);
 
-            logger.error("Error buscando rol {}: {}", id, e.getMessage(), e);
+			Rol rol = rolDAO.findById(c, id);
 
-            throw e;
+			commit = true;
 
-        } finally {
+			return rol;
 
-            JDBCUtils.close(c, true);
-        }
-    }
+		} catch (Exception e) {
 
-    @Override
-    public List<Rol> findAll() throws Exception {
+			logger.error("Error buscando rol {}: {}", id, e.getMessage(), e);
 
-        Connection c = null;
+			throw e;
 
-        try {
+		} finally {
 
-            c = JDBCUtils.getConnection();
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            return rolDAO.findAll(c);
+	@Override
+	public List<Rol> findAll() throws Exception {
 
-        } catch (Exception e) {
+		Connection c = null;
 
-            logger.error("Error listando roles: {}", e.getMessage(), e);
+		boolean commit = false;
 
-            throw e;
+		try {
 
-        } finally {
+			c = JDBCUtils.getConnection();
 
-            JDBCUtils.close(c, true);
-        }
-    }
+			c.setAutoCommit(false);
+
+			List<Rol> roles = rolDAO.findAll(c);
+
+			commit = true;
+
+			return roles;
+
+		} catch (Exception e) {
+
+			logger.error("Error listando roles: {}", e.getMessage(), e);
+
+			throw e;
+
+		} finally {
+
+			JDBCUtils.close(c, commit);
+		}
+	}
 }

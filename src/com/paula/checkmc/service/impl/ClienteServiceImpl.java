@@ -17,298 +17,247 @@ import com.paula.checkmc.util.JDBCUtils;
 
 public class ClienteServiceImpl implements ClienteService {
 
-    private static final Logger logger =
-            LogManager.getLogger(ClienteServiceImpl.class);
+	private static final Logger logger = LogManager.getLogger(ClienteServiceImpl.class);
 
-    private ClienteDAO clienteDAO = new ClienteDAO();
+	private ClienteDAO clienteDAO = new ClienteDAO();
 
-    private EncryptionService encryptionService =  new EncryptionServiceImpl();
+	private EncryptionService encryptionService = new EncryptionServiceImpl();
 
-    private MailService mailService = new MailServiceApacheImpl();
-    
-    @Override
-    public Cliente findById(Long id) throws Exception {
+	private MailService mailService = new MailServiceApacheImpl();
 
-        if (id == null || id <= 0) {
-            return null;
-        }
+	@Override
+	public Cliente findById(Long id) throws Exception {
 
-        Connection c = null;
+		if (id == null || id <= 0) {
+			return null;
+		}
 
-        try {
+		Connection c = null;
 
-            c = JDBCUtils.getConnection();
+		try {
 
-            return clienteDAO.findById(c, id);
+			c = JDBCUtils.getConnection();
 
-        } catch (Exception e) {
+			return clienteDAO.findById(c, id);
 
-            logger.error("Error buscando cliente {}: {}",
-                    id,
-                    e.getMessage(),
-                    e);
+		} catch (Exception e) {
 
-            throw e;
+			logger.error("Error buscando cliente {}: {}", id, e.getMessage(), e);
 
-        } finally {
+			throw e;
 
-            JDBCUtils.close(c, true);
-        }
-    }
+		} finally {
 
-    @Override
-    public Results<ClienteDTO> findByCriteria(
-            ClienteCriteria criteria,
-            int from,
-            int pageSize) throws Exception {
+			JDBCUtils.close(c, true);
+		}
+	}
 
-        Connection c = null;
+	@Override
+	public Results<ClienteDTO> findByCriteria(ClienteCriteria criteria, int from, int pageSize) throws Exception {
 
-        boolean commit = false;
+		Connection c = null;
 
-        try {
+		boolean commit = false;
 
-            c = JDBCUtils.getConnection();
+		try {
 
-            c.setAutoCommit(false);
+			c = JDBCUtils.getConnection();
 
-            Results<ClienteDTO> results =
-                    clienteDAO.findByCriteria(
-                            c,
-                            criteria,
-                            from,
-                            pageSize);
+			c.setAutoCommit(false);
 
-            commit = true;
+			Results<ClienteDTO> results = clienteDAO.findByCriteria(c, criteria, from, pageSize);
 
-            return results;
+			commit = true;
 
-        } catch (Exception e) {
+			return results;
 
-            logger.error("Buscando {}: {}",
-                    criteria,
-                    e.getMessage(),
-                    e);
+		} catch (Exception e) {
 
-            throw e;
+			logger.error("Buscando {}: {}", criteria, e.getMessage(), e);
 
-        } finally {
+			throw e;
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+		} finally {
 
-    @Override
-    public Long  create(Cliente cliente) throws Exception {
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-        Connection c = null;
+	@Override
+	public Long create(Cliente cliente) throws Exception {
 
-        boolean commit = false;
+		Connection c = null;
 
-        try {
+		boolean commit = false;
 
-            c = JDBCUtils.getConnection();
-            c.setAutoCommit(false);
-            Long id = clienteDAO.create(c, cliente);
-            commit = true;
-            return id;
-        } catch (Exception e) {
+		try {
 
-            logger.error("Creando {}: {}",
-                    cliente,
-                    e.getMessage(),
-                    e);
-            throw e;
-        } finally {
+			c = JDBCUtils.getConnection();
+			c.setAutoCommit(false);
+			Long id = clienteDAO.create(c, cliente);
+			commit = true;
+			return id;
+		} catch (Exception e) {
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+			logger.error("Creando {}: {}", cliente, e.getMessage(), e);
+			throw e;
+		} finally {
 
-    @Override
-    public Long register(Cliente usuario) throws Exception {
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-        if (usuario == null) {
+	@Override
+	public Long register(Cliente usuario) throws Exception {
 
-            return null;
-        }
+		if (usuario == null) {
 
-        Connection c = null;
+			return null;
+		}
+		String passwordEncriptada = encryptionService.encrypt(usuario.getPassword());
 
-        boolean commit = false;
+		usuario.setPassword(passwordEncriptada);
 
-        try {
+		Connection c = null;
+		boolean commit = false;
 
-            c = JDBCUtils.getConnection();
+		try {
 
-            c.setAutoCommit(false);
+			c = JDBCUtils.getConnection();
+			c.setAutoCommit(false);
+			Long id = clienteDAO.create(c, usuario);
 
-            String passwordEncriptada =
-                    encryptionService.encrypt(usuario.getPassword());
+			if (id != null) {
 
-            usuario.setPassword(passwordEncriptada);
+				mailService.sendEmail(usuario.getEmail(), "Bienvenido a Checkmycar",
+						"Hola " + usuario.getNombre() + ", su cuenta ha sido registrada correctamente.",
+						"Equipo Checkmycar");
+			}
 
-            Long id = clienteDAO.create(c, usuario);
+			commit = true;
 
-            if (id != null) {
+			return id;
 
-                mailService.sendEmail(
-                        usuario.getEmail(),
-                        "Bienvenido a Checkmycar",
-                        "Hola " + usuario.getNombre()
-                                + ", su cuenta ha sido registrada correctamente.",
-                        "Equipo Checkmycar");
-            }
+		} catch (Exception e) {
 
-            commit = true;
+			logger.error("Error registrando cliente {}: {}", usuario, e.getMessage(), e);
 
-            return id;
+			throw e;
 
-        } catch (Exception e) {
+		} finally {
 
-            logger.error("Error registrando usuario {}: {}",
-                    usuario,
-                    e.getMessage(),
-                    e);
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            throw e;
+	@Override
+	public ClienteDTO login(String dni, String password) throws Exception {
 
-        } finally {
+		Connection c = null;
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+		try {
 
-    @Override
-    public ClienteDTO login(String dni, String password)
-            throws Exception {
+			c = JDBCUtils.getConnection();
 
-        Connection c = null;
+			ClienteCriteria criteria = new ClienteCriteria();
 
-        try {
+			criteria.setDniNie(dni);
 
-            c = JDBCUtils.getConnection();
+			Results<ClienteDTO> resultados = clienteDAO.findByCriteria(c, criteria, 1, 1);
 
-            ClienteCriteria criteria = new ClienteCriteria();
+			if (resultados != null && resultados.getPage() != null && !resultados.getPage().isEmpty()) {
 
-            criteria.setDniNie(dni);
+				ClienteDTO usuario = resultados.getPage().get(0);
 
-            Results<ClienteDTO> resultados =
-                    clienteDAO.findByCriteria(c, criteria, 1, 1);
+				if (encryptionService.checkEncryption(password, usuario.getPassword())) {
 
-            if (resultados != null
-                    && resultados.getPage() != null
-                    && !resultados.getPage().isEmpty()) {
+					return usuario;
+				}
+			}
 
-                ClienteDTO usuario =
-                        resultados.getPage().get(0);
+			return null;
 
-                if (encryptionService.checkEncryption(
-                        password,
-                        usuario.getPassword())) {
+		} catch (Exception e) {
 
-                    return usuario;
-                }
-            }
+			logger.error("Error login {}: {}", dni, e.getMessage(), e);
 
-            return null;
+			throw e;
 
-        } catch (Exception e) {
+		} finally {
 
-            logger.error("Error login {}: {}",
-                    dni,
-                    e.getMessage(),
-                    e);
+			JDBCUtils.close(c, true);
+		}
+	}
 
-            throw e;
+	@Override
+	public boolean update(Cliente cliente) throws Exception {
 
-        } finally {
+		if (cliente == null || cliente.getId() == null || cliente.getId() <= 0) {
 
-            JDBCUtils.close(c, true);
-        }
-    }
+			return false;
+		}
 
-    @Override
-    public boolean update(Cliente cliente)
-            throws Exception {
+		Connection c = null;
 
-        if (cliente == null
-                || cliente.getId() == null
-                || cliente.getId() <= 0) {
+		boolean commit = false;
 
-            return false;
-        }
+		try {
 
-        Connection c = null;
+			c = JDBCUtils.getConnection();
 
-        boolean commit = false;
+			c.setAutoCommit(false);
 
-        try {
+			boolean updated = clienteDAO.update(c, cliente);
 
-            c = JDBCUtils.getConnection();
+			commit = true;
 
-            c.setAutoCommit(false);
+			return updated;
 
-            boolean updated =
-                    clienteDAO.update(c, cliente);
+		} catch (Exception e) {
 
-            commit = true;
+			logger.error("Actualizando {}: {}", cliente, e.getMessage(), e);
 
-            return updated;
+			throw e;
 
-        } catch (Exception e) {
+		} finally {
 
-            logger.error("Actualizando {}: {}",
-                    cliente,
-                    e.getMessage(),
-                    e);
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            throw e;
+	@Override
+	public boolean delete(Long id) throws Exception {
 
-        } finally {
+		if (id == null || id <= 0) {
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+			return false;
+		}
 
-    @Override
-    public boolean delete(Long id)
-            throws Exception {
+		Connection c = null;
 
-        if (id == null || id <= 0) {
+		boolean commit = false;
 
-            return false;
-        }
+		try {
 
-        Connection c = null;
+			c = JDBCUtils.getConnection();
 
-        boolean commit = false;
+			c.setAutoCommit(false);
 
-        try {
+			boolean deleted = clienteDAO.delete(c, id);
 
-            c = JDBCUtils.getConnection();
+			commit = true;
 
-            c.setAutoCommit(false);
+			return deleted;
 
-            boolean deleted =
-                    clienteDAO.delete(c, id);
+		} catch (Exception e) {
 
-            commit = true;
+			logger.error("Error eliminando cliente {}: {}", id, e.getMessage(), e);
 
-            return deleted;
+			throw e;
 
-        } catch (Exception e) {
+		} finally {
 
-            logger.error("Error eliminando cliente {}: {}",
-                    id,
-                    e.getMessage(),
-                    e);
-
-            throw e;
-
-        } finally {
-
-            JDBCUtils.close(c, commit);
-        }
-    }
+			JDBCUtils.close(c, commit);
+		}
+	}
 }

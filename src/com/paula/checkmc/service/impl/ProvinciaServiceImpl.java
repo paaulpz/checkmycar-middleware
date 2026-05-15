@@ -14,69 +14,108 @@ import com.paula.checkmc.util.JDBCUtils;
 
 public class ProvinciaServiceImpl implements ProvinciaService {
 
-    private static final Logger logger = LogManager.getLogger(ProvinciaServiceImpl.class);
+	private static final Logger logger = LogManager.getLogger(ProvinciaServiceImpl.class);
 
-    private ProvinciaDAO provinciaDAO = new ProvinciaDAO();
+	private ProvinciaDAO provinciaDAO = new ProvinciaDAO();
 
-    @Override
-    public Provincia findById(Long id) throws Exception {
+	@Override
+	public Provincia findById(Long id) throws Exception {
 
-        if (id == null || id <= 0) {
-            return null;
-        }
+		if (id == null || id <= 0) {
+			return null;
+		}
 
-        Connection c = null;
+		Connection c = null;
 
-        try {
+		boolean commit = false;
 
-            c = JDBCUtils.getConnection();
+		try {
 
-            return provinciaDAO.findById(c, id);
+			c = JDBCUtils.getConnection();
 
-        } catch (Exception e) {
+			c.setAutoCommit(false);
 
-            logger.error("Error buscando provincia {}: {}", id, e.getMessage(), e);
+			Provincia provincia = provinciaDAO.findById(c, id);
 
-            throw e;
+			commit = true;
 
-        } finally {
+			return provincia;
 
-            JDBCUtils.close(c, true);
-        }
-    }
+		} catch (Exception e) {
 
-    @Override
-    public List<Provincia> findByPais(Long paisId) throws Exception {
+			logger.error("Error buscando provincia {}: {}", id, e.getMessage(), e);
 
-        if (paisId == null || paisId <= 0) {
-            return new ArrayList<>();
-        }
+			throw e;
 
-        Connection c = null;
+		} finally {
 
-        try {
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            c = JDBCUtils.getConnection();
+	@Override
+	public List<Provincia> findByPais(Long paisId) throws Exception {
 
-            return provinciaDAO.findByPais(c, paisId);
+		if (paisId == null || paisId <= 0) {
+			return new ArrayList<>();
+		}
 
-        } catch (Exception e) {
+		Connection c = null;
 
-            logger.error("Error buscando provincias pais {}: {}", paisId, e.getMessage(), e);
+		boolean commit = false;
 
-            throw e;
+		try {
 
-        } finally {
+			c = JDBCUtils.getConnection();
 
-            JDBCUtils.close(c, true);
-        }
-    }
+			c.setAutoCommit(false);
+
+			List<Provincia> provincias = provinciaDAO.findByPais(c, paisId);
+
+			commit = true;
+
+			return provincias;
+
+		} catch (Exception e) {
+
+			logger.error("Error buscando provincias pais {}: {}", paisId, e.getMessage(), e);
+
+			throw e;
+
+		} finally {
+
+			JDBCUtils.close(c, commit);
+		}
+	}
 
 	@Override
 	public List<Provincia> findAll() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
-   
+		Connection c = null;
+
+		boolean commit = false;
+
+		try {
+
+			c = JDBCUtils.getConnection();
+
+			c.setAutoCommit(false);
+
+			List<Provincia> provincias = provinciaDAO.findAll(c);
+
+			commit = true;
+
+			return provincias;
+
+		} catch (Exception e) {
+
+			logger.error("Error listando provincias: {}", e.getMessage(), e);
+
+			throw e;
+
+		} finally {
+
+			JDBCUtils.close(c, commit);
+		}
+	}
 }

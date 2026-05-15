@@ -16,133 +16,153 @@ import com.paula.checkmc.util.JDBCUtils;
 
 public class PiezaServiceImpl implements PiezaService {
 
-    private static final Logger logger = LogManager.getLogger(PiezaServiceImpl.class);
+	private static final Logger logger = LogManager.getLogger(PiezaServiceImpl.class);
 
-    private PiezaDAO piezaDAO = new PiezaDAO();
+	private PiezaDAO piezaDAO = new PiezaDAO();
 
-    @Override
-    public PiezaDTO findById(Long id) throws Exception {
+	@Override
+	public PiezaDTO findById(Long id) throws Exception {
 
-        if (id == null || id <= 0) {
-            return null;
-        }
+		if (id == null || id <= 0) {
+			return null;
+		}
 
-        Connection c = null;
+		Connection c = null;
 
-        try {
+		boolean commit = false;
 
-            c = JDBCUtils.getConnection();
+		try {
 
-            Pieza p = piezaDAO.findById(c, id);
+			c = JDBCUtils.getConnection();
 
-            if (p == null) {
-                return null;
-            }
+			c.setAutoCommit(false);
 
-            PiezaDTO dto = new PiezaDTO();
+			Pieza p = piezaDAO.findById(c, id);
 
-            dto.setId(p.getId());
-            dto.setNombre(p.getNombre());
-            dto.setStock(p.getStock());
-            dto.setEstadoId(p.getEstadoId());
-            dto.setPrecio(p.getPrecio());
+			if (p == null) {
+				return null;
+			}
 
-            return dto;
+			PiezaDTO dto = new PiezaDTO();
 
-        } catch (Exception e) {
+			dto.setId(p.getId());
+			dto.setNombre(p.getNombre());
+			dto.setStock(p.getStock());
+			dto.setEstadoId(p.getEstadoId());
+			dto.setPrecio(p.getPrecio());
+			dto.setNumeroReferencia(p.getNumeroReferencia());
 
-            logger.error("Error buscando pieza {}: {}", id, e.getMessage(), e);
+			commit = true;
 
-            throw e;
+			return dto;
 
-        } finally {
+		} catch (Exception e) {
 
-            JDBCUtils.close(c, true);
-        }
-    }
+			logger.error("Error buscando pieza {}: {}", id, e.getMessage(), e);
 
-    @Override
-    public List<PiezaDTO> findAll() throws Exception {
+			throw e;
 
-        Connection c = null;
+		} finally {
 
-        try {
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            c = JDBCUtils.getConnection();
+	@Override
+	public List<PiezaDTO> findAll() throws Exception {
 
-            List<Pieza> piezas = piezaDAO.findAll(c);
+		Connection c = null;
 
-            List<PiezaDTO> res = new ArrayList<>();
+		boolean commit = false;
 
-            for (Pieza p : piezas) {
+		try {
 
-                PiezaDTO dto = new PiezaDTO();
+			c = JDBCUtils.getConnection();
 
-                dto.setId(p.getId());
-                dto.setNombre(p.getNombre());
-                dto.setStock(p.getStock());
-                dto.setEstadoId(p.getEstadoId());
-                dto.setPrecio(p.getPrecio());
+			c.setAutoCommit(false);
 
-                res.add(dto);
-            }
+			List<Pieza> piezas = piezaDAO.findAll(c);
 
-            return res;
+			List<PiezaDTO> res = new ArrayList<>();
 
-        } catch (Exception e) {
+			for (Pieza p : piezas) {
 
-            logger.error("Error listando piezas: {}", e.getMessage(), e);
+				PiezaDTO dto = new PiezaDTO();
 
-            throw e;
+				dto.setId(p.getId());
+				dto.setNombre(p.getNombre());
+				dto.setStock(p.getStock());
+				dto.setEstadoId(p.getEstadoId());
+				dto.setPrecio(p.getPrecio());
+				dto.setNumeroReferencia(p.getNumeroReferencia());
 
-        } finally {
+				res.add(dto);
+			}
 
-            JDBCUtils.close(c, true);
-        }
-    }
+			commit = true;
 
-    @Override
-    public List<PiezaDTO> findByCriteria(PiezaCriteria criteria, int from, int pageSize)
-            throws Exception {
+			return res;
 
-        if (criteria == null) {
-            return new ArrayList<>();
-        }
+		} catch (Exception e) {
 
-        Connection c = null;
+			logger.error("Error listando piezas: {}", e.getMessage(), e);
 
-        try {
+			throw e;
 
-            c = JDBCUtils.getConnection();
+		} finally {
 
-            List<Pieza> piezas = piezaDAO.findByCriteria(c, criteria);
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            List<PiezaDTO> res = new ArrayList<>();
+	@Override
+	public List<PiezaDTO> findByCriteria(PiezaCriteria criteria, int from, int pageSize) throws Exception {
 
-            for (Pieza p : piezas) {
+		if (criteria == null) {
+			return new ArrayList<>();
+		}
 
-                PiezaDTO dto = new PiezaDTO();
+		Connection c = null;
 
-                dto.setId(p.getId());
-                dto.setNombre(p.getNombre());
-                dto.setStock(p.getStock());
-                dto.setEstadoId(p.getEstadoId());
-                dto.setPrecio(p.getPrecio());
+		boolean commit = false;
 
-                res.add(dto);
-            }
+		try {
 
-            return res;
+			c = JDBCUtils.getConnection();
 
-        } catch (Exception e) {
+			c.setAutoCommit(false);
 
-            logger.error("Error buscando piezas {}: {}", criteria, e.getMessage(), e);
+			List<Pieza> piezas = piezaDAO.findByCriteria(c, criteria);
 
-            throw e;
+			List<PiezaDTO> res = new ArrayList<>();
 
-        } finally {
+			for (Pieza p : piezas) {
 
-            JDBCUtils.close(c, true);
-        }
-    }
+				PiezaDTO dto = new PiezaDTO();
+
+				dto.setId(p.getId());
+				dto.setNombre(p.getNombre());
+				dto.setStock(p.getStock());
+				dto.setEstadoId(p.getEstadoId());
+				dto.setPrecio(p.getPrecio());
+				dto.setNumeroReferencia(p.getNumeroReferencia());
+
+				res.add(dto);
+			}
+
+			commit = true;
+
+			return res;
+
+		} catch (Exception e) {
+
+			logger.error("Error buscando piezas {}: {}", criteria, e.getMessage(), e);
+
+			throw e;
+
+		} finally {
+
+			JDBCUtils.close(c, commit);
+		}
+	}
 }

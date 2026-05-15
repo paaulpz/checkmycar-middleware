@@ -1,5 +1,9 @@
 package com.paula.checkmc.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.paula.checkmc.model.Cliente;
 import com.paula.checkmc.model.ClienteCriteria;
 import com.paula.checkmc.model.ClienteDTO;
 import com.paula.checkmc.model.Results;
@@ -7,27 +11,26 @@ import com.paula.checkmc.service.impl.ClienteServiceImpl;
 
 public class ClienteServiceTest {
 
+    private static final Logger logger =
+            LogManager.getLogger(ClienteServiceTest.class);
+
     private ClienteService service = null;
-    
-    private Long createdClienteId ; 
+
+    private Long createdClienteId;
 
     public ClienteServiceTest() {
+
         this.service = new ClienteServiceImpl();
     }
 
-    /*
-    
-    public void testCreate() {
-
-        
+    public void testCreate() throws Exception {
 
         Cliente c = new Cliente();
 
-   
         c.setNombre("Maria");
         c.setPrimerApellido("Gomez");
-        c.setDniNie("097213468S");
         c.setSegundoApellido("Lopez");
+        c.setDniNie("097213468S");
         c.setEmail("pu@test.com");
         c.setTelefono("669777488");
 
@@ -37,74 +40,87 @@ public class ClienteServiceTest {
         Long id = service.create(c);
 
         if (id != null) {
-            System.out.println("Cliente creado con ID: " + id);
+
+            createdClienteId = id;
+
+            logger.info("Cliente creado correctamente con ID: {}", id);
+
         } else {
-            System.out.println("Error al crear cliente");
+
+            logger.warn("Error al crear cliente");
         }
     }
 
-  
- 
-    public void testFindByCriteria() {
-
-       
+    public void testFindByCriteria() throws Exception {
 
         ClienteCriteria criteria = new ClienteCriteria();
 
-        criteria.setDniNie("12465768S");
+        criteria.setDniNie("097213468S");
 
-        List<Cliente> resultados = service.findByCriteria(criteria, 1, 10);
+        Results<ClienteDTO> results =
+                service.findByCriteria(criteria, 1, 10);
 
-      System.out.println("Resultados encontrados: " + resultados.size());
+        print(results);
     }
-    
-       public void testDelete(Long id) {
 
-        
+    public void testDelete(Long id) throws Exception {
 
         boolean eliminado = service.delete(id);
 
         if (eliminado) {
-            System.out.println("Cliente eliminado correctamente");
+
+            logger.info("Cliente eliminado correctamente");
+
         } else {
-            System.out.println("No se pudo eliminar el cliente");
+
+            logger.warn("No se pudo eliminar el cliente");
         }
     }
 
-  */
-    public void testPageFindBy() {
+    public void testPageFindBy() throws Exception {
+
         ClienteCriteria criteria = new ClienteCriteria();
+
         int pageSize = 5;
+
         Results<ClienteDTO> results = null;
+
         int from = 1;
 
         do {
-        	results = service.findByCriteria(criteria, from, pageSize); 
+
+            results = service.findByCriteria(criteria, from, pageSize);
+
             print(results);
 
             from = from + pageSize;
 
-        } while (from< results.getTotal());
+        } while (from <= results.getTotal());
     }
-    
+
     private void print(Results<ClienteDTO> results) {
-    	System.out.println("Imprimiendo página... .................");
-    	System.out.println("Total resultados: "+results.getTotal());
-		for (ClienteDTO c : results.getPage()) {
-			System.out.println(c);
-		}
-	}
-    
-    
- 
-    public static void main(String[] args) {
+
+        logger.info("Imprimiendo página...");
+        logger.info("Total resultados: {}", results.getTotal());
+
+        for (ClienteDTO c : results.getPage()) {
+
+            logger.info("{}", c);
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
 
         ClienteServiceTest test = new ClienteServiceTest();
-        System.out.println("TESTS CLIENTE SERVICE");
-        
-       //test.testCreate();.
+
+        logger.info("TESTS CLIENTE SERVICE");
+
+        // test.testCreate();
+
         test.testPageFindBy();
-        //test.testFindByCriteria();
-        //test.testDelete(1L);
+
+        // test.testFindByCriteria();
+
+        // test.testDelete(1L);
     }
 }

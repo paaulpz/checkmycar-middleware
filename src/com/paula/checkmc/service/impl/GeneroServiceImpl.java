@@ -13,57 +13,73 @@ import com.paula.checkmc.util.JDBCUtils;
 
 public class GeneroServiceImpl implements GeneroService {
 
-    private static final Logger logger = LogManager.getLogger(GeneroServiceImpl.class);
+	private static final Logger logger = LogManager.getLogger(GeneroServiceImpl.class);
 
-    private GeneroDAO generoDAO = new GeneroDAO();
+	private GeneroDAO generoDAO = new GeneroDAO();
 
-    @Override
-    public Genero findById(Long id) throws Exception {
+	@Override
+	public Genero findById(Long id) throws Exception {
 
-        if (id == null || id <= 0) {
-            return null;
-        }
+		if (id == null || id <= 0) {
+			return null;
+		}
 
-        Connection c = null;
+		Connection c = null;
 
-        try {
+		boolean commit = false;
 
-            c = JDBCUtils.getConnection();
+		try {
 
-            return generoDAO.findById(c, id);
+			c = JDBCUtils.getConnection();
 
-        } catch (Exception e) {
+			c.setAutoCommit(false);
 
-            logger.error("Error buscando genero {}: {}", id, e.getMessage(), e);
+			Genero genero = generoDAO.findById(c, id);
 
-            throw e;
+			commit = true;
 
-        } finally {
+			return genero;
 
-            JDBCUtils.close(c, true);
-        }
-    }
+		} catch (Exception e) {
 
-    @Override
-    public List<Genero> findAll() throws Exception {
+			logger.error("Error buscando genero {}: {}", id, e.getMessage(), e);
 
-        Connection c = null;
+			throw e;
 
-        try {
+		} finally {
 
-            c = JDBCUtils.getConnection();
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            return generoDAO.findAll(c);
+	@Override
+	public List<Genero> findAll() throws Exception {
 
-        } catch (Exception e) {
+		Connection c = null;
 
-            logger.error("Error listando generos: {}", e.getMessage(), e);
+		boolean commit = false;
 
-            throw e;
+		try {
 
-        } finally {
+			c = JDBCUtils.getConnection();
 
-            JDBCUtils.close(c, true);
-        }
-    }
+			c.setAutoCommit(false);
+
+			List<Genero> generos = generoDAO.findAll(c);
+
+			commit = true;
+
+			return generos;
+
+		} catch (Exception e) {
+
+			logger.error("Error listando generos: {}", e.getMessage(), e);
+
+			throw e;
+
+		} finally {
+
+			JDBCUtils.close(c, commit);
+		}
+	}
 }

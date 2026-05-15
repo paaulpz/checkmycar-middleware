@@ -14,99 +14,145 @@ import com.paula.checkmc.util.JDBCUtils;
 
 public class ProvinciaDAO {
 
-    private static final Logger logger = LogManager.getLogger(ProvinciaDAO.class);
+	private static final Logger logger = LogManager.getLogger(ProvinciaDAO.class);
 
-    public Provincia findById(Connection c ,Long id) {
+	public Provincia findById(Connection c, Long id) {
 
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
 
-        try {
+		try {
 
+			StringBuilder sql = new StringBuilder();
 
-            StringBuilder sql = new StringBuilder();
+			sql.append("SELECT id, name, country_id ");
+			sql.append("FROM province ");
+			sql.append("WHERE id=?");
 
-            sql.append("SELECT id, name, country_id ");
-            sql.append("FROM province ");
-            sql.append("WHERE id=?");
+			ps = c.prepareStatement(sql.toString());
 
-            ps = c.prepareStatement(sql.toString());
+			ps.setLong(1, id);
 
-            ps.setLong(1, id);
+			rs = ps.executeQuery();
 
-            rs = ps.executeQuery();
+			if (rs.next()) {
 
-            if (rs.next()) {
+				return loadNext(rs);
+			}
 
-                return loadNext(rs);
-            }
+		} catch (Exception e) {
 
-        } catch (Exception e) {
+			logger.error("Error buscando provincia: {}", id, e);
 
-            logger.error("Error buscando provincia: {}", id, e);
+		} finally {
 
-        } finally {
+			JDBCUtils.close(rs, ps);
+		}
 
-            JDBCUtils.close(rs, ps);
-        }
+		return null;
+	}
 
-        return null;
-    }
+	public List<Provincia> findByPais(Connection c, Long paisId) {
 
-    public List<Provincia> findByPais(Connection c ,Long paisId) {
+		List<Provincia> lista = new ArrayList<>();
 
-        List<Provincia> lista = new ArrayList<>();
+		PreparedStatement ps = null;
+		ResultSet rs = null;
 
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+		try {
 
-        try {
+			StringBuilder sql = new StringBuilder();
 
+			sql.append("SELECT id, name, country_id ");
+			sql.append("FROM province ");
+			sql.append("WHERE country_id=? ");
+			sql.append("ORDER BY name");
 
-            StringBuilder sql = new StringBuilder();
+			ps = c.prepareStatement(sql.toString());
 
-            sql.append("SELECT id, name, country_id ");
-            sql.append("FROM province ");
-            sql.append("WHERE country_id=? ");
-            sql.append("ORDER BY name");
+			ps.setLong(1, paisId);
 
-            ps = c.prepareStatement(sql.toString());
+			rs = ps.executeQuery();
 
-            ps.setLong(1, paisId);
+			while (rs.next()) {
 
-            rs = ps.executeQuery();
+				lista.add(loadNext(rs));
+			}
 
-            while (rs.next()) {
+		} catch (Exception e) {
 
-                lista.add(loadNext(rs));
-            }
+			logger.error("Error buscando provincias por pais: {}", paisId, e);
 
-        } catch (Exception e) {
+		} finally {
 
-            logger.error("Error buscando provincias por pais: {}", paisId, e);
+			JDBCUtils.close(rs, ps);
+		}
 
-        } finally {
+		return lista;
+	}
 
-            JDBCUtils.close(rs, ps);
-        }
+	public List<Provincia> findAll(Connection c) throws Exception {
 
-        return lista;
-    }
-    
-  
+		logger.debug("Listando provincias");
 
-    private Provincia loadNext(ResultSet rs) throws Exception {
+		PreparedStatement ps = null;
 
-        int i = 1;
+		ResultSet rs = null;
 
-        Provincia p = new Provincia();
+		List<Provincia> provincias = new ArrayList<>();
 
-        p.setId(rs.getLong(i++));
-        p.setNombre(rs.getString(i++));
-        p.setPaisId(rs.getLong(i++));
+		try {
 
-        return p;
-    }
+			StringBuilder sql = new StringBuilder();
 
-	
+			sql.append("SELECT id, name, country_id ");
+			sql.append("FROM province ");
+			sql.append("ORDER BY name ASC");
+
+			ps = c.prepareStatement(sql.toString());
+
+			rs = ps.executeQuery();
+
+			while (rs.next()) {
+
+				Provincia provincia = new Provincia();
+
+				provincia.setId(rs.getLong("id"));
+
+				provincia.setNombre(rs.getString("name"));
+
+				provincia.setPaisId(rs.getLong("country_id"));
+
+				provincias.add(provincia);
+			}
+
+			logger.debug("Provincias encontradas: {}", provincias.size());
+
+			return provincias;
+
+		} catch (Exception e) {
+
+			logger.error("Error listando provincias", e);
+
+			throw e;
+
+		} finally {
+
+			JDBCUtils.close(rs, ps);
+		}
+	}
+
+	private Provincia loadNext(ResultSet rs) throws Exception {
+
+		int i = 1;
+
+		Provincia p = new Provincia();
+
+		p.setId(rs.getLong(i++));
+		p.setNombre(rs.getString(i++));
+		p.setPaisId(rs.getLong(i++));
+
+		return p;
+	}
+
 }

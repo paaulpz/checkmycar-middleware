@@ -15,187 +15,213 @@ import com.paula.checkmc.util.JDBCUtils;
 
 public class VentaServiceImpl implements VentaService {
 
-    private static final Logger logger = LogManager.getLogger(VentaServiceImpl.class);
+	private static final Logger logger = LogManager.getLogger(VentaServiceImpl.class);
 
-    private VentaDAO ventaDAO = new VentaDAO();
+	private VentaDAO ventaDAO = new VentaDAO();
 
-    @Override
-    public VentaDTO findById(Long id) throws Exception {
+	@Override
+	public VentaDTO findById(Long id) throws Exception {
 
-        if (id == null || id <= 0) {
-            return null;
-        }
+		if (id == null || id <= 0) {
+			return null;
+		}
 
-        Connection c = null;
+		Connection c = null;
 
-        try {
+		boolean commit = false;
 
-            c = JDBCUtils.getConnection();
+		try {
 
-            return ventaDAO.findById(c, id);
+			c = JDBCUtils.getConnection();
 
-        } catch (Exception e) {
+			c.setAutoCommit(false);
 
-            logger.error("Error buscando venta {}: {}", id, e.getMessage(), e);
+			VentaDTO venta = ventaDAO.findById(c, id);
 
-            throw e;
+			commit = true;
 
-        } finally {
+			return venta;
 
-            JDBCUtils.close(c, true);
-        }
-    }
+		} catch (Exception e) {
 
-    @Override
-    public Results<VentaDTO> findByCriteria(
-            VentaCriteria criteria,
-            int from,
-            int pageSize) throws Exception {
+			logger.error("Error buscando venta {}: {}", id, e.getMessage(), e);
 
-        Connection c = null;
-        boolean commit = false;
+			throw e;
 
-        try {
+		} finally {
 
-            c = JDBCUtils.getConnection();
-            c.setAutoCommit(false);
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            Results<VentaDTO> results =
-                    ventaDAO.findByCriteria(c, criteria, from, pageSize);
+	@Override
+	public Results<VentaDTO> findByCriteria(VentaCriteria criteria, int from, int pageSize) throws Exception {
 
-            commit = true;
+		Connection c = null;
 
-            return results;
+		boolean commit = false;
 
-        } catch (Exception e) {
+		try {
 
-            logger.error("Buscando ventas {}: {}", criteria, e.getMessage(), e);
+			c = JDBCUtils.getConnection();
 
-            throw e;
+			c.setAutoCommit(false);
 
-        } finally {
+			Results<VentaDTO> results = ventaDAO.findByCriteria(c, criteria, from, pageSize);
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+			commit = true;
 
-    @Override
-    public boolean delete(Long id) throws Exception {
+			return results;
 
-        if (id == null || id <= 0) {
-            return false;
-        }
+		} catch (Exception e) {
 
-        Connection c = null;
-        boolean commit = false;
+			logger.error("Buscando ventas {}: {}", criteria, e.getMessage(), e);
 
-        try {
+			throw e;
 
-            c = JDBCUtils.getConnection();
-            c.setAutoCommit(false);
+		} finally {
 
-            boolean deleted = ventaDAO.delete(c, id);
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            commit = true;
+	@Override
+	public boolean delete(Long id) throws Exception {
 
-            return deleted;
+		if (id == null || id <= 0) {
+			return false;
+		}
 
-        } catch (Exception e) {
+		Connection c = null;
 
-            logger.error("Error eliminando venta {}: {}", id, e.getMessage(), e);
+		boolean commit = false;
 
-            throw e;
+		try {
 
-        } finally {
+			c = JDBCUtils.getConnection();
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+			c.setAutoCommit(false);
 
-    @Override
-    public Long create(VentaDTO venta) throws Exception {
+			boolean deleted = ventaDAO.delete(c, id);
 
-        if (venta == null) {
-            return null;
-        }
+			commit = true;
 
-        Connection c = null;
-        boolean commit = false;
+			return deleted;
 
-        try {
+		} catch (Exception e) {
 
-            c = JDBCUtils.getConnection();
-            c.setAutoCommit(false);
+			logger.error("Error eliminando venta {}: {}", id, e.getMessage(), e);
 
-            Venta v = new Venta();
+			throw e;
 
-            v.setFechaVenta(venta.getFechaVenta());
-            v.setPrecioCliente(venta.getPrecioCliente());
-            v.setPrecioFinal(venta.getPrecioFinal());
-            v.setClienteCompradorId(venta.getClienteCompradorId());
-            v.setClienteVendedorId(venta.getClienteVendedorId());
-            v.setEmpleadoId(venta.getEmpleadoId());
-            v.setCocheId(venta.getCocheId());
+		} finally {
 
-            Long creada = ventaDAO.create(c, v);
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            commit = true;
+	@Override
+	public Long create(VentaDTO venta) throws Exception {
 
-            return creada;
+		if (venta == null) {
+			return null;
+		}
 
-        } catch (Exception e) {
+		Connection c = null;
 
-            logger.error("Error creando venta {}: {}", venta, e.getMessage(), e);
+		boolean commit = false;
 
-            throw e;
+		try {
 
-        } finally {
+			c = JDBCUtils.getConnection();
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+			c.setAutoCommit(false);
 
-    @Override
-    public boolean update(VentaDTO venta) throws Exception {
+			Venta v = new Venta();
 
-        if (venta == null || venta.getId() == null || venta.getId() <= 0) {
-            return false;
-        }
+			v.setFechaVenta(venta.getFechaVenta());
 
-        Connection c = null;
-        boolean commit = false;
+			v.setPrecioCliente(venta.getPrecioCliente());
 
-        try {
+			v.setPrecioFinal(venta.getPrecioFinal());
 
-            c = JDBCUtils.getConnection();
-            c.setAutoCommit(false);
+			v.setClienteCompradorId(venta.getClienteCompradorId());
 
-            Venta v = new Venta();
+			v.setClienteVendedorId(venta.getClienteVendedorId());
 
-            v.setId(venta.getId());
-            v.setFechaVenta(venta.getFechaVenta());
-            v.setPrecioCliente(venta.getPrecioCliente());
-            v.setPrecioFinal(venta.getPrecioFinal());
-            v.setClienteCompradorId(venta.getClienteCompradorId());
-            v.setClienteVendedorId(venta.getClienteVendedorId());
-            v.setEmpleadoId(venta.getEmpleadoId());
-            v.setCocheId(venta.getCocheId());
+			v.setEmpleadoId(venta.getEmpleadoId());
 
-            boolean updated = ventaDAO.update(c, v);
+			v.setCocheId(venta.getCocheId());
 
-            commit = true;
+			Long creada = ventaDAO.create(c, v);
 
-            return updated;
+			commit = true;
 
-        } catch (Exception e) {
+			return creada;
 
-            logger.error("Error actualizando venta {}: {}", venta, e.getMessage(), e);
+		} catch (Exception e) {
 
-            throw e;
+			logger.error("Error creando venta {}: {}", venta, e.getMessage(), e);
 
-        } finally {
+			throw e;
 
-            JDBCUtils.close(c, commit);
-        }
-    }
+		} finally {
+
+			JDBCUtils.close(c, commit);
+		}
+	}
+
+	@Override
+	public boolean update(VentaDTO venta) throws Exception {
+
+		if (venta == null || venta.getId() == null || venta.getId() <= 0) {
+
+			return false;
+		}
+
+		Connection c = null;
+
+		boolean commit = false;
+
+		try {
+
+			c = JDBCUtils.getConnection();
+
+			c.setAutoCommit(false);
+
+			Venta v = new Venta();
+
+			v.setId(venta.getId());
+
+			v.setFechaVenta(venta.getFechaVenta());
+
+			v.setPrecioCliente(venta.getPrecioCliente());
+
+			v.setPrecioFinal(venta.getPrecioFinal());
+
+			v.setClienteCompradorId(venta.getClienteCompradorId());
+
+			v.setClienteVendedorId(venta.getClienteVendedorId());
+
+			v.setEmpleadoId(venta.getEmpleadoId());
+
+			v.setCocheId(venta.getCocheId());
+
+			boolean updated = ventaDAO.update(c, v);
+
+			commit = true;
+
+			return updated;
+
+		} catch (Exception e) {
+
+			logger.error("Error actualizando venta {}: {}", venta, e.getMessage(), e);
+
+			throw e;
+
+		} finally {
+
+			JDBCUtils.close(c, commit);
+		}
+	}
 }

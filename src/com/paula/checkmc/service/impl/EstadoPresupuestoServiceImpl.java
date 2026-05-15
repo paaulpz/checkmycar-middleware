@@ -13,57 +13,73 @@ import com.paula.checkmc.util.JDBCUtils;
 
 public class EstadoPresupuestoServiceImpl implements EstadoPresupuestoService {
 
-    private static final Logger logger = LogManager.getLogger(EstadoPresupuestoServiceImpl.class);
+	private static final Logger logger = LogManager.getLogger(EstadoPresupuestoServiceImpl.class);
 
-    private EstadoPresupuestoDAO estadoPresupuestoDAO = new EstadoPresupuestoDAO();
+	private EstadoPresupuestoDAO estadoPresupuestoDAO = new EstadoPresupuestoDAO();
 
-    @Override
-    public EstadoPresupuesto findById(Long id) throws Exception {
+	@Override
+	public EstadoPresupuesto findById(Long id) throws Exception {
 
-        if (id == null || id <= 0) {
-            return null;
-        }
+		if (id == null || id <= 0) {
+			return null;
+		}
 
-        Connection c = null;
+		Connection c = null;
 
-        try {
+		boolean commit = false;
 
-            c = JDBCUtils.getConnection();
+		try {
 
-            return estadoPresupuestoDAO.findById(c, id);
+			c = JDBCUtils.getConnection();
 
-        } catch (Exception e) {
+			c.setAutoCommit(false);
 
-            logger.error("Error buscando estado presupuesto {}: {}", id, e.getMessage(), e);
+			EstadoPresupuesto estado = estadoPresupuestoDAO.findById(c, id);
 
-            throw e;
+			commit = true;
 
-        } finally {
+			return estado;
 
-            JDBCUtils.close(c, true);
-        }
-    }
+		} catch (Exception e) {
 
-    @Override
-    public List<EstadoPresupuesto> findAll() throws Exception {
+			logger.error("Error buscando estado presupuesto {}: {}", id, e.getMessage(), e);
 
-        Connection c = null;
+			throw e;
 
-        try {
+		} finally {
 
-            c = JDBCUtils.getConnection();
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            return estadoPresupuestoDAO.findAll(c);
+	@Override
+	public List<EstadoPresupuesto> findAll() throws Exception {
 
-        } catch (Exception e) {
+		Connection c = null;
 
-            logger.error("Error listando estados presupuesto: {}", e.getMessage(), e);
+		boolean commit = false;
 
-            throw e;
+		try {
 
-        } finally {
+			c = JDBCUtils.getConnection();
 
-            JDBCUtils.close(c, true);
-        }
-    }
+			c.setAutoCommit(false);
+
+			List<EstadoPresupuesto> estados = estadoPresupuestoDAO.findAll(c);
+
+			commit = true;
+
+			return estados;
+
+		} catch (Exception e) {
+
+			logger.error("Error listando estados presupuesto: {}", e.getMessage(), e);
+
+			throw e;
+
+		} finally {
+
+			JDBCUtils.close(c, commit);
+		}
+	}
 }

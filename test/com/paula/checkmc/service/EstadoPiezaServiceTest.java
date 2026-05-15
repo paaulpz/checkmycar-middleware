@@ -2,47 +2,57 @@ package com.paula.checkmc.service;
 
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.paula.checkmc.model.EstadoPieza;
-import com.paula.checkmc.service.EstadoPiezaService;
 import com.paula.checkmc.service.impl.EstadoPiezaServiceImpl;
 
 public class EstadoPiezaServiceTest {
 
+    private static final Logger logger =
+            LogManager.getLogger(EstadoPiezaServiceTest.class);
+
     private EstadoPiezaService service = null;
 
     public EstadoPiezaServiceTest() {
+
         this.service = new EstadoPiezaServiceImpl();
     }
 
-    
-    public void testFindById(Long id) {
+    public void testFindById(Long id) throws Exception {
 
-     
         EstadoPieza estado = service.findById(id);
 
         if (estado != null) {
-            System.out.println("Estado encontrado: " + estado.getNombre());
+
+            logger.info("Id: {}", estado.getId());
+            logger.info("Nombre: {}", estado.getNombre());
+
         } else {
-            System.out.println("No se encontró el estado de pieza");
+
+            logger.warn("No se encontró el estado de pieza");
         }
     }
 
-  
-    public void testFindAll() {
+    public void testFindAll() throws Exception {
 
-    
         List<EstadoPieza> estados = service.findAll();
 
-        System.out.println("Estados encontrados: " + estados.size());
+        logger.info("Total estados encontrados: {}", estados.size());
+
+        for (EstadoPieza e : estados) {
+
+            logger.info("{} - {}", e.getId(), e.getNombre());
+        }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
         EstadoPiezaServiceTest test = new EstadoPiezaServiceTest();
 
         test.testFindById(1L);
 
-    
-        //test.testFindAll();
+        test.testFindAll();
     }
 }

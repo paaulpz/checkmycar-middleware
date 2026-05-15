@@ -13,57 +13,73 @@ import com.paula.checkmc.util.JDBCUtils;
 
 public class TipoCombustibleServiceImpl implements TipoCombustibleService {
 
-    private static final Logger logger = LogManager.getLogger(TipoCombustibleServiceImpl.class);
+	private static final Logger logger = LogManager.getLogger(TipoCombustibleServiceImpl.class);
 
-    private TipoCombustibleDAO tipoCombustibleDAO = new TipoCombustibleDAO();
+	private TipoCombustibleDAO tipoCombustibleDAO = new TipoCombustibleDAO();
 
-    @Override
-    public TipoCombustible findById(Long id) throws Exception {
+	@Override
+	public TipoCombustible findById(Long id) throws Exception {
 
-        if (id == null || id <= 0) {
-            return null;
-        }
+		if (id == null || id <= 0) {
+			return null;
+		}
 
-        Connection c = null;
+		Connection c = null;
 
-        try {
+		boolean commit = false;
 
-            c = JDBCUtils.getConnection();
+		try {
 
-            return tipoCombustibleDAO.findById(c, id);
+			c = JDBCUtils.getConnection();
 
-        } catch (Exception e) {
+			c.setAutoCommit(false);
 
-            logger.error("Error buscando tipo combustible {}: {}", id, e.getMessage(), e);
+			TipoCombustible tipoCombustible = tipoCombustibleDAO.findById(c, id);
 
-            throw e;
+			commit = true;
 
-        } finally {
+			return tipoCombustible;
 
-            JDBCUtils.close(c, true);
-        }
-    }
+		} catch (Exception e) {
 
-    @Override
-    public List<TipoCombustible> findAll() throws Exception {
+			logger.error("Error buscando tipo combustible {}: {}", id, e.getMessage(), e);
 
-        Connection c = null;
+			throw e;
 
-        try {
+		} finally {
 
-            c = JDBCUtils.getConnection();
+			JDBCUtils.close(c, commit);
+		}
+	}
 
-            return tipoCombustibleDAO.findAll(c);
+	@Override
+	public List<TipoCombustible> findAll() throws Exception {
 
-        } catch (Exception e) {
+		Connection c = null;
 
-            logger.error("Error listando tipos combustible: {}", e.getMessage(), e);
+		boolean commit = false;
 
-            throw e;
+		try {
 
-        } finally {
+			c = JDBCUtils.getConnection();
 
-            JDBCUtils.close(c, true);
-        }
-    }
+			c.setAutoCommit(false);
+
+			List<TipoCombustible> tiposCombustible = tipoCombustibleDAO.findAll(c);
+
+			commit = true;
+
+			return tiposCombustible;
+
+		} catch (Exception e) {
+
+			logger.error("Error listando tipos combustible: {}", e.getMessage(), e);
+
+			throw e;
+
+		} finally {
+
+			JDBCUtils.close(c, commit);
+		}
+	}
 }
