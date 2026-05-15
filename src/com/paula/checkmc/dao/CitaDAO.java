@@ -228,8 +228,13 @@ public class CitaDAO {
 
 			ps = c.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS);
 
-			DAOUtils.setParameters(ps, cita.getDescripcion(), cita.getFecha(), cita.getClienteId(), cita.getCocheId(),
-					cita.getEstadoCitaId());
+			DAOUtils.setParameters(
+			        ps,
+			        cita.getDescripcion(),
+			        cita.getFecha(),
+			        cita.getClienteId(),
+			        cita.getCocheId(),
+			        1L);
 
 			ps.executeUpdate();
 
@@ -355,8 +360,13 @@ public class CitaDAO {
 
 			ps = c.prepareStatement(sql.toString());
 
-			DAOUtils.setParameters(ps, cita.getDescripcion(), cita.getFecha(), cita.getClienteId(), cita.getCocheId(),
-					cita.getEstadoCitaId(), cita.getId());
+			DAOUtils.setParameters(ps, 
+					cita.getDescripcion(),
+					cita.getFecha(), 
+					cita.getClienteId(),
+					cita.getCocheId(),
+					cita.getEstadoCitaId(), 
+					cita.getId());
 
 			return ps.executeUpdate() > 0;
 
