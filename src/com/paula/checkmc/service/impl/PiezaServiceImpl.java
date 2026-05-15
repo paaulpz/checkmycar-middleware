@@ -49,6 +49,7 @@ public class PiezaServiceImpl implements PiezaService {
 			dto.setNombre(p.getNombre());
 			dto.setStock(p.getStock());
 			dto.setEstadoId(p.getEstadoId());
+			dto.setNombreEstado(p.getEstadoNombre());
 			dto.setPrecio(p.getPrecio());
 			dto.setNumeroReferencia(p.getNumeroReferencia());
 
@@ -93,6 +94,7 @@ public class PiezaServiceImpl implements PiezaService {
 				dto.setNombre(p.getNombre());
 				dto.setStock(p.getStock());
 				dto.setEstadoId(p.getEstadoId());
+				dto.setNombreEstado(p.getEstadoNombre());
 				dto.setPrecio(p.getPrecio());
 				dto.setNumeroReferencia(p.getNumeroReferencia());
 
@@ -144,6 +146,7 @@ public class PiezaServiceImpl implements PiezaService {
 				dto.setNombre(p.getNombre());
 				dto.setStock(p.getStock());
 				dto.setEstadoId(p.getEstadoId());
+				dto.setNombreEstado(p.getEstadoNombre());
 				dto.setPrecio(p.getPrecio());
 				dto.setNumeroReferencia(p.getNumeroReferencia());
 
