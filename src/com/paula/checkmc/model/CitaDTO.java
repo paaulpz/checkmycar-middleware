@@ -10,6 +10,7 @@ public class CitaDTO extends AbstracValueObject {
 
     private Long clienteId;
     private Long cocheId;
+    private String nombreCoche;
     private Long estadoCitaId;
 
     private String nombreCliente;
@@ -93,4 +94,14 @@ public class CitaDTO extends AbstracValueObject {
     public void setEstadoCita(String estadoCita) {
     	this.estadoCita = estadoCita; 
     	}
+
+	public String getNombreCoche() {
+		return nombreCoche;
+	}
+
+	public void setNombreCoche(String nombreCoche) {
+		this.nombreCoche = nombreCoche;
+	}
+    
+    
 }

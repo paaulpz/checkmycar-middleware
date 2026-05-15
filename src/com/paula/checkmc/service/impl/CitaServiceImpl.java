@@ -7,11 +7,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.paula.checkmc.dao.CitaDAO;
+import com.paula.checkmc.dao.ClienteDAO;
 import com.paula.checkmc.model.Cita;
 import com.paula.checkmc.model.CitaCriteria;
 import com.paula.checkmc.model.CitaDTO;
+import com.paula.checkmc.model.Cliente;
 import com.paula.checkmc.model.Results;
 import com.paula.checkmc.service.CitaService;
+import com.paula.checkmc.service.MailService;
 import com.paula.checkmc.util.JDBCUtils;
 
 public class CitaServiceImpl implements CitaService {
@@ -19,6 +22,9 @@ public class CitaServiceImpl implements CitaService {
 	private Logger logger = LogManager.getLogger(CitaServiceImpl.class.getName());
 
 	private CitaDAO citaDAO = new CitaDAO();
+	private ClienteDAO clienteDAO = new ClienteDAO();
+
+	private MailService mailService = new MailServiceApacheImpl();
 
 	@Override
 	public Cita findById(Long id) throws Exception {
@@ -129,6 +135,19 @@ public class CitaServiceImpl implements CitaService {
 			c.setAutoCommit(false);
 
 			boolean updated = citaDAO.update(c, cita);
+
+			if (updated && cita.getEstadoCitaId() != null && cita.getEstadoCitaId().equals(2L)) {
+
+				Cliente cliente = clienteDAO.findById(c, cita.getClienteId());
+
+				if (cliente != null && cliente.getEmail() != null) {
+
+					mailService.sendEmail(
+							cliente.getEmail(), "Cita confirmada", "Hola " + cliente.getNombre()
+									+ ", su cita para el día " + cita.getFecha() +  " ha sido confirmada.",
+							"Departamento de Gestión y Mantenimiento CheckMyCar");
+				}
+			}
 
 			commit = true;
 
